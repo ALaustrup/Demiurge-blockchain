@@ -1,0 +1,21 @@
+{
+  "name": "demiurge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DEMIURGE - A sovereign L1 blockchain ecosystem for creators",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}
+
