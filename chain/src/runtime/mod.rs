@@ -7,13 +7,17 @@
 use crate::core::state::State;
 use crate::core::transaction::Transaction;
 
+mod abyss_registry;
 mod avatars_profiles;
 mod bank_cgt;
+mod fabric_manager;
 mod nft_dgen;
 
+pub use abyss_registry::{get_listing, AbyssRegistryModule, ListingId};
 pub use avatars_profiles::{is_archon, AvatarsProfilesModule};
 pub use bank_cgt::{get_balance_cgt, BankCgtModule};
-pub use nft_dgen::{get_nft, get_nfts_by_owner, NftDgenModule};
+pub use fabric_manager::{get_fabric_asset, FabricManagerModule, FabricRootHash};
+pub use nft_dgen::{get_nft, get_nfts_by_owner, NftDgenModule, NftId};
 
 /// Trait that all runtime modules must implement.
 ///
@@ -67,6 +71,8 @@ impl Runtime {
             .with_module(Box::new(BankCgtModule::new()))
             .with_module(Box::new(AvatarsProfilesModule::new()))
             .with_module(Box::new(NftDgenModule::new()))
+            .with_module(Box::new(FabricManagerModule::new()))
+            .with_module(Box::new(AbyssRegistryModule::new()))
     }
 
     /// Dispatch a transaction to the appropriate runtime module.
@@ -103,7 +109,7 @@ mod tests {
     #[test]
     fn test_runtime_with_default_modules() {
         let runtime = Runtime::with_default_modules();
-        assert_eq!(runtime.modules.len(), 3);
+        assert_eq!(runtime.modules.len(), 5);
     }
 
     #[test]

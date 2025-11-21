@@ -63,6 +63,19 @@ pub fn get_balance_cgt(state: &State, addr: &Address) -> u64 {
     get_balance(state, addr)
 }
 
+/// Internal helper for modules to directly set balances.
+///
+/// This is used by other runtime modules (e.g., fabric_manager, abyss_registry)
+/// to perform balance operations without going through the bank_cgt transfer call.
+/// Use with caution - this bypasses nonce checks and other validations.
+pub(crate) fn set_balance_for_module(
+    state: &mut State,
+    addr: &Address,
+    amount: u64,
+) -> Result<(), String> {
+    set_balance(state, addr, amount)
+}
+
 /// Transfer parameters
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TransferParams {

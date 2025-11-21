@@ -1,0 +1,21 @@
+{
+  "name": "@demiurge/abyss-gateway",
+  "version": "0.1.0",
+  "description": "GraphQL gateway for Abyss marketplace and Demiurge chain data",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@graphql-yoga/node": "^5.0.0",
+    "graphql": "^16.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  }
+}
+

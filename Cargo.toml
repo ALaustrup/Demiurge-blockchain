@@ -6,6 +6,7 @@ members = [
     "runtime/fabric_manager",
     "runtime/abyss_registry",
     "runtime/avatars_profiles",
+    "indexer/ingestor-rs",
 ]
 resolver = "2"
 
