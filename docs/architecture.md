@@ -23,8 +23,8 @@ The Rust-based blockchain node implements:
 #### Runtime Modules
 Runtime modules handle domain-specific logic:
 
-- **`bank_cgt`**: CGT token balances, transfers, and minting
-- **`avatars_profiles`**: Archon role flags and identity management
+- **`bank_cgt`**: CGT token balances, transfers, minting, currency metadata (total supply, max supply), and nonce management
+- **`urgeid_registry`**: UrgeID identity profiles, handles (@username), Syzygy tracking, and badge system
 - **`nft_dgen`**: D-GEN NFT minting, transfers, and metadata
 - **`fabric_manager`**: Fabric asset registration and fee pools
 - **`abyss_registry`**: NFT marketplace listings, buying, and royalties
@@ -37,7 +37,11 @@ Runtime modules handle domain-specific logic:
 ### 2. Portal Website (`apps/portal-web/`)
 
 Next.js 15+ portal with:
-- **Live Chain Status**: Real-time polling of chain height
+- **Live Chain Status**: Real-time polling of chain height, CGT metadata, and total supply
+- **UrgeID Onboarding**: Create sovereign identity with keypair generation
+- **UrgeID Dashboard**: Profile, CGT balance, Syzygy score, badges, handles, transaction history
+- **Send CGT**: Transfer CGT with Ed25519 client-side signing, transaction hash tracking, and status polling
+- **Vault Export/Import**: Password-encrypted backup/restore of UrgeID keys
 - **Genesis Archon Dashboard**: Balance, Archon status, and NFT display
 - **Mint Test NFT**: Dev-only button for minting test NFTs
 - **Dark Theme**: Glassmorphic UI with TailwindCSS and Framer Motion
@@ -79,21 +83,28 @@ Qt 6.10 QML desktop application for:
 
 State is stored as key-value pairs in RocksDB:
 
-- **CGT Balances**: `bank:balance:{address}` → `u64` (bincode serialized)
-- **Archon Flags**: `avatars:archon:{address}` → `[1u8]` or `[0u8]`
+- **CGT Balances**: `bank:balance:{address}` → `u128` (bincode serialized, smallest units)
+- **CGT Total Supply**: `bank:total_supply` → `u128` (bincode serialized)
+- **CGT Nonces**: `bank:nonce:{address}` → `u64` (bincode serialized)
+- **Archon Flags**: `urgeid:archon:{address}` → `[1u8]` or `[0u8]`
+- **UrgeID Profiles**: `urgeid/profile:{address}` → `UrgeIDProfile` (bincode serialized)
+- **UrgeID Handles**: `urgeid/handle/{handle}` → `Address` (32 bytes)
 - **NFT Metadata**: `nft:token:{id}` → `DGenMetadata` (bincode serialized)
 - **Owner NFTs**: `nft:owner:{address}` → `Vec<NftId>` (bincode serialized)
 - **NFT Counter**: `nft:counter` → `NftId` (bincode serialized)
+- **Transactions**: `tx:{hash}` → `Transaction` (bincode serialized)
 
 ## Security Considerations
 
 ### Dev Mode vs Production
 
 - **Dev Faucet**: Only available in debug builds (`#[cfg(debug_assertions)]`)
-- **Signature Validation**: Currently bypassed for dev convenience
-- **Nonce Checks**: Currently bypassed for dev convenience
+- **Dev Transfer**: `cgt_devUnsafeTransfer` only available in debug builds
+- **Signature Validation**: Ed25519 signatures are computed client-side and attached via `cgt_signTransaction` RPC
+- **Nonce Checks**: Enforced in transaction processing (nonce must match current nonce)
+- **Transaction Hashing**: SHA-256 of serialized transaction, stored in state for retrieval
 
-**Note**: For production, proper signature validation and nonce checks must be implemented.
+**Note**: For production, full signature verification should be implemented in transaction execution.
 
 ### Genesis Authority
 
@@ -106,13 +117,14 @@ The Genesis authority is the all-zero address (`[0u8; 32]`). Only this address c
 ### Phase 2.5+
 - Block persistence and retrieval
 - State root computation
-- Full transaction validation (signatures, nonces)
+- Full signature verification in transaction execution
 
 ### Phase 3+
 - P2P networking
 - Block production (mining)
 - Consensus mechanism
-- Full signature validation
+- Full signature verification
+- Transaction indexing for efficient history queries
 
 ### Phase 4+
 - Fabric P2P network integration

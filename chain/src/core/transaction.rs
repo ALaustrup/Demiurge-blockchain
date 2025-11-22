@@ -5,6 +5,7 @@
 //! `call_id`, with parameters encoded in the `payload` field.
 
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use thiserror::Error;
 
 /// Address type: a 32-byte public key identifier.
@@ -64,6 +65,30 @@ impl Transaction {
     pub fn from_bytes(bytes: &[u8]) -> Result<Self, TransactionError> {
         bincode::deserialize(bytes)
             .map_err(|e| TransactionError::DeserializationError(e.to_string()))
+    }
+
+    /// Compute the hash of this transaction.
+    ///
+    /// Returns a 32-byte SHA-256 hash of the bincode-serialized transaction.
+    pub fn hash(&self) -> Result<[u8; 32], TransactionError> {
+        let bytes = self.to_bytes()?;
+        let mut hasher = Sha256::new();
+        hasher.update(&bytes);
+        let digest = hasher.finalize();
+        let mut hash = [0u8; 32];
+        hash.copy_from_slice(&digest);
+        Ok(hash)
+    }
+
+    /// Serialize transaction without signature for signing.
+    ///
+    /// This creates a copy of the transaction with an empty signature,
+    /// serializes it, and returns the bytes. This is used for creating
+    /// the message that will be signed.
+    pub fn serialize_for_signing(&self) -> Result<Vec<u8>, TransactionError> {
+        let mut tx_for_signing = self.clone();
+        tx_for_signing.signature = vec![];
+        tx_for_signing.to_bytes()
     }
 }
 

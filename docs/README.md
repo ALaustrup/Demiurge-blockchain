@@ -2,18 +2,29 @@
 
 **The Sovereign Digital Pantheon for creators, gamers, and AI.**
 
-Demiurge is a sovereign L1 blockchain where **Archons** (creators) and **Nomads** (explorers) mint, trade, and experience D-GEN NFTs, streamed over the Fabric P2P network and traded in the Abyss marketplace, powered by the Creator God Token (CGT).
+Demiurge is a sovereign L1 blockchain where **UrgeIDs** (sovereign identities) and **Archons** (creators) mint, trade, and experience D-GEN NFTs, streamed over the Fabric P2P network and traded in the Abyss marketplace, powered by the Creator God Token (CGT).
 
 ## Concepts
 
-### Archons (Creators)
-Archons are creators who have "ascended" to creator status. Archons can mint D-GEN NFTs and participate in the creator economy. The Genesis Archon is pre-funded and marked as an Archon during chain initialization.
+### UrgeID (Sovereign Identity)
+Every user on Demiurge has an **UrgeID** - a sovereign identity that includes:
+- **Profile**: Display name, bio, optional handle (@username)
+- **Syzygy Score**: Contribution metric for seeding/serving other creators' content
+- **Badges**: Achievement markers (e.g., "Luminary" for high Syzygy scores)
+- **Wallet**: CGT balance and transaction history
 
-### Nomads (Explorers)
-Nomads are explorers who roam, collect, and experience worlds created by Archons. They can own and trade D-GEN NFTs.
+### Archons (Creators)
+Archons are UrgeID users who have "ascended" to creator status. Archons can mint D-GEN NFTs and participate in the creator economy. The Genesis Archon is pre-funded and marked as an Archon during chain initialization.
 
 ### CGT (Creator God Token)
-CGT is the native token of the Demiurge chain. It powers transactions, fees, and the creator economy. The Genesis Archon starts with 1,000,000 CGT.
+CGT is the native token of the Demiurge chain:
+- **Name**: Creator God Token
+- **Symbol**: CGT
+- **Decimals**: 8 (smallest unit: 10^-8 CGT)
+- **Max Supply**: 1,000,000,000 CGT (1 billion)
+- **Total Supply**: Tracked on-chain, enforced at mint time
+
+The Genesis Archon starts with 1,000,000 CGT (100,000,000,000,000 smallest units).
 
 ### Fabric (P2P Content)
 Fabric is a P2P content network that anchors immutable content roots. D-GEN NFTs reference Fabric assets via `fabric_root_hash`.
@@ -59,8 +70,11 @@ The portal will be available at `http://localhost:3000`.
 ### 3. Visit the Portal
 
 Open `http://localhost:3000` in your browser. You'll see:
-- **Live Chain Status**: Real-time chain height and health
+- **Live Chain Status**: Real-time chain height, CGT metadata, and total supply
 - **Genesis Archon Dashboard**: Balance, Archon status, and owned NFTs
+- **Create UrgeID**: Onboard flow to create your sovereign identity
+- **UrgeID Dashboard**: Profile, CGT balance, Syzygy score, badges, transaction history
+- **Send CGT**: Transfer CGT between UrgeIDs with Ed25519 signing
 - **Mint Test NFT**: Dev-only button to mint a test D-GEN NFT
 
 ## Developer Features
@@ -73,9 +87,26 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 ```
 
 This address is:
-- Pre-funded with 1,000,000 CGT during genesis initialization
+- Pre-funded with 1,000,000 CGT (100,000,000,000,000 smallest units) during genesis initialization
 - Automatically marked as an Archon
 - Ready to mint D-GEN NFTs immediately
+
+### UrgeID Onboarding
+
+Users can create their UrgeID via the portal:
+1. Generate Ed25519 keypair (stored in localStorage)
+2. Create on-chain profile with display name and bio
+3. Optionally set a unique handle (@username)
+4. Start earning Syzygy by seeding content
+
+### CGT Transfers
+
+CGT can be transferred between UrgeIDs:
+1. Build unsigned transaction (server-side)
+2. Sign with Ed25519 (client-side)
+3. Submit signed transaction
+4. Track transaction hash and poll for confirmation
+5. View transaction history (local + on-chain)
 
 ### Dev Faucet
 
@@ -125,8 +156,20 @@ The Demiurge node exposes the following JSON-RPC methods:
 ### Chain Info
 - `cgt_getChainInfo`: Get current chain height
 
-### Wallet
-- `cgt_getBalance`: Get CGT balance for an address
+### CGT Currency
+- `cgt_getMetadata`: Get CGT currency metadata (name, symbol, decimals, maxSupply, totalSupply)
+- `cgt_getTotalSupply`: Get current total CGT supply
+- `cgt_getBalance`: Get CGT balance for an address (returns string in smallest units)
+- `cgt_getNonce`: Get transaction nonce for an address
+
+### UrgeID Identity
+- `urgeid_create`: Create a new UrgeID profile
+- `urgeid_get`: Get UrgeID profile by address
+- `urgeid_recordSyzygy`: Record Syzygy contribution (increments score, awards badges)
+- `urgeid_setHandle`: Set a unique handle (@username) for an UrgeID
+- `urgeid_getByHandle`: Get UrgeID profile by handle
+
+### Wallet & Archon Status
 - `cgt_isArchon`: Check if an address has Archon status
 
 ### NFTs
@@ -137,12 +180,17 @@ The Demiurge node exposes the following JSON-RPC methods:
 - `cgt_getListing`: Get marketplace listing by ID
 - `cgt_getFabricAsset`: Get Fabric asset by root hash
 
-### Dev Tools
-- `cgt_devFaucet`: Mint 10,000 CGT to an address (debug builds only)
-
 ### Transactions
-- `cgt_sendRawTransaction`: Submit a raw transaction to the mempool
+- `cgt_buildTransferTx`: Build a transfer transaction (returns unsigned tx hex)
+- `cgt_signTransaction`: Attach Ed25519 signature to unsigned transaction
+- `cgt_sendRawTransaction`: Submit a signed transaction to the mempool (returns tx_hash)
+- `cgt_getTransaction`: Get transaction by hash
+- `cgt_getTransactionHistory`: Get transaction history for an address
 - `cgt_getBlockByHeight`: Get a block by height (stubbed for now)
+
+### Dev Tools
+- `cgt_devFaucet`: Mint CGT to an address (debug builds only)
+- `cgt_devUnsafeTransfer`: Direct transfer without signature (debug builds only)
 
 ## Architecture
 

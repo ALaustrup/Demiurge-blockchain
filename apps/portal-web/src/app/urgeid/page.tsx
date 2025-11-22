@@ -5,9 +5,28 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Wallet, Coins, Sparkles, ArrowLeft } from "lucide-react";
 import QRCode from "react-qr-code";
-import { callRpc, formatCgt, getCgtBalance } from "@/lib/rpc";
+import {
+  callRpc,
+  formatCgt,
+  getCgtBalance,
+  cgtToSmallest,
+  getNonce,
+  buildTransferTx,
+  sendRawTransaction,
+  getTransaction,
+  getTransactionHistory,
+  signTransactionRpc,
+} from "@/lib/rpc";
+import { signTransaction } from "@/lib/signing";
 import { formatUrgeId } from "@/lib/urgeid";
 import { exportVault, importVault } from "@/lib/vault";
+import {
+  saveTransaction,
+  getTransactionsForAddress,
+  updateTransactionStatus,
+  generateTxId,
+  type TransactionRecord,
+} from "@/lib/transactions";
 
 type UrgeIDProfile = {
   address: string;
@@ -42,6 +61,11 @@ export default function UrgeIDPage() {
   const [handleInput, setHandleInput] = useState("");
   const [handleStatus, setHandleStatus] = useState<string | null>(null);
   const [vaultStatus, setVaultStatus] = useState<string | null>(null);
+  const [sendTo, setSendTo] = useState("");
+  const [sendAmount, setSendAmount] = useState("");
+  const [sending, setSending] = useState(false);
+  const [sendStatus, setSendStatus] = useState<string | null>(null);
+  const [txHistory, setTxHistory] = useState<TransactionRecord[]>([]);
 
   // Check if user already has a wallet
   useEffect(() => {
@@ -52,6 +76,9 @@ export default function UrgeIDPage() {
       setPrivateKey(storedKey);
       setStep("dashboard");
       loadDashboard(storedAddress);
+      // Load transaction history
+      const history = getTransactionsForAddress(storedAddress);
+      setTxHistory(history);
     }
   }, []);
 
@@ -125,6 +152,47 @@ export default function UrgeIDPage() {
     } catch (err: any) {
       console.error("Failed to load dashboard:", err);
     }
+  };
+
+  // Poll transaction status
+  const pollTransactionStatus = async (txHash: string) => {
+    if (!profile) return;
+    
+    let attempts = 0;
+    const maxAttempts = 10;
+    const pollInterval = 2000; // 2 seconds
+
+    const poll = async () => {
+      if (attempts >= maxAttempts) {
+        updateTransactionStatus(txHash, "failed", txHash, "Timeout waiting for confirmation");
+        setTxHistory(getTransactionsForAddress(profile.address));
+        return;
+      }
+
+      try {
+        const tx = await getTransaction(txHash);
+        if (tx) {
+          // Transaction found on-chain, mark as confirmed
+          updateTransactionStatus(txHash, "confirmed", txHash);
+          setTxHistory(getTransactionsForAddress(profile.address));
+        } else {
+          // Not found yet, keep polling
+          attempts++;
+          setTimeout(poll, pollInterval);
+        }
+      } catch (err) {
+        console.error("Error polling transaction:", err);
+        attempts++;
+        if (attempts < maxAttempts) {
+          setTimeout(poll, pollInterval);
+        } else {
+          updateTransactionStatus(txHash, "failed", txHash, "Error checking status");
+          setTxHistory(getTransactionsForAddress(profile.address));
+        }
+      }
+    };
+
+    setTimeout(poll, pollInterval);
   };
 
   if (step === "onboarding") {
@@ -421,6 +489,208 @@ export default function UrgeIDPage() {
               </div>
             )}
           </section>
+
+          {/* Send CGT Section */}
+          <section className="mt-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4">
+            <h3 className="text-xs font-semibold text-slate-400 mb-3">
+              Send CGT
+            </h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                  Recipient Address (hex)
+                </label>
+                <input
+                  type="text"
+                  value={sendTo}
+                  onChange={(e) => setSendTo(e.target.value.trim())}
+                  placeholder="Enter recipient hex address"
+                  className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 font-mono outline-none focus:border-sky-500"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-slate-400 mb-1">
+                  Amount (CGT)
+                </label>
+                <input
+                  type="number"
+                  step="0.00000001"
+                  value={sendAmount}
+                  onChange={(e) => setSendAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-100 outline-none focus:border-sky-500"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!sendTo || !sendAmount || !profile) {
+                    setSendStatus("Please fill in recipient and amount");
+                    return;
+                  }
+
+                  const amount = parseFloat(sendAmount);
+                  if (isNaN(amount) || amount <= 0) {
+                    setSendStatus("Invalid amount");
+                    return;
+                  }
+
+                  if (balance !== null && amount > balance) {
+                    setSendStatus("Insufficient balance");
+                    return;
+                  }
+
+                  setSending(true);
+                  setSendStatus(null);
+
+                  try {
+                    // Get nonce
+                    const nonceRes = await getNonce(profile.address);
+                    const nonce = nonceRes.nonce;
+
+                    // Convert amount to smallest units
+                    const amountSmallest = cgtToSmallest(amount);
+
+                    // Build transaction (server-side serialization, without signature)
+                    const txRes = await buildTransferTx(
+                      profile.address,
+                      sendTo,
+                      amountSmallest,
+                      nonce,
+                      0 // fee
+                    );
+
+                    // Sign the transaction
+                    // The tx_hex is the unsigned transaction bytes
+                    const txBytes = Uint8Array.from(
+                      Buffer.from(txRes.tx_hex, "hex")
+                    );
+                    
+                    // Sign the transaction bytes (these represent the unsigned transaction)
+                    const signatureHex = await signTransaction(txBytes, privateKey);
+
+                    // Attach signature to transaction via RPC
+                    const signedTxRes = await signTransactionRpc(txRes.tx_hex, signatureHex);
+
+                    // Submit the signed transaction
+                    const submitRes = await sendRawTransaction(signedTxRes.tx_hex);
+
+                    if (submitRes.accepted && submitRes.tx_hash) {
+                      // Save to transaction history with hash
+                      const txRecord: TransactionRecord = {
+                        id: submitRes.tx_hash,
+                        from: profile.address,
+                        to: sendTo,
+                        amount: amountSmallest,
+                        amountCgt: amount,
+                        fee: 0,
+                        timestamp: Date.now(),
+                        status: "pending",
+                        txHash: submitRes.tx_hash,
+                      };
+                      saveTransaction(txRecord);
+                      setTxHistory(getTransactionsForAddress(profile.address));
+
+                      setSendStatus("Transaction submitted successfully!");
+                      setSendTo("");
+                      setSendAmount("");
+                      
+                      // Start polling for transaction status
+                      pollTransactionStatus(submitRes.tx_hash);
+                      
+                      // Reload balance after a delay
+                      setTimeout(() => {
+                        loadDashboard(profile.address);
+                      }, 2000);
+                    } else {
+                      setSendStatus("Transaction submission failed");
+                    }
+                  } catch (err: any) {
+                    setSendStatus(err?.message || "Transaction failed");
+                  } finally {
+                    setSending(false);
+                  }
+                }}
+                disabled={sending || !sendTo || !sendAmount}
+                className="w-full rounded-md border border-slate-600 bg-sky-600 px-4 py-2 text-sm font-medium text-slate-50 hover:bg-sky-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {sending ? "Sending..." : "Send CGT"}
+              </button>
+              {sendStatus && (
+                <p
+                  className={`text-xs ${
+                    sendStatus.includes("successful")
+                      ? "text-emerald-400"
+                      : "text-rose-400"
+                  }`}
+                >
+                  {sendStatus}
+                </p>
+              )}
+            </div>
+          </section>
+
+          {/* Transaction History */}
+          {txHistory.length > 0 && (
+            <section className="mt-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4">
+              <h3 className="text-xs font-semibold text-slate-400 mb-3">
+                Transaction History
+              </h3>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {txHistory.map((tx) => (
+                  <div
+                    key={tx.id}
+                    className="rounded-md border border-slate-700 bg-slate-800/30 p-3 text-xs"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`font-mono ${
+                              tx.from.toLowerCase() === profile?.address.toLowerCase()
+                                ? "text-rose-400"
+                                : "text-emerald-400"
+                            }`}
+                          >
+                            {tx.from.toLowerCase() === profile?.address.toLowerCase()
+                              ? "→"
+                              : "←"}
+                          </span>
+                          <span className="text-slate-300">
+                            {tx.from.toLowerCase() === profile?.address.toLowerCase()
+                              ? "Sent"
+                              : "Received"}
+                          </span>
+                          <span
+                            className={`px-1.5 py-0.5 rounded text-[10px] ${
+                              tx.status === "confirmed"
+                                ? "bg-emerald-500/20 text-emerald-400"
+                                : tx.status === "pending"
+                                ? "bg-yellow-500/20 text-yellow-400"
+                                : "bg-rose-500/20 text-rose-400"
+                            }`}
+                          >
+                            {tx.status}
+                          </span>
+                        </div>
+                        <div className="mt-1 text-slate-400">
+                          {formatCgt(tx.amount)} CGT
+                        </div>
+                        <div className="mt-1 text-slate-500 text-[10px] font-mono">
+                          {tx.from.toLowerCase() === profile?.address.toLowerCase()
+                            ? `To: ${tx.to.slice(0, 8)}...${tx.to.slice(-6)}`
+                            : `From: ${tx.from.slice(0, 8)}...${tx.from.slice(-6)}`}
+                        </div>
+                        <div className="mt-1 text-slate-500 text-[10px]">
+                          {new Date(tx.timestamp).toLocaleString()}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           <div className="grid gap-4 md:grid-cols-2">
             {/* Balance */}

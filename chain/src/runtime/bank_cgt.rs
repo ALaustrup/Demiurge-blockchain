@@ -79,6 +79,16 @@ fn get_nonce(state: &State, addr: &Address) -> u64 {
         .unwrap_or(0)
 }
 
+/// Public helper for querying nonce (for RPC use).
+pub fn get_nonce_cgt(state: &State, addr: &Address) -> u64 {
+    get_nonce(state, addr)
+}
+
+/// Public helper for setting nonce (for RPC use).
+pub fn set_nonce_cgt(state: &mut State, addr: &Address, nonce: u64) -> Result<(), String> {
+    set_nonce(state, addr, nonce)
+}
+
 fn set_nonce(state: &mut State, addr: &Address, nonce: u64) -> Result<(), String> {
     let bytes = bincode::serialize(&nonce).map_err(|e| e.to_string())?;
     state

@@ -19,8 +19,8 @@ pub use urgeid_registry::{
     set_handle, UrgeIDProfile, UrgeIDRegistryModule,
 };
 pub use bank_cgt::{
-    get_balance_cgt, get_cgt_total_supply, CGT_DECIMALS, CGT_MAX_SUPPLY, CGT_NAME, CGT_SYMBOL,
-    BankCgtModule,
+    get_balance_cgt, get_cgt_total_supply, get_nonce_cgt, set_nonce_cgt, CGT_DECIMALS,
+    CGT_MAX_SUPPLY, CGT_NAME, CGT_SYMBOL, BankCgtModule,
 };
 pub use fabric_manager::{get_fabric_asset, FabricManagerModule, FabricRootHash};
 pub use nft_dgen::{get_nft, get_nfts_by_owner, NftDgenModule, NftId};

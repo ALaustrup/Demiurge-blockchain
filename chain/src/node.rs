@@ -9,6 +9,7 @@ use std::sync::{Arc, Mutex};
 
 use anyhow::Result;
 use bincode;
+use hex;
 
 use crate::config::{GENESIS_ARCHON_ADDRESS, GENESIS_ARCHON_INITIAL_BALANCE};
 use crate::core::block::Block;
@@ -99,14 +100,79 @@ impl Node {
     /// # Arguments
     /// - `tx`: The transaction to add to the mempool
     ///
+    /// # Returns
+    /// Transaction hash as hex string, or error message
+    ///
     /// # Note
-    /// This adds the transaction to the mempool but does not immediately
-    /// include it in a block. Block production and transaction inclusion
-    /// will be implemented in later phases.
-    pub fn submit_transaction(&self, tx: Transaction) {
+    /// This adds the transaction to the mempool and stores it in state
+    /// keyed by hash for later retrieval.
+    pub fn submit_transaction(&self, tx: Transaction) -> Result<String, String> {
+        // Compute transaction hash
+        let tx_hash = tx.hash().map_err(|e| format!("failed to hash transaction: {}", e))?;
+        let tx_hash_hex = hex::encode(&tx_hash);
+
+        // Store transaction in state (keyed by hash)
+        let tx_bytes = tx.to_bytes().map_err(|e| format!("failed to serialize transaction: {}", e))?;
+        let tx_key = format!("tx:{}", tx_hash_hex);
+        
+        self.with_state_mut(|state| -> anyhow::Result<()> {
+            state.put_raw(tx_key.as_bytes().to_vec(), tx_bytes)?;
+            Ok(())
+        })
+        .map_err(|e| format!("failed to store transaction: {}", e))?;
+
+        // Add to mempool
         let mut mempool = self.mempool.lock().expect("mempool mutex poisoned");
         mempool.push(tx);
-        // Later phases will include block production and actual inclusion.
+
+        Ok(tx_hash_hex)
+    }
+
+    /// Get a transaction by hash.
+    ///
+    /// # Arguments
+    /// - `hash_hex`: Transaction hash as hex string
+    ///
+    /// # Returns
+    /// `Some(Transaction)` if found, `None` otherwise
+    pub fn get_transaction_by_hash(&self, hash_hex: &str) -> Option<Transaction> {
+        let tx_key = format!("tx:{}", hash_hex);
+        self.with_state(|state| {
+            state.get_raw(tx_key.as_bytes())
+                .and_then(|bytes| Transaction::from_bytes(&bytes).ok())
+        })
+    }
+
+    /// Get transactions for an address (sent or received).
+    ///
+    /// # Arguments
+    /// - `address`: Address to query
+    /// - `limit`: Maximum number of transactions to return
+    ///
+    /// # Returns
+    /// Vector of transaction hashes (hex strings)
+    ///
+    /// # Note
+    /// This is a simple implementation that scans all stored transactions.
+    /// In production, you'd want an index for efficient queries.
+    pub fn get_transactions_for_address(&self, address: &Address, limit: usize) -> Vec<String> {
+        // For now, return transactions from mempool that match the address
+        // In production, you'd query from indexed storage
+        let mempool = self.mempool.lock().expect("mempool mutex poisoned");
+        mempool
+            .iter()
+            .filter(|tx| {
+                tx.from == *address
+                    || {
+                        // Check if this is a transfer to this address
+                        // This is a simplified check - in production, decode payload
+                        false // TODO: decode payload to check recipient
+                    }
+            })
+            .take(limit)
+            .filter_map(|tx| tx.hash().ok())
+            .map(|h| hex::encode(&h))
+            .collect()
     }
 
     /// Execute a function with read-only access to state.
@@ -117,6 +183,7 @@ impl Node {
         f(&state)
     }
 
+
     /// Get CGT balance for an address.
     pub fn get_balance_cgt(&self, addr: &Address) -> u128 {
         self.with_state(|state| get_balance_cgt(state, addr))
@@ -125,6 +192,12 @@ impl Node {
     /// Get total CGT supply.
     pub fn get_cgt_total_supply(&self) -> u128 {
         self.with_state(|state| get_cgt_total_supply(state).unwrap_or(0))
+    }
+
+    /// Get nonce for an address.
+    pub fn get_nonce(&self, addr: &Address) -> u64 {
+        use crate::runtime::get_nonce_cgt;
+        self.with_state(|state| get_nonce_cgt(state, addr))
     }
 
     /// Check if an address has Archon status.

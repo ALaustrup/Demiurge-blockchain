@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@noble/ed25519": "^3.0.0",
+    "@noble/hashes": "^2.0.1",
     "axios": "^1.7.0",
     "bech32": "^2.0.0",
     "framer-motion": "^12.23.24",

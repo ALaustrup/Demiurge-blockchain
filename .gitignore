@@ -18,16 +18,27 @@ desktop.ini
 *.sublime-workspace
 
 # Rust
-/target
-**/target
+/target/
+**/target/
+target/
 Cargo.lock
+*.pdb
+*.dll
+*.exe
+*.rlib
+*.d
+incremental/
+debug/
+release/
 
 # Node / Next.js / TypeScript
-node_modules
+node_modules/
+**/node_modules/
 .pnp.*
-.next
-dist
-out
+.next/
+**/.next/
+dist/
+out/
 pnpm-lock.yaml
 yarn.lock
 package-lock.json
@@ -39,6 +50,7 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
+.eslintcache
 
 # Next.js
 .next/
@@ -49,6 +61,7 @@ next-env.d.ts
 
 # Qt / CMake build dirs
 **/build/
+build/
 **/CMakeLists.txt.user
 *.user
 *.pro.user
@@ -57,6 +70,18 @@ next-env.d.ts
 *.jsc
 build-*/
 *.autosave
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+install_manifest.txt
+*.dll
+*.a
+*.lib
+*.so
+*.dylib
+Qt*.dll
+*.exe
 
 # Docker
 .dockerignore
@@ -73,6 +98,9 @@ build-*/
 *.sqlite3
 rocksdb/
 .demiurge/
+**/.demiurge/
+*.LOCK
+*.lock
 
 # Build artifacts
 dist/
@@ -97,4 +125,58 @@ temp/
 
 # Turbo
 .turbo/
+.turbod/
+
+# Large binary files and build artifacts
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.dmg
+*.iso
+*.img
+
+# IDE and editor files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Vercel
+.vercel/
+vercel.json
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Coverage and testing
+coverage/
+.nyc_output/
+*.lcov
+.jest/
+
+# Misc
+*.pid
+*.seed
+*.pid.lock
+.npm
+.eslintcache
+.stylelintcache
 

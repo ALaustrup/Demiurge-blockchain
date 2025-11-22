@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Demiurge Portal Web
+
+The Next.js web portal for the Demiurge blockchain ecosystem.
+
+## Features
+
+- **Live Chain Status**: Real-time chain height, CGT metadata, and total supply
+- **UrgeID Onboarding**: Create your sovereign identity with Ed25519 keypair
+- **UrgeID Dashboard**: 
+  - Profile management (display name, bio, handle)
+  - CGT balance display (human-readable + smallest units)
+  - Syzygy score and badges
+  - Transaction history (sent/received with status polling)
+  - Send CGT with Ed25519 signing
+  - Vault export/import (password-encrypted)
+- **Genesis Archon Dashboard**: Balance, Archon status, and NFT display
+- **Mint Test NFT**: Dev-only button for minting test NFTs
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ and pnpm
+- Demiurge chain node running on `http://127.0.0.1:8545`
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Learn More
+### Build
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Key Libraries
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Next.js 16+**: App Router, React Server Components
+- **TypeScript**: Type-safe development
+- **TailwindCSS**: Utility-first styling
+- **Framer Motion**: Animations
+- **@noble/ed25519**: Ed25519 signing for transactions
+- **react-qr-code**: QR code generation for UrgeID addresses
+- **bech32**: Address encoding (for future use)
+
+## Project Structure
+
+```
+apps/portal-web/
+├── src/
+│   ├── app/              # Next.js App Router pages
+│   │   ├── page.tsx      # Landing page
+│   │   └── urgeid/       # UrgeID onboarding and dashboard
+│   ├── components/       # React components
+│   ├── lib/              # Utilities
+│   │   ├── rpc.ts        # RPC client helpers
+│   │   ├── signing.ts    # Ed25519 signing
+│   │   ├── transactions.ts # Transaction history
+│   │   └── urgeid.ts     # UrgeID formatting
+│   └── config/           # Configuration
+└── public/               # Static assets
+```
+
+## Environment Variables
+
+- `NEXT_PUBLIC_DEMIURGE_RPC_URL`: RPC endpoint (default: `http://127.0.0.1:8545/rpc`)
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The portal is configured for Vercel deployment. Ensure `.gitignore` excludes large build artifacts (`target/`, `node_modules/`, `.next/`, etc.) to avoid pushing unnecessary files.

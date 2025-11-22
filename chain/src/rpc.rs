@@ -70,6 +70,45 @@ pub struct GetBalanceParams {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct GetNonceParams {
+    pub address: String, // hex string
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DevTransferParams {
+    pub from: String, // hex string
+    pub to: String,   // hex string
+    pub amount: String, // amount in smallest units (u128 as string)
+    pub fee: Option<u64>, // optional fee, defaults to 0
+}
+
+#[derive(Debug, Deserialize)]
+pub struct BuildTransferTxParams {
+    pub from: String,    // hex string
+    pub to: String,       // hex string
+    pub amount: String,   // amount in smallest units (u128 as string)
+    pub nonce: u64,
+    pub fee: Option<u64>, // optional fee, defaults to 0
+}
+
+#[derive(Debug, Deserialize)]
+pub struct GetTxParams {
+    pub tx_hash: String, // hex string
+}
+
+#[derive(Debug, Deserialize)]
+pub struct GetTxHistoryParams {
+    pub address: String, // hex string
+    pub limit: Option<usize>, // optional limit, defaults to 50
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SignTxParams {
+    pub tx_hex: String,      // unsigned transaction hex
+    pub signature: String,   // signature hex (64 bytes = 128 hex chars)
+}
+
+#[derive(Debug, Deserialize)]
 pub struct IsArchonParams {
     pub address: String,
 }
@@ -964,14 +1003,23 @@ async fn handle_rpc(
                 }
             };
 
-            node.submit_transaction(tx);
-
-            Json(JsonRpcResponse {
-                jsonrpc: "2.0".to_string(),
-                result: Some(json!({ "accepted": true })),
-                error: None,
-                id,
-            })
+            match node.submit_transaction(tx) {
+                Ok(tx_hash) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(json!({ "accepted": true, "tx_hash": tx_hash })),
+                    error: None,
+                    id,
+                }),
+                Err(msg) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32603,
+                        message: msg,
+                    }),
+                    id,
+                }),
+            }
         }
         "cgt_getMetadata" => {
             let total_supply = node.get_cgt_total_supply();
@@ -994,6 +1042,300 @@ async fn handle_rpc(
                 jsonrpc: "2.0".to_string(),
                 result: Some(json!({
                     "totalSupply": total_supply.to_string(),
+                })),
+                error: None,
+                id,
+            })
+        }
+        "cgt_getNonce" => {
+            let params: GetNonceParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(GetNonceParams {
+                        address: String::new(),
+                    }),
+                None => GetNonceParams {
+                    address: String::new(),
+                },
+            };
+
+            match parse_address_hex(&params.address) {
+                Ok(addr) => {
+                    let nonce = node.get_nonce(&addr);
+                    Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: Some(json!({ "nonce": nonce })),
+                        error: None,
+                        id,
+                    })
+                }
+                Err(msg) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32602,
+                        message: msg,
+                    }),
+                    id,
+                }),
+            }
+        }
+        "cgt_devUnsafeTransfer" => {
+            // Dev-only: unsafe transfer without signature verification
+            #[cfg(not(debug_assertions))]
+            {
+                return Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32601,
+                        message: "cgt_devUnsafeTransfer is only available in debug builds".to_string(),
+                    }),
+                    id,
+                });
+            }
+
+            let params: DevTransferParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(DevTransferParams {
+                        from: String::new(),
+                        to: String::new(),
+                        amount: String::new(),
+                        fee: Some(0),
+                    }),
+                None => DevTransferParams {
+                    from: String::new(),
+                    to: String::new(),
+                    amount: String::new(),
+                    fee: Some(0),
+                },
+            };
+
+            let from_addr = match parse_address_hex(&params.from) {
+                Ok(addr) => addr,
+                Err(msg) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("invalid 'from' address: {}", msg),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            let to_addr = match parse_address_hex(&params.to) {
+                Ok(addr) => addr,
+                Err(msg) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("invalid 'to' address: {}", msg),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            let amount = match params.amount.parse::<u128>() {
+                Ok(a) => a,
+                Err(e) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("invalid amount: {}", e),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            let fee = params.fee.unwrap_or(0) as u128;
+
+            let result: Result<(u128, u128), String> = node.with_state_mut(|state| {
+                use crate::runtime::bank_cgt::{get_balance_cgt, set_balance_for_module, get_nonce_cgt, set_nonce_cgt};
+
+                // Get nonce
+                let current_nonce = get_nonce_cgt(state, &from_addr);
+                
+                // Check balance
+                let from_balance = get_balance_cgt(state, &from_addr);
+                let total = amount.checked_add(fee).ok_or_else(|| "overflow".to_string())?;
+                
+                if from_balance < total {
+                    return Err("insufficient balance for amount + fee".to_string());
+                }
+
+                // Get recipient balance
+                let to_balance = get_balance_cgt(state, &to_addr);
+
+                // Update balances
+                let new_from_balance = from_balance - total;
+                let new_to_balance = to_balance
+                    .checked_add(amount)
+                    .ok_or_else(|| "overflow on recipient".to_string())?;
+
+                set_balance_for_module(state, &from_addr, new_from_balance)?;
+                set_balance_for_module(state, &to_addr, new_to_balance)?;
+                set_nonce_cgt(state, &from_addr, current_nonce + 1)?;
+
+                Ok((new_from_balance, new_to_balance))
+            });
+
+            match result {
+                Ok((from_balance, to_balance)) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(json!({
+                        "ok": true,
+                        "from_balance": from_balance.to_string(),
+                        "to_balance": to_balance.to_string(),
+                    })),
+                    error: None,
+                    id,
+                }),
+                Err(msg) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32603,
+                        message: format!("Transfer failed: {}", msg),
+                    }),
+                    id,
+                }),
+            }
+        }
+        "cgt_buildTransferTx" => {
+            // Helper to build and serialize a transfer transaction
+            let params: BuildTransferTxParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(BuildTransferTxParams {
+                        from: String::new(),
+                        to: String::new(),
+                        amount: String::new(),
+                        nonce: 0,
+                        fee: Some(0),
+                    }),
+                None => BuildTransferTxParams {
+                    from: String::new(),
+                    to: String::new(),
+                    amount: String::new(),
+                    nonce: 0,
+                    fee: Some(0),
+                },
+            };
+
+            let from_addr = match parse_address_hex(&params.from) {
+                Ok(addr) => addr,
+                Err(msg) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("invalid 'from' address: {}", msg),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            let to_addr = match parse_address_hex(&params.to) {
+                Ok(addr) => addr,
+                Err(msg) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("invalid 'to' address: {}", msg),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            let amount = match params.amount.parse::<u128>() {
+                Ok(a) => a,
+                Err(e) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("invalid amount: {}", e),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            let fee = params.fee.unwrap_or(0);
+
+            // Build transfer params
+            use crate::runtime::bank_cgt::TransferParams;
+            let transfer_params = TransferParams {
+                to: to_addr,
+                amount,
+            };
+
+            // Serialize payload
+            let payload = match bincode::serialize(&transfer_params) {
+                Ok(p) => p,
+                Err(e) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32603,
+                            message: format!("failed to serialize payload: {}", e),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            // Build transaction (signature will be added client-side)
+            // For now, we return unsigned transaction
+            // Client will decode, add signature, re-encode
+            let tx = crate::core::transaction::Transaction {
+                from: from_addr,
+                nonce: params.nonce,
+                module_id: "bank_cgt".to_string(),
+                call_id: "transfer".to_string(),
+                payload,
+                fee,
+                signature: vec![], // Client will sign and add this
+            };
+
+            // Serialize transaction to bytes
+            let tx_bytes = match tx.to_bytes() {
+                Ok(b) => b,
+                Err(e) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32603,
+                            message: format!("failed to serialize transaction: {}", e),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            // Return hex-encoded transaction
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "tx_hex": hex::encode(&tx_bytes),
                 })),
                 error: None,
                 id,
