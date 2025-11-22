@@ -198,11 +198,13 @@ export default function HomePage() {
             transition={{ delay: 0.1, duration: 0.4 }}
           >
             A sovereign L1 blockchain where{" "}
-            <span className="font-semibold text-sky-400">Archons</span> (creators)
-            and{" "}
-            <span className="font-semibold text-violet-300">Nomads</span> (explorers)
+            <span className="font-semibold text-sky-400">Aeons</span> (creators and explorers)
             mint, trade, and experience D-GEN NFTs, streamed over the Fabric P2P
-            network and traded in the Abyss marketplace, powered by the Creator God
+            network and traded in the Abyss marketplace. Through{" "}
+            <span className="font-semibold text-violet-300">Syzygy</span> (P2P data seeding),
+            Aeons ascend, earning Gnosis XP and Syzygy Scores.{" "}
+            <span className="font-semibold text-amber-400">Luminaries</span> emerge as
+            distinguished badges for those who reach the highest thresholds, powered by the Creator God
             Token (CGT).
           </motion.p>
 
@@ -293,8 +295,8 @@ export default function HomePage() {
         />
         <PillarCard
           icon={<Users className="h-4 w-4" />}
-          title="Archons & Nomads"
-          body="Creators become Archons, minting D-GEN NFTs and seeding the Fabric. Nomads roam, collect, and experience worlds."
+          title="Aeons & Syzygy"
+          body="Every user is an Aeon. Through Syzygy (P2P data seeding), Aeons ascend via Gnosis XP and Syzygy Scores. Luminaries are badges earned at the highest thresholds."
         />
         <PillarCard
           icon={<Sparkles className="h-4 w-4" />}
@@ -395,16 +397,16 @@ export default function HomePage() {
           The Demiurge Stack
         </h2>
         <p className="text-sm text-slate-300">
-          Demiurge is a modular but sovereign L1: Archon-operated nodes run Forge
+          Demiurge is a modular but sovereign L1: Aeon-operated nodes run Forge
           PoW and host Fabric content; the CGT bank module tracks balances; the
           D-GEN runtime mints NFTs with embedded AI provenance; Fabric anchors
-          immutable content roots; and Abyss provides a native marketplace for
-          licenses and assets.
+          immutable content roots; the Aeon Registry tracks progression, handles, and badges;
+          and Abyss provides a native marketplace for licenses and assets.
         </p>
         <p className="text-xs text-slate-500">
-          This portal is a first window into the Pantheon. Future versions will
-          let you connect a wallet, claim your Archon identity, mint D-GEN NFTs,
-          and browse live Fabric worlds and Abyss listings directly.
+          This portal is a first window into the Pantheon. Become an Aeon, mint D-GEN NFTs,
+          track your ascension through Gnosis XP and Syzygy Scores, and browse live Fabric
+          worlds and Abyss listings directly.
         </p>
       </section>
     </main>
