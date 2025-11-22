@@ -15,8 +15,9 @@ use crate::core::block::Block;
 use crate::core::state::State;
 use crate::core::transaction::{Address, Transaction};
 use crate::runtime::{
-    get_balance_cgt, get_fabric_asset, get_listing, get_nft, get_nfts_by_owner, is_archon,
-    AvatarsProfilesModule, BankCgtModule, FabricRootHash, ListingId, NftId, RuntimeModule,
+    get_balance_cgt, get_cgt_total_supply, get_fabric_asset, get_listing, get_nft,
+    get_nfts_by_owner, is_archon,
+    BankCgtModule, FabricRootHash, ListingId, NftId, RuntimeModule, UrgeIDRegistryModule,
 };
 
 /// Chain information returned by JSON-RPC queries.
@@ -117,8 +118,13 @@ impl Node {
     }
 
     /// Get CGT balance for an address.
-    pub fn get_balance_cgt(&self, addr: &Address) -> u64 {
+    pub fn get_balance_cgt(&self, addr: &Address) -> u128 {
         self.with_state(|state| get_balance_cgt(state, addr))
+    }
+
+    /// Get total CGT supply.
+    pub fn get_cgt_total_supply(&self) -> u128 {
+        self.with_state(|state| get_cgt_total_supply(state).unwrap_or(0))
     }
 
     /// Check if an address has Archon status.
@@ -197,17 +203,17 @@ fn init_genesis_state(state: &mut State) -> Result<()> {
         .map_err(|e| anyhow::anyhow!("Failed to mint genesis CGT: {}", e))?;
 
     // Mark Genesis Archon as Archon
-    let avatars_module = AvatarsProfilesModule::new();
+    let urgeid_module = UrgeIDRegistryModule::new();
     let claim_tx = Transaction {
         from: genesis_addr,
         nonce: 0,
-        module_id: "avatars_profiles".to_string(),
+        module_id: "urgeid_registry".to_string(),
         call_id: "claim_archon".to_string(),
         payload: vec![],
         fee: 0,
         signature: vec![],
     };
-    avatars_module
+    urgeid_module
         .dispatch("claim_archon", &claim_tx, state)
         .map_err(|e| anyhow::anyhow!("Failed to claim genesis Archon: {}", e))?;
 

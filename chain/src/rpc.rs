@@ -22,9 +22,9 @@ use crate::config::DEV_FAUCET_AMOUNT;
 use crate::core::transaction::{Address, Transaction};
 use crate::node::Node;
 use crate::runtime::{
-    add_gnosis_xp, add_syzygy_score, create_aeon_profile, get_aeon_profile,
-    get_address_by_handle, recompute_ascension, set_handle, update_badges, BankCgtModule,
-    FabricRootHash, ListingId, NftDgenModule, NftId, RuntimeModule,
+    create_urgeid_profile, get_address_by_handle, get_urgeid_profile, record_syzygy, set_handle,
+    BankCgtModule, CGT_DECIMALS, CGT_MAX_SUPPLY, CGT_NAME, CGT_SYMBOL, FabricRootHash, ListingId,
+    NftDgenModule, NftId, RuntimeModule,
 };
 
 /// JSON-RPC request envelope.
@@ -105,37 +105,31 @@ pub struct MintDgenNftParams {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct AeonCreateParams {
+pub struct UrgeIDCreateParams {
     pub address: String, // hex string
     pub display_name: String,
     pub bio: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct AeonGetParams {
+pub struct UrgeIDGetParams {
     pub address: String, // hex string
 }
 
 #[derive(Debug, Deserialize)]
-pub struct AeonRecordSyzygyParams {
-    pub from: String, // hex string - seeding Aeon
-    pub to: String,   // hex string - original content Aeon
-    pub weight: u64,  // volume/importance
-}
-
-#[derive(Debug, Deserialize)]
-pub struct AeonGetAscensionParams {
+pub struct UrgeIDRecordSyzygyParams {
     pub address: String, // hex string
+    pub amount: u64,     // Syzygy contribution amount
 }
 
 #[derive(Debug, Deserialize)]
-pub struct AeonSetHandleParams {
+pub struct UrgeIDSetHandleParams {
     pub address: String, // hex string
     pub handle: String,  // handle without @
 }
 
 #[derive(Debug, Deserialize)]
-pub struct AeonGetByHandleParams {
+pub struct UrgeIDGetByHandleParams {
     pub handle: String, // handle without @
 }
 
@@ -217,7 +211,7 @@ async fn handle_rpc(
                     let balance = node.get_balance_cgt(&addr);
                     Json(JsonRpcResponse {
                         jsonrpc: "2.0".to_string(),
-                        result: Some(json!({ "balance": balance })),
+                        result: Some(json!({ "balance": balance.to_string() })),
                         error: None,
                         id,
                     })
@@ -413,7 +407,7 @@ async fn handle_rpc(
                 match parse_address_hex(&params.address) {
                     Ok(addr) => {
                         // Mint CGT directly via state mutation
-                        let result: Result<u64, String> = node.with_state_mut(|state| {
+                        let result: Result<u128, String> = node.with_state_mut(|state| {
                             let bank_module = BankCgtModule::new();
                             let mint_params = crate::runtime::bank_cgt::MintToParams {
                                 to: addr,
@@ -443,7 +437,7 @@ async fn handle_rpc(
                                 jsonrpc: "2.0".to_string(),
                                 result: Some(json!({
                                     "ok": true,
-                                    "new_balance": new_balance
+                                    "new_balance": new_balance.to_string()
                                 })),
                                 error: None,
                                 id,
@@ -569,7 +563,7 @@ async fn handle_rpc(
             // Otherwise, we'll bypass signature checks and mint directly
             let result = node.with_state_mut(|state| {
                 // Check if owner is Archon (required for minting)
-                if !crate::runtime::avatars_profiles::is_archon(state, &owner_addr) {
+                if !crate::runtime::urgeid_registry::is_archon(state, &owner_addr) {
                     return Err("only Archons may mint D-GEN NFTs".to_string());
                 }
 
@@ -630,16 +624,16 @@ async fn handle_rpc(
                 }),
             }
         }
-        "aeon_create" => {
-            let params: AeonCreateParams = match req.params.as_ref() {
+        "urgeid_create" => {
+            let params: UrgeIDCreateParams = match req.params.as_ref() {
                 Some(raw) => serde_json::from_value(raw.clone())
                     .map_err(|e| e.to_string())
-                    .unwrap_or(AeonCreateParams {
+                    .unwrap_or(UrgeIDCreateParams {
                         address: String::new(),
                         display_name: String::new(),
                         bio: None,
                     }),
-                None => AeonCreateParams {
+                None => UrgeIDCreateParams {
                     address: String::new(),
                     display_name: String::new(),
                     bio: None,
@@ -664,7 +658,7 @@ async fn handle_rpc(
             let current_height = node.chain_info().height;
 
             let result = node.with_state_mut(|state| {
-                create_aeon_profile(state, address, params.display_name, params.bio, current_height)
+                create_urgeid_profile(state, address, params.display_name, params.bio, current_height)
             });
 
             match result {
@@ -698,9 +692,8 @@ async fn handle_rpc(
                             "address": hex::encode(profile.address),
                             "display_name": profile.display_name,
                             "bio": profile.bio,
-                            "gnosis_xp": profile.gnosis_xp,
+                            "handle": profile.handle,
                             "syzygy_score": profile.syzygy_score,
-                            "ascension_level": profile.ascension_level,
                             "badges": profile.badges,
                             "created_at_height": profile.created_at_height,
                         })),
@@ -713,20 +706,20 @@ async fn handle_rpc(
                     result: None,
                     error: Some(JsonRpcError {
                         code: -32603,
-                        message: format!("Failed to create Aeon profile: {}", msg),
+                        message: format!("Failed to create UrgeID profile: {}", msg),
                     }),
                     id,
                 }),
             }
         }
-        "aeon_get" => {
-            let params: AeonGetParams = match req.params.as_ref() {
+        "urgeid_get" => {
+            let params: UrgeIDGetParams = match req.params.as_ref() {
                 Some(raw) => serde_json::from_value(raw.clone())
                     .map_err(|e| e.to_string())
-                    .unwrap_or(AeonGetParams {
+                    .unwrap_or(UrgeIDGetParams {
                         address: String::new(),
                     }),
-                None => AeonGetParams {
+                None => UrgeIDGetParams {
                     address: String::new(),
                 },
             };
@@ -746,7 +739,7 @@ async fn handle_rpc(
                 }
             };
 
-            let profile_opt = node.with_state(|state| get_aeon_profile(state, &address));
+            let profile_opt = node.with_state(|state| get_urgeid_profile(state, &address));
 
             Json(JsonRpcResponse {
                 jsonrpc: "2.0".to_string(),
@@ -755,9 +748,8 @@ async fn handle_rpc(
                         "address": hex::encode(profile.address),
                         "display_name": profile.display_name,
                         "bio": profile.bio,
-                        "gnosis_xp": profile.gnosis_xp,
+                        "handle": profile.handle,
                         "syzygy_score": profile.syzygy_score,
-                        "ascension_level": profile.ascension_level,
                         "badges": profile.badges,
                         "created_at_height": profile.created_at_height,
                     }),
@@ -767,23 +759,21 @@ async fn handle_rpc(
                 id,
             })
         }
-        "aeon_recordSyzygy" => {
-            let params: AeonRecordSyzygyParams = match req.params.as_ref() {
+        "urgeid_recordSyzygy" => {
+            let params: UrgeIDRecordSyzygyParams = match req.params.as_ref() {
                 Some(raw) => serde_json::from_value(raw.clone())
                     .map_err(|e| e.to_string())
-                    .unwrap_or(AeonRecordSyzygyParams {
-                        from: String::new(),
-                        to: String::new(),
-                        weight: 0,
+                    .unwrap_or(UrgeIDRecordSyzygyParams {
+                        address: String::new(),
+                        amount: 0,
                     }),
-                None => AeonRecordSyzygyParams {
-                    from: String::new(),
-                    to: String::new(),
-                    weight: 0,
+                None => UrgeIDRecordSyzygyParams {
+                    address: String::new(),
+                    amount: 0,
                 },
             };
 
-            let from_addr = match parse_address_hex(&params.from) {
+            let address = match parse_address_hex(&params.address) {
                 Ok(addr) => addr,
                 Err(msg) => {
                     return Json(JsonRpcResponse {
@@ -791,59 +781,25 @@ async fn handle_rpc(
                         result: None,
                         error: Some(JsonRpcError {
                             code: -32602,
-                            message: format!("invalid 'from' address: {}", msg),
+                            message: format!("invalid address: {}", msg),
                         }),
                         id,
                     });
                 }
             };
 
-            let _to_addr = match parse_address_hex(&params.to) {
-                Ok(addr) => addr,
-                Err(msg) => {
-                    return Json(JsonRpcResponse {
-                        jsonrpc: "2.0".to_string(),
-                        result: None,
-                        error: Some(JsonRpcError {
-                            code: -32602,
-                            message: format!("invalid 'to' address: {}", msg),
-                        }),
-                        id,
-                    });
-                }
-            };
-
-            let result: Result<serde_json::Value, String> = node.with_state_mut(|state| {
-                // Add Syzygy Score to seeding Aeon
-                add_syzygy_score(state, &from_addr, params.weight)?;
-
-                // Add Gnosis XP (weight / 2) to seeding Aeon
-                let xp_gain = params.weight / 2;
-                if xp_gain > 0 {
-                    add_gnosis_xp(state, &from_addr, xp_gain)?;
-                }
-
-                // Recompute ascension and update badges
-                recompute_ascension(state, &from_addr)?;
-                update_badges(state, &from_addr)?;
-
-                // Get updated profile
-                let profile = get_aeon_profile(state, &from_addr)
-                    .ok_or("Profile not found after update")?;
-
-                Ok(json!({
-                    "address": hex::encode(profile.address),
-                    "gnosis_xp": profile.gnosis_xp,
-                    "syzygy_score": profile.syzygy_score,
-                    "ascension_level": profile.ascension_level,
-                    "badges": profile.badges,
-                }))
+            let result = node.with_state_mut(|state| {
+                record_syzygy(state, address, params.amount)
             });
 
             match result {
-                Ok(stats) => Json(JsonRpcResponse {
+                Ok(profile) => Json(JsonRpcResponse {
                     jsonrpc: "2.0".to_string(),
-                    result: Some(stats),
+                    result: Some(json!({
+                        "address": hex::encode(profile.address),
+                        "syzygy_score": profile.syzygy_score,
+                        "badges": profile.badges,
+                    })),
                     error: None,
                     id,
                 }),
@@ -858,64 +814,15 @@ async fn handle_rpc(
                 }),
             }
         }
-        "aeon_getAscension" => {
-            let params: AeonGetAscensionParams = match req.params.as_ref() {
+        "urgeid_setHandle" => {
+            let params: UrgeIDSetHandleParams = match req.params.as_ref() {
                 Some(raw) => serde_json::from_value(raw.clone())
                     .map_err(|e| e.to_string())
-                    .unwrap_or(AeonGetAscensionParams {
-                        address: String::new(),
-                    }),
-                None => AeonGetAscensionParams {
-                    address: String::new(),
-                },
-            };
-
-            let address = match parse_address_hex(&params.address) {
-                Ok(addr) => addr,
-                Err(msg) => {
-                    return Json(JsonRpcResponse {
-                        jsonrpc: "2.0".to_string(),
-                        result: None,
-                        error: Some(JsonRpcError {
-                            code: -32602,
-                            message: format!("invalid address: {}", msg),
-                        }),
-                        id,
-                    });
-                }
-            };
-
-            let profile_opt = node.with_state(|state| get_aeon_profile(state, &address));
-
-            match profile_opt {
-                Some(profile) => Json(JsonRpcResponse {
-                    jsonrpc: "2.0".to_string(),
-                    result: Some(json!({
-                        "gnosis_xp": profile.gnosis_xp,
-                        "syzygy_score": profile.syzygy_score,
-                        "ascension_level": profile.ascension_level,
-                        "badges": profile.badges,
-                    })),
-                    error: None,
-                    id,
-                }),
-                None => Json(JsonRpcResponse {
-                    jsonrpc: "2.0".to_string(),
-                    result: Some(serde_json::Value::Null),
-                    error: None,
-                    id,
-                }),
-            }
-        }
-        "aeon_setHandle" => {
-            let params: AeonSetHandleParams = match req.params.as_ref() {
-                Some(raw) => serde_json::from_value(raw.clone())
-                    .map_err(|e| e.to_string())
-                    .unwrap_or(AeonSetHandleParams {
+                    .unwrap_or(UrgeIDSetHandleParams {
                         address: String::new(),
                         handle: String::new(),
                     }),
-                None => AeonSetHandleParams {
+                None => UrgeIDSetHandleParams {
                     address: String::new(),
                     handle: String::new(),
                 },
@@ -948,9 +855,7 @@ async fn handle_rpc(
                         "display_name": profile.display_name,
                         "bio": profile.bio,
                         "handle": profile.handle,
-                        "gnosis_xp": profile.gnosis_xp,
                         "syzygy_score": profile.syzygy_score,
-                        "ascension_level": profile.ascension_level,
                         "badges": profile.badges,
                         "created_at_height": profile.created_at_height,
                     })),
@@ -968,14 +873,14 @@ async fn handle_rpc(
                 }),
             }
         }
-        "aeon_getByHandle" => {
-            let params: AeonGetByHandleParams = match req.params.as_ref() {
+        "urgeid_getByHandle" => {
+            let params: UrgeIDGetByHandleParams = match req.params.as_ref() {
                 Some(raw) => serde_json::from_value(raw.clone())
                     .map_err(|e| e.to_string())
-                    .unwrap_or(AeonGetByHandleParams {
+                    .unwrap_or(UrgeIDGetByHandleParams {
                         handle: String::new(),
                     }),
-                None => AeonGetByHandleParams {
+                None => UrgeIDGetByHandleParams {
                     handle: String::new(),
                 },
             };
@@ -989,7 +894,7 @@ async fn handle_rpc(
 
             match address_opt {
                 Some(addr) => {
-                    let profile_opt = node.with_state(|state| get_aeon_profile(state, &addr));
+                    let profile_opt = node.with_state(|state| get_urgeid_profile(state, &addr));
                     match profile_opt {
                         Some(profile) => Json(JsonRpcResponse {
                             jsonrpc: "2.0".to_string(),
@@ -998,9 +903,7 @@ async fn handle_rpc(
                                 "display_name": profile.display_name,
                                 "bio": profile.bio,
                                 "handle": profile.handle,
-                                "gnosis_xp": profile.gnosis_xp,
                                 "syzygy_score": profile.syzygy_score,
-                                "ascension_level": profile.ascension_level,
                                 "badges": profile.badges,
                                 "created_at_height": profile.created_at_height,
                             })),
@@ -1066,6 +969,32 @@ async fn handle_rpc(
             Json(JsonRpcResponse {
                 jsonrpc: "2.0".to_string(),
                 result: Some(json!({ "accepted": true })),
+                error: None,
+                id,
+            })
+        }
+        "cgt_getMetadata" => {
+            let total_supply = node.get_cgt_total_supply();
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "name": CGT_NAME,
+                    "symbol": CGT_SYMBOL,
+                    "decimals": CGT_DECIMALS,
+                    "maxSupply": CGT_MAX_SUPPLY.to_string(),
+                    "totalSupply": total_supply.to_string(),
+                })),
+                error: None,
+                id,
+            })
+        }
+        "cgt_getTotalSupply" => {
+            let total_supply = node.get_cgt_total_supply();
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "totalSupply": total_supply.to_string(),
+                })),
                 error: None,
                 id,
             })

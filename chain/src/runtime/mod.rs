@@ -8,18 +8,20 @@ use crate::core::state::State;
 use crate::core::transaction::Transaction;
 
 pub mod abyss_registry;
-pub mod avatars_profiles;
+pub mod urgeid_registry;
 pub mod bank_cgt;
 pub mod fabric_manager;
 pub mod nft_dgen;
 
 pub use abyss_registry::{get_listing, AbyssRegistryModule, ListingId};
-pub use avatars_profiles::{
-    add_gnosis_xp, add_syzygy_score, create_aeon_profile, get_aeon_profile,
-    get_address_by_handle, is_archon, recompute_ascension, set_handle, update_badges,
-    AvatarsProfilesModule, AeonProfile,
+pub use urgeid_registry::{
+    create_urgeid_profile, get_address_by_handle, get_urgeid_profile, is_archon, record_syzygy,
+    set_handle, UrgeIDProfile, UrgeIDRegistryModule,
 };
-pub use bank_cgt::{get_balance_cgt, BankCgtModule};
+pub use bank_cgt::{
+    get_balance_cgt, get_cgt_total_supply, CGT_DECIMALS, CGT_MAX_SUPPLY, CGT_NAME, CGT_SYMBOL,
+    BankCgtModule,
+};
 pub use fabric_manager::{get_fabric_asset, FabricManagerModule, FabricRootHash};
 pub use nft_dgen::{get_nft, get_nfts_by_owner, NftDgenModule, NftId};
 
@@ -28,7 +30,7 @@ pub use nft_dgen::{get_nft, get_nfts_by_owner, NftDgenModule, NftId};
 /// Runtime modules handle specific domains of functionality:
 /// - `bank_cgt`: CGT token balances and transfers
 /// - `nft_dgen`: D-GEN NFT minting and transfers
-/// - `avatars_profiles`: Archon role flags and identity profiles
+/// - `urgeid_registry`: UrgeID profiles and Syzygy tracking
 pub trait RuntimeModule: Send + Sync {
     /// Returns the unique identifier for this module (e.g., "bank_cgt").
     fn module_id(&self) -> &'static str;
@@ -73,7 +75,7 @@ impl Runtime {
     pub fn with_default_modules() -> Self {
         Self::new()
             .with_module(Box::new(BankCgtModule::new()))
-            .with_module(Box::new(AvatarsProfilesModule::new()))
+            .with_module(Box::new(UrgeIDRegistryModule::new()))
             .with_module(Box::new(NftDgenModule::new()))
             .with_module(Box::new(FabricManagerModule::new()))
             .with_module(Box::new(AbyssRegistryModule::new()))

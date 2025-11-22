@@ -5,6 +5,7 @@ import { Activity, CircuitBoard, Sparkles, Users, Wallet, Coins } from "lucide-r
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { DEMIURGE_RPC_URL, GENESIS_ARCHON_ADDRESS } from "@/config/demiurge";
+import { formatCgt, getCgtMetadata, getCgtTotalSupply } from "@/lib/rpc";
 
 type ChainInfo = {
   height: number;
@@ -26,6 +27,11 @@ export default function HomePage() {
   const [isArchon, setIsArchon] = useState<boolean>(false);
   const [minting, setMinting] = useState(false);
   const [genesisError, setGenesisError] = useState<string | null>(null);
+  const [cgtMetadata, setCgtMetadata] = useState<{
+    totalSupply: string;
+    maxSupply: string;
+    symbol: string;
+  } | null>(null);
 
   useEffect(() => {
     const fetchChainInfo = async () => {
@@ -100,6 +106,25 @@ export default function HomePage() {
 
     fetchGenesisData();
     const interval = setInterval(fetchGenesisData, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch CGT metadata
+  useEffect(() => {
+    const fetchCgtMetadata = async () => {
+      try {
+        const metadata = await getCgtMetadata();
+        setCgtMetadata({
+          totalSupply: metadata.totalSupply,
+          maxSupply: metadata.maxSupply,
+          symbol: metadata.symbol,
+        });
+      } catch (err) {
+        // Silently fail - CGT metadata is optional
+      }
+    };
+    fetchCgtMetadata();
+    const interval = setInterval(fetchCgtMetadata, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -198,13 +223,13 @@ export default function HomePage() {
             transition={{ delay: 0.1, duration: 0.4 }}
           >
             A sovereign L1 blockchain where{" "}
-            <span className="font-semibold text-sky-400">Aeons</span> (creators and explorers)
+            <span className="font-semibold text-sky-400">UrgeIDs</span> (creators and explorers)
             mint, trade, and experience D-GEN NFTs, streamed over the Fabric P2P
             network and traded in the Abyss marketplace. Through{" "}
             <span className="font-semibold text-violet-300">Syzygy</span> (P2P data seeding),
-            Aeons ascend, earning Gnosis XP and Syzygy Scores.{" "}
+            UrgeIDs earn Syzygy Scores.{" "}
             <span className="font-semibold text-amber-400">Luminaries</span> emerge as
-            distinguished badges for those who reach the highest thresholds, powered by the Creator God
+            distinguished badges for those who reach the highest Syzygy thresholds, powered by the Creator God
             Token (CGT).
           </motion.p>
 
@@ -215,10 +240,10 @@ export default function HomePage() {
             transition={{ delay: 0.2, duration: 0.4 }}
           >
             <button
-              onClick={() => (window.location.href = "/aeon")}
+              onClick={() => (window.location.href = "/urgeid")}
               className="rounded-full bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 shadow-lg shadow-sky-500/30 hover:bg-sky-400"
             >
-              Become an Aeon
+              Create your UrgeID
             </button>
             <button className="rounded-full border border-slate-700 px-5 py-2 text-sm text-slate-200 hover:border-slate-500">
               Read the Architecture
@@ -267,6 +292,16 @@ export default function HomePage() {
                     NODE ONLINE
                   </span>
                 </div>
+                {cgtMetadata && (
+                  <>
+                    <div className="flex justify-between pt-2 border-t border-slate-800">
+                      <span className="text-slate-400">CGT Supply</span>
+                      <span className="font-mono text-sky-300">
+                        {formatCgt(cgtMetadata.totalSupply)} / {formatCgt(cgtMetadata.maxSupply)} {cgtMetadata.symbol}
+                      </span>
+                    </div>
+                  </>
+                )}
               </>
             )}
 
@@ -295,8 +330,8 @@ export default function HomePage() {
         />
         <PillarCard
           icon={<Users className="h-4 w-4" />}
-          title="Aeons & Syzygy"
-          body="Every user is an Aeon. Through Syzygy (P2P data seeding), Aeons ascend via Gnosis XP and Syzygy Scores. Luminaries are badges earned at the highest thresholds."
+          title="UrgeID & Syzygy"
+          body="Every user has an UrgeID — a sovereign identity on the Demiurge chain. Through Syzygy (P2P data seeding), UrgeIDs earn Syzygy Scores. Luminaries are badges earned at the highest thresholds."
         />
         <PillarCard
           icon={<Sparkles className="h-4 w-4" />}
@@ -397,15 +432,15 @@ export default function HomePage() {
           The Demiurge Stack
         </h2>
         <p className="text-sm text-slate-300">
-          Demiurge is a modular but sovereign L1: Aeon-operated nodes run Forge
+          Demiurge is a modular but sovereign L1: UrgeID-operated nodes run Forge
           PoW and host Fabric content; the CGT bank module tracks balances; the
           D-GEN runtime mints NFTs with embedded AI provenance; Fabric anchors
-          immutable content roots; the Aeon Registry tracks progression, handles, and badges;
+          immutable content roots; the UrgeID Registry tracks profiles, handles, and badges;
           and Abyss provides a native marketplace for licenses and assets.
         </p>
         <p className="text-xs text-slate-500">
-          This portal is a first window into the Pantheon. Become an Aeon, mint D-GEN NFTs,
-          track your ascension through Gnosis XP and Syzygy Scores, and browse live Fabric
+          This portal is a first window into the Pantheon. Create your UrgeID, mint D-GEN NFTs,
+          earn CGT for seeding other creators' work, and browse live Fabric
           worlds and Abyss listings directly.
         </p>
       </section>

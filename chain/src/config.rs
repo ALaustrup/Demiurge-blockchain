@@ -15,10 +15,12 @@ pub const GENESIS_ARCHON_ADDRESS: [u8; 32] = [0xaa; 32];
 /// Genesis initialization key in state.
 const KEY_GENESIS_INITIALIZED: &[u8] = b"demiurge/genesis_initialized";
 
-/// Initial CGT balance for Genesis Archon (1 million CGT).
-pub const GENESIS_ARCHON_INITIAL_BALANCE: u64 = 1_000_000;
+/// Initial CGT balance for Genesis Archon (1 million CGT in smallest units).
+/// 1,000,000 CGT * 10^8 = 100,000,000,000,000 smallest units
+pub const GENESIS_ARCHON_INITIAL_BALANCE: u128 = 1_000_000u128 * 100_000_000u128;
 
-/// Dev faucet amount (10,000 CGT per request).
+/// Dev faucet amount (10,000 CGT per request in smallest units).
+/// 10,000 CGT * 10^8 = 1,000,000,000,000 smallest units
 #[cfg(debug_assertions)]
-pub const DEV_FAUCET_AMOUNT: u64 = 10_000;
+pub const DEV_FAUCET_AMOUNT: u128 = 10_000u128 * 100_000_000u128;
 

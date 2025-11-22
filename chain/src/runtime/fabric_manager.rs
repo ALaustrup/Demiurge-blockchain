@@ -22,15 +22,15 @@ pub type FabricRootHash = [u8; 32];
 pub struct FabricAsset {
     pub owner: Address, // Archon who registered it
     pub fabric_root_hash: FabricRootHash,
-    pub pool_cgt_total: u64,     // total CGT originally allocated
-    pub pool_cgt_remaining: u64, // remaining CGT to distribute
+    pub pool_cgt_total: u128,     // total CGT originally allocated
+    pub pool_cgt_remaining: u128, // remaining CGT to distribute
 }
 
 /// Register asset parameters
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RegisterAssetParams {
     pub fabric_root_hash: FabricRootHash,
-    pub initial_pool_cgt: u64,
+    pub initial_pool_cgt: u128,
 }
 
 /// Reward seeder parameters
@@ -38,7 +38,7 @@ pub struct RegisterAssetParams {
 pub struct RewardSeederParams {
     pub fabric_root_hash: FabricRootHash,
     pub seeder: Address,
-    pub amount_cgt: u64,
+    pub amount_cgt: u128,
 }
 
 /// Helper functions for Fabric asset management

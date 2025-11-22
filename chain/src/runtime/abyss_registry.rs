@@ -25,7 +25,7 @@ pub struct Listing {
     pub id: ListingId,
     pub token_id: NftId,
     pub seller: Address,
-    pub price_cgt: u64,
+    pub price_cgt: u128,
     pub active: bool,
 }
 
@@ -33,7 +33,7 @@ pub struct Listing {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreateListingParams {
     pub token_id: NftId,
-    pub price_cgt: u64,
+    pub price_cgt: u128,
 }
 
 /// Cancel listing parameters
@@ -205,12 +205,12 @@ fn handle_buy_listing(tx: &Transaction, state: &mut State) -> Result<(), String>
         _ => (None, 0),
     };
 
-    let mut royalty_amount = 0u64;
+    let mut royalty_amount = 0u128;
     if royalty_recipient.is_some() {
-        royalty_amount = (price as u128)
+        royalty_amount = price
             .saturating_mul(royalty_bps as u128)
             .checked_div(10_000)
-            .unwrap_or(0) as u64;
+            .unwrap_or(0);
     }
 
     if royalty_amount > price {

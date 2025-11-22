@@ -3,30 +3,20 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Wallet, Coins, Sparkles, Award, ArrowLeft } from "lucide-react";
+import { Wallet, Coins, Sparkles, ArrowLeft } from "lucide-react";
 import QRCode from "react-qr-code";
-import { callRpc } from "@/lib/rpc";
-import { toAeonId } from "@/lib/aeonId";
+import { callRpc, formatCgt, getCgtBalance } from "@/lib/rpc";
+import { formatUrgeId } from "@/lib/urgeid";
 import { exportVault, importVault } from "@/lib/vault";
-import { DEMIURGE_RPC_URL } from "@/config/demiurge";
 
-type AeonProfile = {
+type UrgeIDProfile = {
   address: string;
   display_name: string;
-  bio?: string;
+  bio?: string | null;
   handle?: string | null;
-  gnosis_xp: number;
   syzygy_score: number;
-  ascension_level: number;
   badges: string[];
-  created_at_height: number;
-};
-
-type AscensionStats = {
-  gnosis_xp: number;
-  syzygy_score: number;
-  ascension_level: number;
-  badges: string[];
+  created_at_height?: number | null;
 };
 
 type Nft = {
@@ -37,16 +27,15 @@ type Nft = {
   royalty_bps?: number;
 };
 
-export default function AeonPage() {
+export default function UrgeIDPage() {
   const router = useRouter();
   const [step, setStep] = useState<"onboarding" | "dashboard">("onboarding");
   const [address, setAddress] = useState<string>("");
   const [privateKey, setPrivateKey] = useState<string>("");
   const [displayName, setDisplayName] = useState<string>("");
   const [bio, setBio] = useState<string>("");
-  const [profile, setProfile] = useState<AeonProfile | null>(null);
+  const [profile, setProfile] = useState<UrgeIDProfile | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
-  const [ascension, setAscension] = useState<AscensionStats | null>(null);
   const [nfts, setNfts] = useState<Nft[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,8 +45,8 @@ export default function AeonPage() {
 
   // Check if user already has a wallet
   useEffect(() => {
-    const storedAddress = localStorage.getItem("demiurge_aeon_wallet_address");
-    const storedKey = localStorage.getItem("demiurge_aeon_wallet_key");
+    const storedAddress = localStorage.getItem("demiurge_urgeid_wallet_address");
+    const storedKey = localStorage.getItem("demiurge_urgeid_wallet_key");
     if (storedAddress && storedKey) {
       setAddress(storedAddress);
       setPrivateKey(storedKey);
@@ -81,7 +70,7 @@ export default function AeonPage() {
     setPrivateKey(keyHex);
   };
 
-  const createAeon = async () => {
+  const createUrgeID = async () => {
     if (!address || !displayName.trim()) {
       setError("Address and display name are required");
       return;
@@ -91,21 +80,21 @@ export default function AeonPage() {
     setError(null);
 
     try {
-      const profile = await callRpc<AeonProfile>("aeon_create", {
+      const profile = await callRpc<UrgeIDProfile>("urgeid_create", {
         address,
         display_name: displayName,
         bio: bio.trim() || null,
       });
 
       // Store wallet locally
-      localStorage.setItem("demiurge_aeon_wallet_address", address);
-      localStorage.setItem("demiurge_aeon_wallet_key", privateKey);
+      localStorage.setItem("demiurge_urgeid_wallet_address", address);
+      localStorage.setItem("demiurge_urgeid_wallet_key", privateKey);
 
       setProfile(profile);
       setStep("dashboard");
       await loadDashboard(address);
     } catch (err: any) {
-      setError(err.message || "Failed to create Aeon profile");
+      setError(err.message || "Failed to create UrgeID profile");
     } finally {
       setLoading(false);
     }
@@ -114,7 +103,7 @@ export default function AeonPage() {
   const loadDashboard = async (addr: string) => {
     try {
       // Load profile
-      const profile = await callRpc<AeonProfile | null>("aeon_get", {
+      const profile = await callRpc<UrgeIDProfile | null>("urgeid_get", {
         address: addr,
       });
       if (profile) {
@@ -122,20 +111,11 @@ export default function AeonPage() {
         setHandleInput(profile.handle || "");
       }
 
-      // Load balance
-      const balanceRes = await callRpc<{ balance: number }>("cgt_getBalance", {
-        address: addr,
-      });
-      setBalance(balanceRes.balance);
-
-      // Load ascension
-      const ascensionRes = await callRpc<AscensionStats | null>(
-        "aeon_getAscension",
-        { address: addr }
-      );
-      if (ascensionRes) {
-        setAscension(ascensionRes);
-      }
+      // Load balance (stored as smallest units string, convert to number)
+      const balanceRes = await getCgtBalance(addr);
+      const balanceSmallest = BigInt(balanceRes.balance);
+      const balanceNum = Number(balanceSmallest) / 1e8;
+      setBalance(balanceNum);
 
       // Load NFTs
       const nftsRes = await callRpc<{ nfts: Nft[] }>("cgt_getNftsByOwner", {
@@ -164,12 +144,12 @@ export default function AeonPage() {
           animate={{ opacity: 1, y: 0 }}
         >
           <h1 className="text-3xl font-semibold text-slate-50">
-            Become an Aeon
+            Create your UrgeID
           </h1>
           <p className="text-sm text-slate-300">
             Create your on-chain identity in the Demiurge Pantheon. Every user
-            is an Aeon with progression stats, badges, and the ability to mint
-            D-GEN NFTs.
+            has an UrgeID — a sovereign identity with Syzygy tracking, badges,
+            and the ability to mint D-GEN NFTs.
           </p>
 
           {!address && (
@@ -178,7 +158,7 @@ export default function AeonPage() {
                 onClick={generateKeypair}
                 className="rounded-full bg-sky-500 px-6 py-3 text-sm font-medium text-slate-950 shadow-lg shadow-sky-500/30 hover:bg-sky-400"
               >
-                Generate Aeon Vault
+                Generate UrgeID Vault
               </button>
             </div>
           )}
@@ -187,7 +167,7 @@ export default function AeonPage() {
             <div className="space-y-6">
               <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
                 <div className="mb-2 text-xs font-medium text-slate-400">
-                  Aeon Vault Address
+                  UrgeID Vault Address
                 </div>
                 <div className="flex items-center gap-2">
                   <code className="font-mono text-xs break-all text-sky-300 max-w-full">
@@ -238,7 +218,7 @@ export default function AeonPage() {
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="Your Aeon name"
+                    placeholder="Your UrgeID name"
                     className="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-4 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
                   />
                 </div>
@@ -250,18 +230,18 @@ export default function AeonPage() {
                   <textarea
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    placeholder="Tell us about your Aeon..."
+                    placeholder="Tell us about your UrgeID..."
                     rows={3}
                     className="w-full rounded-lg border border-slate-700 bg-slate-900/50 px-4 py-2 text-sm text-slate-200 placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
                   />
                 </div>
 
                 <button
-                  onClick={createAeon}
+                  onClick={createUrgeID}
                   disabled={loading || !displayName.trim()}
                   className="w-full rounded-full bg-violet-500 px-6 py-3 text-sm font-medium text-slate-50 shadow-lg shadow-violet-500/30 hover:bg-violet-400 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? "Creating..." : "Create Aeon Profile"}
+                  {loading ? "Creating..." : "Create UrgeID Profile"}
                 </button>
 
                 {error && (
@@ -288,9 +268,9 @@ export default function AeonPage() {
         </button>
         <button
           onClick={() => {
-            localStorage.removeItem("demiurge_aeon_wallet_address");
-            localStorage.removeItem("demiurge_aeon_wallet_key");
-            router.push("/aeon");
+            localStorage.removeItem("demiurge_urgeid_wallet_address");
+            localStorage.removeItem("demiurge_urgeid_wallet_key");
+            router.push("/urgeid");
           }}
           className="text-xs text-slate-500 hover:text-slate-300"
         >
@@ -310,15 +290,15 @@ export default function AeonPage() {
                 {profile.display_name}
               </h1>
               <h2 className="mt-1 text-lg font-semibold text-slate-50">
-                Aeon:{" "}
+                Your UrgeID:{" "}
                 <span className="font-mono text-sm text-slate-300">
                   {profile.address.slice(0, 6)}...{profile.address.slice(-4)}
                 </span>
               </h2>
             </div>
-            {ascension && ascension.badges.length > 0 && (
+            {profile.badges.length > 0 && (
               <div className="flex gap-2">
-                {ascension.badges.map((badge) => (
+                {profile.badges.map((badge) => (
                   <span
                     key={badge}
                     className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-400"
@@ -334,16 +314,36 @@ export default function AeonPage() {
             <p className="text-sm text-slate-300">{profile.bio}</p>
           )}
 
-          {/* Aeon Vault Section */}
+          {/* UrgeID Vault Section */}
           <section className="mt-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4">
             <h3 className="text-xs font-semibold text-slate-400">
-              Aeon Vault
+              Your UrgeID
             </h3>
 
             <div className="mt-2 space-y-2">
               <div>
                 <div className="text-[11px] text-slate-500 mb-1">
-                  Hex Address
+                  Your UrgeID
+                </div>
+                <div className="flex items-center gap-2">
+                  <code className="font-mono text-[11px] break-all text-slate-200">
+                    {formatUrgeId(profile.address)}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigator.clipboard.writeText(formatUrgeId(profile.address))
+                    }
+                    className="rounded-md border border-slate-600 px-2 py-[2px] text-[10px] text-slate-200 hover:bg-slate-800"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[11px] text-slate-500 mb-1">
+                  Raw Address
                 </div>
                 <div className="flex items-center gap-2">
                   <code className="font-mono text-[11px] break-all text-slate-200">
@@ -359,29 +359,9 @@ export default function AeonPage() {
                 </div>
               </div>
 
-              <div>
-                <div className="text-[11px] text-slate-500 mb-1">
-                  Aeon ID (bech32)
-                </div>
-                <div className="flex items-center gap-2">
-                  <code className="font-mono text-[11px] break-all text-slate-200">
-                    {toAeonId(profile.address)}
-                  </code>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      navigator.clipboard.writeText(toAeonId(profile.address))
-                    }
-                    className="rounded-md border border-slate-600 px-2 py-[2px] text-[10px] text-slate-200 hover:bg-slate-800"
-                  >
-                    Copy
-                  </button>
-                </div>
-              </div>
-
               <div className="pt-2 border-t border-slate-800 mt-2">
                 <div className="text-[11px] text-slate-500 mb-2">
-                  Scan Aeon Vault
+                  Scan UrgeID Vault
                 </div>
                 <div className="inline-block rounded-md bg-slate-900 p-2">
                   <QRCode value={profile.address} size={96} />
@@ -393,11 +373,11 @@ export default function AeonPage() {
           {/* Handle Section */}
           <section className="mt-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4">
             <h3 className="text-xs font-semibold text-slate-400">
-              Aeon Handle
+              UrgeID Handle
             </h3>
 
             <div className="mt-2 text-[11px] text-slate-400">
-              Choose a unique handle other Aeons can use to find you.
+              Choose a unique handle other UrgeIDs can use to find you.
             </div>
 
             <div className="mt-2 flex items-center gap-2">
@@ -413,7 +393,7 @@ export default function AeonPage() {
                 onClick={async () => {
                   setHandleStatus(null);
                   try {
-                    const updated = await callRpc<AeonProfile>("aeon_setHandle", {
+                    const updated = await callRpc<UrgeIDProfile>("urgeid_setHandle", {
                       address: profile.address,
                       handle: handleInput.replace(/^@/, ""),
                     });
@@ -451,47 +431,28 @@ export default function AeonPage() {
               </div>
               <p className="text-2xl font-mono font-semibold text-emerald-400">
                 {balance !== null
-                  ? balance.toLocaleString()
+                  ? formatCgt(balance * 1e8)
                   : "—"}{" "}
                 CGT
               </p>
+              {balance !== null && (
+                <p className="text-xs text-slate-500 mt-1">
+                  {Math.floor(balance * 1e8).toLocaleString()} smallest units
+                </p>
+              )}
             </div>
 
-            {/* Ascension Level */}
-            {ascension && (
-              <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
-                <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-300">
-                  <Award className="h-4 w-4 text-violet-400" />
-                  Ascension Level
-                </div>
-                <p className="text-2xl font-semibold text-violet-400">
-                  {ascension.ascension_level}
-                </p>
+            {/* Syzygy Score */}
+            <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+              <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-300">
+                <Sparkles className="h-4 w-4 text-violet-400" />
+                Syzygy Score
               </div>
-            )}
+              <p className="text-2xl font-mono font-semibold text-violet-400">
+                {profile.syzygy_score.toLocaleString()}
+              </p>
+            </div>
           </div>
-
-          {/* Progression Stats */}
-          {ascension && (
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
-                <div className="mb-1 text-xs font-medium text-slate-400">
-                  Gnosis XP
-                </div>
-                <p className="text-lg font-mono font-semibold text-sky-300">
-                  {ascension.gnosis_xp.toLocaleString()}
-                </p>
-              </div>
-              <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
-                <div className="mb-1 text-xs font-medium text-slate-400">
-                  Syzygy Score
-                </div>
-                <p className="text-lg font-mono font-semibold text-violet-300">
-                  {ascension.syzygy_score.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          )}
 
           {/* NFTs */}
           <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
@@ -528,11 +489,11 @@ export default function AeonPage() {
           {/* Vault Export/Import Section */}
           <section className="mt-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4">
             <h3 className="text-xs font-semibold text-slate-400">
-              Aeon Vault (Export / Import)
+              UrgeID Vault (Export / Import)
             </h3>
 
             <div className="mt-2 text-[11px] text-slate-400">
-              Export an encrypted backup of your Aeon Vault, or import an existing one.
+              Export an encrypted backup of your UrgeID Vault, or import an existing one.
             </div>
 
             <div className="mt-3 flex flex-col gap-3">
@@ -546,8 +507,8 @@ export default function AeonPage() {
 
                     try {
                       // Retrieve wallet from localStorage
-                      const storedAddress = localStorage.getItem("demiurge_aeon_wallet_address");
-                      const storedKey = localStorage.getItem("demiurge_aeon_wallet_key");
+                      const storedAddress = localStorage.getItem("demiurge_urgeid_wallet_address");
+                      const storedKey = localStorage.getItem("demiurge_urgeid_wallet_key");
                       if (!storedAddress || !storedKey) {
                         throw new Error("No local wallet found.");
                       }
@@ -561,7 +522,7 @@ export default function AeonPage() {
                       const url = URL.createObjectURL(blob);
                       const a = document.createElement("a");
                       a.href = url;
-                      a.download = `aeon-vault-${wallet.address.slice(0, 8)}.json`;
+                      a.download = `urgeid-vault-${wallet.address.slice(0, 8)}.json`;
                       a.click();
                       URL.revokeObjectURL(url);
 
@@ -598,10 +559,10 @@ export default function AeonPage() {
                         privateKey: restored.privateKey,
                       };
 
-                      localStorage.setItem("demiurge_aeon_wallet_address", restored.address);
-                      localStorage.setItem("demiurge_aeon_wallet_key", restored.privateKey);
+                      localStorage.setItem("demiurge_urgeid_wallet_address", restored.address);
+                      localStorage.setItem("demiurge_urgeid_wallet_key", restored.privateKey);
 
-                      setVaultStatus("Vault imported and set as active Aeon.");
+                      setVaultStatus("Vault imported and set as active UrgeID.");
                       // Reload dashboard with new address
                       setAddress(restored.address);
                       await loadDashboard(restored.address);

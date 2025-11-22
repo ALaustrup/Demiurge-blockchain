@@ -1,18 +1,28 @@
 //! Bank module for CGT (Creator God Token) balances and transfers.
 //!
 //! This module handles:
-//! - CGT balance tracking per address
+//! - CGT balance tracking per address (in smallest units, 10^-8)
 //! - Transfers between addresses
-//! - Minting (restricted to genesis authority for now)
+//! - Minting with max supply enforcement
+//! - Total supply tracking
 
 use serde::{Deserialize, Serialize};
+
+use anyhow;
 
 use super::RuntimeModule;
 use crate::core::state::State;
 use crate::core::transaction::{Address, Transaction};
 
+// Currency metadata
+pub const CGT_NAME: &str = "Creator God Token";
+pub const CGT_SYMBOL: &str = "CGT";
+pub const CGT_DECIMALS: u8 = 8;
+pub const CGT_MAX_SUPPLY: u128 = 1_000_000_000u128 * 100_000_000u128; // 1B * 10^8
+
 const PREFIX_BALANCE: &[u8] = b"bank:balance:";
 const PREFIX_NONCE: &[u8] = b"bank:nonce:";
+const KEY_TOTAL_SUPPLY: &[u8] = b"bank_cgt/total_supply";
 
 /// Helper functions for balance management
 
@@ -30,18 +40,36 @@ fn nonce_key(address: &Address) -> Vec<u8> {
     key
 }
 
-fn get_balance(state: &State, addr: &Address) -> u64 {
+fn get_balance(state: &State, addr: &Address) -> anyhow::Result<u128> {
     state
         .get_raw(&balance_key(addr))
-        .and_then(|bytes| bincode::deserialize::<u64>(&bytes).ok())
-        .unwrap_or(0)
+        .and_then(|bytes| bincode::deserialize::<u128>(&bytes).ok())
+        .ok_or_else(|| anyhow::anyhow!("failed to deserialize balance"))
+        .or_else(|_| Ok(0u128))
 }
 
-fn set_balance(state: &mut State, addr: &Address, amount: u64) -> Result<(), String> {
-    let bytes = bincode::serialize(&amount).map_err(|e| e.to_string())?;
+fn set_balance(state: &mut State, addr: &Address, amount: u128) -> anyhow::Result<()> {
+    let bytes = bincode::serialize(&amount).map_err(|e| anyhow::anyhow!("serialization error: {}", e))?;
     state
         .put_raw(balance_key(addr), bytes)
-        .map_err(|e| e.to_string())
+        .map_err(|e| anyhow::anyhow!("state error: {}", e))
+}
+
+/// Get total CGT supply from state.
+pub fn get_cgt_total_supply(state: &State) -> anyhow::Result<u128> {
+    state
+        .get_raw(KEY_TOTAL_SUPPLY)
+        .and_then(|bytes| bincode::deserialize::<u128>(&bytes).ok())
+        .ok_or_else(|| anyhow::anyhow!("failed to deserialize total supply"))
+        .or_else(|_| Ok(0u128))
+}
+
+/// Set total CGT supply in state.
+pub fn set_cgt_total_supply(state: &mut State, amount: u128) -> anyhow::Result<()> {
+    let bytes = bincode::serialize(&amount).map_err(|e| anyhow::anyhow!("serialization error: {}", e))?;
+    state
+        .put_raw(KEY_TOTAL_SUPPLY.to_vec(), bytes)
+        .map_err(|e| anyhow::anyhow!("state error: {}", e))
 }
 
 fn get_nonce(state: &State, addr: &Address) -> u64 {
@@ -59,8 +87,8 @@ fn set_nonce(state: &mut State, addr: &Address, nonce: u64) -> Result<(), String
 }
 
 /// Public helper for querying CGT balance (for RPC/wallet use).
-pub fn get_balance_cgt(state: &State, addr: &Address) -> u64 {
-    get_balance(state, addr)
+pub fn get_balance_cgt(state: &State, addr: &Address) -> u128 {
+    get_balance(state, addr).unwrap_or(0)
 }
 
 /// Internal helper for modules to directly set balances.
@@ -71,23 +99,120 @@ pub fn get_balance_cgt(state: &State, addr: &Address) -> u64 {
 pub(crate) fn set_balance_for_module(
     state: &mut State,
     addr: &Address,
-    amount: u64,
+    amount: u128,
 ) -> Result<(), String> {
-    set_balance(state, addr, amount)
+    set_balance(state, addr, amount).map_err(|e| e.to_string())
+}
+
+/// Mint CGT to an address with max supply enforcement.
+///
+/// # Arguments
+/// - `state`: Mutable state reference
+/// - `to`: Recipient address
+/// - `amount`: Amount to mint (in smallest units, 10^-8)
+/// - `caller_module`: Module ID calling this function (for authorization)
+///
+/// # Returns
+/// - `Ok(())` if minting succeeded
+/// - `Err(String)` if max supply would be exceeded or caller is not authorized
+pub fn cgt_mint_to(
+    state: &mut State,
+    to: &Address,
+    amount: u128,
+    caller_module: &str,
+) -> Result<(), String> {
+    // Enforce allowed minting modules
+    let allowed_modules = ["forge", "fabric_manager", "system"];
+    if !allowed_modules.contains(&caller_module) {
+        return Err(format!(
+            "module '{}' is not authorized to mint CGT",
+            caller_module
+        ));
+    }
+
+    // Check total supply
+    let current_total = get_cgt_total_supply(state).map_err(|e| e.to_string())?;
+    let new_total = current_total
+        .checked_add(amount)
+        .ok_or("total supply overflow")?;
+
+    if new_total > CGT_MAX_SUPPLY {
+        return Err(format!(
+            "CGT_MAX_SUPPLY exceeded: {} > {}",
+            new_total, CGT_MAX_SUPPLY
+        ));
+    }
+
+    // Update balance
+    let current_balance = get_balance(state, to).map_err(|e| e.to_string())?;
+    let new_balance = current_balance
+        .checked_add(amount)
+        .ok_or("balance overflow")?;
+    set_balance(state, to, new_balance).map_err(|e| e.to_string())?;
+
+    // Update total supply
+    set_cgt_total_supply(state, new_total).map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+/// Burn CGT from an address.
+///
+/// # Arguments
+/// - `state`: Mutable state reference
+/// - `from`: Address to burn from
+/// - `amount`: Amount to burn (in smallest units, 10^-8)
+/// - `caller_module`: Module ID calling this function (for authorization)
+///
+/// # Returns
+/// - `Ok(())` if burning succeeded
+/// - `Err(String)` if insufficient balance or caller is not authorized
+pub fn cgt_burn_from(
+    state: &mut State,
+    from: &Address,
+    amount: u128,
+    caller_module: &str,
+) -> Result<(), String> {
+    // Only system module can burn for now
+    if caller_module != "system" {
+        return Err(format!(
+            "module '{}' is not authorized to burn CGT",
+            caller_module
+        ));
+    }
+
+    // Check balance
+    let current_balance = get_balance(state, from).map_err(|e| e.to_string())?;
+    if current_balance < amount {
+        return Err("insufficient balance for burn".into());
+    }
+
+    // Update balance
+    let new_balance = current_balance - amount;
+    set_balance(state, from, new_balance).map_err(|e| e.to_string())?;
+
+    // Update total supply
+    let current_total = get_cgt_total_supply(state).map_err(|e| e.to_string())?;
+    let new_total = current_total
+        .checked_sub(amount)
+        .ok_or("total supply underflow")?;
+    set_cgt_total_supply(state, new_total).map_err(|e| e.to_string())?;
+
+    Ok(())
 }
 
 /// Transfer parameters
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TransferParams {
     pub to: Address,
-    pub amount: u64,
+    pub amount: u128,
 }
 
 /// Mint parameters
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MintToParams {
     pub to: Address,
-    pub amount: u64,
+    pub amount: u128,
 }
 
 /// BankCgtModule handles CGT token operations
@@ -125,22 +250,23 @@ fn handle_transfer(tx: &Transaction, state: &mut State) -> Result<(), String> {
         ));
     }
 
-    let mut from_balance = get_balance(state, &tx.from);
-    let mut to_balance = get_balance(state, &params.to);
+    let from_balance = get_balance(state, &tx.from).map_err(|e| e.to_string())?;
+    let to_balance = get_balance(state, &params.to).map_err(|e| e.to_string())?;
 
-    let total = params.amount.checked_add(tx.fee).ok_or("overflow")?;
+    let fee = tx.fee as u128;
+    let total = params.amount.checked_add(fee).ok_or("overflow")?;
 
     if from_balance < total {
         return Err("insufficient balance for amount + fee".into());
     }
 
-    from_balance -= total;
-    to_balance = to_balance
+    let new_from_balance = from_balance - total;
+    let new_to_balance = to_balance
         .checked_add(params.amount)
         .ok_or("overflow on recipient")?;
 
-    set_balance(state, &tx.from, from_balance)?;
-    set_balance(state, &params.to, to_balance)?;
+    set_balance(state, &tx.from, new_from_balance).map_err(|e| e.to_string())?;
+    set_balance(state, &params.to, new_to_balance).map_err(|e| e.to_string())?;
 
     // Increment nonce
     set_nonce(state, &tx.from, current_nonce + 1)?;
@@ -159,14 +285,9 @@ fn handle_mint_to(tx: &Transaction, state: &mut State) -> Result<(), String> {
 
     let params: MintToParams = bincode::deserialize(&tx.payload).map_err(|e| e.to_string())?;
 
-    let current = get_balance(state, &params.to);
-    let new_balance = current
-        .checked_add(params.amount)
-        .ok_or("overflow on mint_to")?;
-
-    set_balance(state, &params.to, new_balance)?;
-
-    Ok(())
+    // Use the new cgt_mint_to function with max supply enforcement
+    // Caller module is "system" for genesis mints
+    cgt_mint_to(state, &params.to, params.amount, "system")
 }
 
 #[cfg(test)]
@@ -207,6 +328,7 @@ mod tests {
         module.dispatch("mint_to", &tx, &mut state).unwrap();
 
         assert_eq!(get_balance_cgt(&state, &addr), 1000);
+        assert_eq!(get_cgt_total_supply(&state).unwrap(), 1000);
     }
 
     #[test]
@@ -252,5 +374,16 @@ mod tests {
 
         assert_eq!(get_balance_cgt(&state, &from), 690); // 1000 - 300 - 10
         assert_eq!(get_balance_cgt(&state, &to), 300);
+    }
+
+    #[test]
+    fn test_max_supply_enforcement() {
+        let mut state = State::in_memory();
+        let addr = [1u8; 32];
+
+        // Try to mint more than max supply
+        let result = cgt_mint_to(&mut state, &addr, CGT_MAX_SUPPLY + 1, "system");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("CGT_MAX_SUPPLY exceeded"));
     }
 }
