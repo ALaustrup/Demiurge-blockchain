@@ -6,7 +6,20 @@ import { useRouter } from "next/navigation";
 import { getUserAnalytics, type UserAnalytics } from "@/lib/rpc";
 import { graphqlRequest, getChatHeaders, QUERIES, type ChatAnalytics, type MessageActivity } from "@/lib/graphql";
 import { formatCgt, cgtFromSmallest } from "@/lib/rpc";
-import { formatDistanceToNow } from "date-fns";
+// Helper function for relative time
+function formatDistanceToNow(date: Date, options?: { addSuffix?: boolean }): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSecs = Math.floor(diffMs / 1000);
+  const diffMins = Math.floor(diffSecs / 60);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffSecs < 60) return options?.addSuffix ? "just now" : "0 minutes";
+  if (diffMins < 60) return options?.addSuffix ? `${diffMins}m ago` : `${diffMins} minutes`;
+  if (diffHours < 24) return options?.addSuffix ? `${diffHours}h ago` : `${diffHours} hours`;
+  return options?.addSuffix ? `${diffDays}d ago` : `${diffDays} days`;
+}
 
 export default function AnalyticsPage() {
   const router = useRouter();
