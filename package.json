@@ -7,7 +7,9 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "start:all": "powershell -ExecutionPolicy Bypass -File ./start-all.ps1",
+    "stop:all": "powershell -ExecutionPolicy Bypass -File ./stop-all.ps1"
   },
   "devDependencies": {
     "turbo": "^2.0.0"

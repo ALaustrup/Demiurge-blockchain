@@ -2,7 +2,7 @@
  * Ed25519 signing utilities for Demiurge transactions.
  */
 
-import { sign, getPublicKey } from "@noble/ed25519";
+import { signAsync, getPublicKeyAsync } from "@noble/ed25519";
 
 /**
  * Hash bytes using SHA-256 (Web Crypto API).
@@ -17,9 +17,9 @@ async function sha256Hash(data: Uint8Array): Promise<Uint8Array> {
 /**
  * Derive public key (address) from private key.
  */
-export function deriveAddress(privateKeyHex: string): string {
+export async function deriveAddress(privateKeyHex: string): Promise<string> {
   const privateKey = hexToBytes(privateKeyHex);
-  const publicKey = getPublicKey(privateKey);
+  const publicKey = await getPublicKeyAsync(privateKey);
   return bytesToHex(publicKey);
 }
 
@@ -35,7 +35,8 @@ export async function signMessage(
   privateKeyHex: string
 ): Promise<string> {
   const privateKey = hexToBytes(privateKeyHex);
-  const signature = await sign(message, privateKey);
+  // Use async version which works with Web Crypto API automatically
+  const signature = await signAsync(message, privateKey);
   return bytesToHex(signature);
 }
 

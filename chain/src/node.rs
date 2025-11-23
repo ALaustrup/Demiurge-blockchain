@@ -18,7 +18,7 @@ use crate::core::transaction::{Address, Transaction};
 use crate::runtime::{
     get_balance_cgt, get_cgt_total_supply, get_fabric_asset, get_listing, get_nft,
     get_nfts_by_owner, is_archon,
-    BankCgtModule, FabricRootHash, ListingId, NftId, RuntimeModule, UrgeIDRegistryModule,
+    BankCgtModule, FabricRootHash, ListingId, NftId, Runtime, RuntimeModule, UrgeIDRegistryModule,
 };
 
 /// Chain information returned by JSON-RPC queries.
@@ -105,7 +105,8 @@ impl Node {
     ///
     /// # Note
     /// This adds the transaction to the mempool and stores it in state
-    /// keyed by hash for later retrieval.
+    /// keyed by hash for later retrieval. In dev mode, transactions are
+    /// executed immediately for instant balance updates.
     pub fn submit_transaction(&self, tx: Transaction) -> Result<String, String> {
         // Compute transaction hash
         let tx_hash = tx.hash().map_err(|e| format!("failed to hash transaction: {}", e))?;
@@ -120,6 +121,17 @@ impl Node {
             Ok(())
         })
         .map_err(|e| format!("failed to store transaction: {}", e))?;
+
+        // Execute transaction immediately (dev mode behavior)
+        // In production, this would be done via block production/mining
+        let exec_result = self.with_state_mut(|state| -> Result<(), String> {
+            let mut runtime = Runtime::with_default_modules();
+            runtime.dispatch_tx(&tx, state)
+        });
+
+        if let Err(e) = exec_result {
+            return Err(format!("transaction execution failed: {}", e));
+        }
 
         // Add to mempool
         let mut mempool = self.mempool.lock().expect("mempool mutex poisoned");

@@ -1,17 +1,33 @@
-// Abyss Gateway - GraphQL API for Demiurge chain data
-//
-// This is a Phase 4 skeleton. Later phases will connect to PostgreSQL
-// and provide real queries for NFTs, listings, Fabric assets, etc.
-//
-// NOTE: Currently a minimal stub to avoid build errors.
-// Full implementation will be added in later phases.
+/**
+ * Abyss Gateway - GraphQL API for Demiurge chain data and chat system.
+ */
+
+import { createServer } from "http";
+import { yoga } from "./server";
+import { chatDb } from "./chatDb";
+
+const PORT = process.env.PORT || 4000;
+
+const server = createServer(yoga);
+
+// Cleanup inactive rooms every 5 minutes
+setInterval(() => {
+  try {
+    const deleted = chatDb.cleanupInactiveRooms();
+    if (deleted > 0) {
+      console.log(`Cleaned up ${deleted} inactive room(s)`);
+    }
+  } catch (error) {
+    console.error("Error cleaning up inactive rooms:", error);
+  }
+}, 5 * 60 * 1000); // 5 minutes
+
+server.listen(PORT, () => {
+  console.log(`Abyss Gateway running on http://localhost:${PORT}/graphql`);
+  console.log(`GraphiQL available at http://localhost:${PORT}/graphql`);
+});
 
 export function main() {
-  console.log('Abyss gateway (Phase 4 skeleton) - not yet implemented');
-  // TODO: Implement GraphQL server with @graphql-yoga/node v3 API
-}
-
-if (require.main === module) {
-  main();
+  // Server is started above
 }
 

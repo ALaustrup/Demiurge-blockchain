@@ -1,0 +1,101 @@
+# Chat & Social Layer
+
+Demiurge includes a built-in chat system that connects all UrgeID users (accessible via "My Void" in the portal) through World Chat and Direct Messages. The system supports media sharing, NFT references, and community safety features.
+
+## World Chat
+
+World Chat is a global public room where all users can communicate. Messages are visible to everyone and appear in real-time.
+
+### Features
+
+- **Public Communication**: Share messages with the entire Demiurge community
+- **Real-time Updates**: Messages appear instantly via GraphQL subscriptions (polling-based, with WebSocket support planned)
+- **Media Sharing**: Upload images/videos from your device or share from your NFT collection
+  - Supported formats: JPEG, PNG, GIF, WebP, MP4, WebM
+  - Max file size: 10MB
+  - Media is stored as base64 data URLs
+- **NFT-Aware**: Attach NFT references to messages for sharing and discovery
+- **Safety Features**: "Blur 4 All" option allows any user to blur inappropriate media for the entire community
+
+## Direct Messages (DMs)
+
+Direct Messages are private conversations between two users. DM rooms are created automatically when you send your first message to another user.
+
+### Features
+
+- **Private Conversations**: One-on-one messaging with any UrgeID user
+- **Username-Based**: Find users by their @username
+- **Persistent History**: All messages are stored and accessible
+
+## Identity & Usernames
+
+All messages are signed and logged with your UrgeID identity (accessible via "My Void" in the portal):
+
+- **Username Display**: Messages show your @username prominently
+- **Address Fallback**: If no username is set, the system automatically syncs usernames from the chain
+- **On-Chain Identity**: Your chat identity is linked to your UrgeID profile
+- **Auto-Sync**: Usernames are automatically synced from the Demiurge chain when messages are sent or loaded
+
+## Media Sharing
+
+Messages can include media attachments:
+
+- **Device Upload**: Upload images or videos directly from your device
+- **NFT Collection**: Share media from your NFT collection
+- **Display**: Images and videos render inline in chat messages
+- **Blurred Media**: Community-moderated content shows a blur effect with a safety overlay
+
+## NFT-Aware Messages
+
+Messages can include NFT references:
+
+- **Attach NFT ID**: Include an NFT ID when sending a message
+- **Clickable Badges**: NFT references appear as clickable badges
+- **Marketplace Links**: Clicking an NFT badge navigates to the marketplace detail view
+
+## The Seven Archons
+
+The Seven Archons are special system NPCs that you can message:
+
+- **@ialdabaoth** – The Sovereign (CGT, Archonic Tax, order)
+- **@sabaoth** – The Guardian (security)
+- **@abrasax** – The Oracle (analytics/market)
+- **@yao** – The Scribe (docs, metadata)
+- **@astaphaios** – The Strategist (optimization)
+- **@adonaios** – The Cartographer (Fabric topology)
+- **@elaios** – The Mentor (onboarding)
+
+In the future, the Seven Archons will act as on-chain bound AI advisors and helpers. For now, they are reserved system identities that you can message.
+
+## Safety & Moderation
+
+### Blur 4 All
+
+Any user can instantly blur inappropriate media content for the entire community:
+
+- **Right-click** on any message containing media
+- Select **"Blur 4 All"** from the context menu
+- The media will be blurred for all users with a safety overlay
+- This is a permanent action to protect the community
+
+### Future: Chat Moderators
+
+A moderation system is planned that will allow up to 3 moderators per room. To become a moderator, users must obtain the "Chat Safety & Ethics Cert" NFT from the future Chain Certifications system.
+
+## Getting Started
+
+1. **Access My Void**: Log in at `/urgeid` (shown as "My Void" in navigation when logged in)
+2. **Navigate to Chat**: Go to `/chat` in the portal
+3. **Start Messaging**: 
+   - Click "World Chat" to join the global conversation
+   - Click on a user in "Your DMs" to open a direct message
+   - Click on an Archon to start a conversation with them
+   - Use the media icon (📷) to attach images, videos, or NFTs to your messages
+
+## Technical Details
+
+- **Backend**: Abyss Gateway (GraphQL Yoga server)
+- **Database**: SQLite (local persistence, future path to PostgreSQL)
+- **Real-time**: GraphQL subscriptions for live message updates
+- **Authentication**: Header-based (x-demiurge-address, x-demiurge-username)
+

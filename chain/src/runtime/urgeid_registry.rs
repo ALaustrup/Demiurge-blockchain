@@ -14,6 +14,7 @@ use crate::core::transaction::{Address, Transaction};
 const PREFIX_ARCHON_FLAG: &[u8] = b"avatars:archon:";
 const PREFIX_URGEID_PROFILE: &[u8] = b"urgeid/profile:";
 const PREFIX_URGEID_HANDLE: &[u8] = b"urgeid/handle/";
+const PREFIX_USERNAME: &[u8] = b"username/";
 
 // Badge threshold
 const LUMINARY_SYZYGY_THRESHOLD: u64 = 10_000;
@@ -24,9 +25,15 @@ pub struct UrgeIDProfile {
     pub address: Address,
     pub display_name: String,
     pub bio: Option<String>,
-    /// Optional unique handle (e.g., "username" without @)
+    /// Optional unique handle (e.g., "username" without @) - legacy, use username instead
     pub handle: Option<String>,
+    /// Globally unique username (normalized, lowercased)
+    pub username: Option<String>,
+    /// Current level (starts at 1)
+    pub level: u32,
     pub syzygy_score: u64,
+    /// Total CGT earned from level-up rewards
+    pub total_cgt_earned_from_rewards: u128,
     pub badges: Vec<String>,
     pub created_at_height: u64,
 }
@@ -111,12 +118,125 @@ fn set_handle_mapping(state: &mut State, handle: &str, address: Address) -> Resu
 }
 
 /// Remove handle mapping.
-fn remove_handle_mapping(state: &mut State, handle: &str) -> Result<(), String> {
+fn remove_handle_mapping(_state: &mut State, _handle: &str) -> Result<(), String> {
     // For now, we'll just overwrite with empty or leave it
     // In a real implementation, you might want to track deletions
     // For simplicity, we'll just remove the key by setting it to empty
     // RocksDB doesn't have explicit delete in our abstraction, so we'll leave it
     // The lookup will fail if the mapping doesn't exist
+    Ok(())
+}
+
+/// Username management
+
+/// Normalize username: lowercase, trim, validate format.
+pub fn normalize_username(raw: &str) -> Result<String, String> {
+    let normalized = raw.trim().to_lowercase();
+    
+    // Length check: 3-32 characters
+    if normalized.len() < 3 || normalized.len() > 32 {
+        return Err("Username must be 3-32 characters".into());
+    }
+    
+    // Only allow [a-z0-9_.]
+    if !normalized.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_' || c == '.') {
+        return Err("Username can only contain lowercase letters, numbers, underscores, and dots".into());
+    }
+    
+    // No leading/trailing dots
+    if normalized.starts_with('.') || normalized.ends_with('.') {
+        return Err("Username cannot start or end with a dot".into());
+    }
+    
+    // No consecutive dots
+    if normalized.contains("..") {
+        return Err("Username cannot contain consecutive dots".into());
+    }
+    
+    Ok(normalized)
+}
+
+fn username_key(name: &str) -> Vec<u8> {
+    let mut key = Vec::with_capacity(PREFIX_USERNAME.len() + name.len());
+    key.extend_from_slice(PREFIX_USERNAME);
+    key.extend_from_slice(name.as_bytes());
+    key
+}
+
+/// Get address by username.
+pub fn get_address_by_username(state: &State, username: &str) -> Result<Option<Address>, String> {
+    let normalized = normalize_username(username)?;
+    state
+        .get_raw(&username_key(&normalized))
+        .and_then(|bytes| {
+            if bytes.len() == 32 {
+                let mut addr = [0u8; 32];
+                addr.copy_from_slice(&bytes);
+                Some(addr)
+            } else {
+                None
+            }
+        })
+        .ok_or_else(|| "Username not found".to_string())
+        .map(Some)
+        .or_else(|_| Ok(None))
+}
+
+/// Set username mapping (username -> address).
+fn set_username_mapping(state: &mut State, username: &str, addr: &Address) -> Result<(), String> {
+    let normalized = normalize_username(username)?;
+    state
+        .put_raw(username_key(&normalized), addr.to_vec())
+        .map_err(|e| e.to_string())
+}
+
+/// Clear username mapping.
+fn clear_username_mapping(_state: &mut State, _username: &str) -> Result<(), String> {
+    // For simplicity, we'll just leave the key (lookup will fail if mapping doesn't exist)
+    // In production, you might want to track deletions explicitly
+    Ok(())
+}
+
+/// Set username for an UrgeID.
+pub fn set_username(
+    state: &mut State,
+    caller: &Address,
+    raw_username: &str,
+) -> Result<(), String> {
+    // Normalize and validate
+    let normalized = normalize_username(raw_username)?;
+    
+    // Check if already taken
+    if let Some(existing_addr) = get_address_by_username(state, &normalized)? {
+        if existing_addr != *caller {
+            return Err("Username already taken".into());
+        }
+        // Same address, updating is fine (no-op)
+    }
+    
+    // Load profile for caller
+    let mut profile = load_urgeid_profile(state, caller)
+        .ok_or_else(|| "UrgeID profile not found".to_string())?;
+    
+    // If profile.username == Some(normalized.clone()), do nothing
+    if profile.username.as_ref() == Some(&normalized) {
+        return Ok(());
+    }
+    
+    // If profile has a different username, remove old mapping
+    if let Some(old) = &profile.username {
+        if old != &normalized {
+            clear_username_mapping(state, old)?;
+        }
+    }
+    
+    // Update profile
+    profile.username = Some(normalized.clone());
+    
+    // Write both: updated profile and username mapping
+    store_urgeid_profile(state, &profile)?;
+    set_username_mapping(state, &normalized, caller)?;
+    
     Ok(())
 }
 
@@ -139,7 +259,10 @@ pub fn create_urgeid_profile(
         display_name,
         bio,
         handle: None, // Handles are set separately via set_handle
+        username: None, // Usernames are set separately via set_username
+        level: 1, // Start at level 1
         syzygy_score: 0,
+        total_cgt_earned_from_rewards: 0,
         badges: vec![],
         created_at_height: current_height,
     };
@@ -204,14 +327,23 @@ pub fn get_urgeid_profile(state: &State, address: &Address) -> Option<UrgeIDProf
     load_urgeid_profile(state, address)
 }
 
+/// Compute level threshold for a given level.
+pub fn level_threshold(level: u32) -> u64 {
+    const BASE: u64 = 1_000;
+    BASE.saturating_mul(level.saturating_mul(level) as u64)
+}
+
 /// Record Syzygy contribution and update badges.
 ///
-/// Increments syzygy_score by the given amount and awards badges if thresholds are met.
+/// Increments syzygy_score by the given amount, checks for level-ups, mints CGT rewards,
+/// and awards badges if thresholds are met.
 pub fn record_syzygy(
     state: &mut State,
     address: Address,
     amount: u64,
 ) -> Result<UrgeIDProfile, String> {
+    use crate::runtime::cgt_mint_to;
+    
     let mut profile = load_urgeid_profile(state, &address)
         .ok_or_else(|| "UrgeID profile not found".to_string())?;
 
@@ -220,6 +352,21 @@ pub fn record_syzygy(
         .syzygy_score
         .checked_add(amount)
         .ok_or("Syzygy Score overflow")?;
+
+    // Level up logic: check if syzygy_score meets next level threshold
+    const REWARD_PER_LEVEL: u128 = 10_0000_0000; // 10 CGT in smallest units (10 * 10^8)
+    
+    while profile.syzygy_score >= level_threshold(profile.level) {
+        profile.level += 1;
+        
+        // Mint 10 CGT as level-up reward
+        cgt_mint_to(state, &address, REWARD_PER_LEVEL, "urgeid_level_rewards")
+            .map_err(|e| format!("Failed to mint level reward: {}", e))?;
+        
+        profile.total_cgt_earned_from_rewards = profile
+            .total_cgt_earned_from_rewards
+            .saturating_add(REWARD_PER_LEVEL);
+    }
 
     // Check for Luminary badge
     let has_luminary = profile.badges.iter().any(|b| b == "Luminary");

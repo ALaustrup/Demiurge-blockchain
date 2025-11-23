@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "@graphql-yoga/node": "^3.9.1",
-    "graphql": "^16.8.1"
+    "graphql": "^16.8.1",
+    "better-sqlite3": "^9.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/better-sqlite3": "^7.6.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.0.0"
   }

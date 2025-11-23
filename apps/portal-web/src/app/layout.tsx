@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Navbar } from "@/components/layout/Navbar";
 
 export const metadata: Metadata = {
   title: "Demiurge — Sovereign Digital Pantheon",
@@ -15,6 +16,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="gradient-orbit min-h-screen antialiased">
         <div className="min-h-screen bg-slate-950/80">
+          <Navbar />
           {children}
         </div>
       </body>

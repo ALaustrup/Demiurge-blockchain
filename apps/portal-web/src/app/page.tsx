@@ -200,7 +200,58 @@ export default function HomePage() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-16 px-6 py-12">
+    <main className="relative mx-auto flex min-h-screen max-w-6xl flex-col gap-16 px-6 py-12 overflow-hidden">
+      {/* Logo Background with Glass Effect */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="relative w-full h-full max-w-5xl max-h-5xl mx-auto">
+            {/* Logo Image with blur and transparency */}
+            <img
+              src="/demiurge-logo2.png"
+              alt="Demiurge Logo"
+              className="absolute inset-0 w-full h-full object-contain"
+              style={{
+                opacity: 0.12,
+                filter: "blur(4px) brightness(0.85) contrast(1.2)",
+              }}
+              onError={(e) => {
+                // Silently handle missing logo - don't show broken image
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+            {/* Glass morphism overlay with salmon pink tint */}
+            <div 
+              className="absolute inset-0 backdrop-blur-2xl"
+              style={{
+                background: "radial-gradient(circle at center, rgba(251, 113, 133, 0.08) 0%, transparent 65%)",
+                maskImage: "radial-gradient(ellipse at center, black 35%, transparent 70%)",
+                WebkitMaskImage: "radial-gradient(ellipse at center, black 35%, transparent 70%)",
+                mixBlendMode: "overlay",
+              }}
+            />
+            {/* Additional glow effect */}
+            <div 
+              className="absolute inset-0"
+              style={{
+                background: "radial-gradient(ellipse at center, rgba(251, 113, 133, 0.12) 0%, rgba(244, 63, 94, 0.06) 40%, transparent 70%)",
+                mixBlendMode: "screen",
+                filter: "blur(20px)",
+              }}
+            />
+            {/* Subtle border glow */}
+            <div 
+              className="absolute inset-0 rounded-full"
+              style={{
+                background: "radial-gradient(ellipse at center, transparent 60%, rgba(251, 113, 133, 0.1) 80%, transparent 100%)",
+                filter: "blur(40px)",
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Content with relative positioning */}
+      <div className="relative z-10">
       {/* HERO */}
       <section className="grid gap-10 md:grid-cols-[2fr,1fr] items-center">
         <div className="space-y-6">
@@ -223,13 +274,13 @@ export default function HomePage() {
             transition={{ delay: 0.1, duration: 0.4 }}
           >
             A sovereign L1 blockchain where{" "}
-            <span className="font-semibold text-sky-400">UrgeIDs</span> (creators and explorers)
-            mint, trade, and experience D-GEN NFTs, streamed over the Fabric P2P
+            <span className="font-semibold text-sky-400">UrgeIDs</span> (sovereign identities, accessible via "My Void" in the portal) and{" "}
+            <span className="font-semibold text-violet-300">Archons</span> (creators) mint, trade, and experience D-GEN NFTs, streamed over the Fabric P2P
             network and traded in the Abyss marketplace. Through{" "}
             <span className="font-semibold text-violet-300">Syzygy</span> (P2P data seeding),
-            UrgeIDs earn Syzygy Scores.{" "}
+            UrgeIDs earn Syzygy Scores and level up, earning CGT rewards.{" "}
             <span className="font-semibold text-amber-400">Luminaries</span> emerge as
-            distinguished badges for those who reach the highest Syzygy thresholds, powered by the Creator God
+            distinguished badges for those who reach the highest Syzygy thresholds. The platform includes a full social layer with World Chat, Direct Messages, and media sharing, all powered by the Creator God
             Token (CGT).
           </motion.p>
 
@@ -241,9 +292,9 @@ export default function HomePage() {
           >
             <button
               onClick={() => (window.location.href = "/urgeid")}
-              className="rounded-full bg-sky-500 px-5 py-2 text-sm font-medium text-slate-950 shadow-lg shadow-sky-500/30 hover:bg-sky-400"
+              className="rounded-full bg-rose-500 px-5 py-2 text-sm font-medium text-slate-950 shadow-lg shadow-rose-500/30 hover:bg-rose-400"
             >
-              Create your UrgeID
+              Enter My Void
             </button>
             <button className="rounded-full border border-slate-700 px-5 py-2 text-sm text-slate-200 hover:border-slate-500">
               Read the Architecture
@@ -330,8 +381,8 @@ export default function HomePage() {
         />
         <PillarCard
           icon={<Users className="h-4 w-4" />}
-          title="UrgeID & Syzygy"
-          body="Every user has an UrgeID — a sovereign identity on the Demiurge chain. Through Syzygy (P2P data seeding), UrgeIDs earn Syzygy Scores. Luminaries are badges earned at the highest thresholds."
+          title="My Void & Syzygy"
+          body="Every user has an UrgeID (accessible via 'My Void' in the portal) — a sovereign identity on the Demiurge chain. Through Syzygy (P2P data seeding), UrgeIDs earn Syzygy Scores and level up, automatically earning 10 CGT per level. Luminaries are badges earned at the highest thresholds."
         />
         <PillarCard
           icon={<Sparkles className="h-4 w-4" />}
@@ -444,6 +495,7 @@ export default function HomePage() {
           worlds and Abyss listings directly.
         </p>
       </section>
+      </div>
     </main>
   );
 }

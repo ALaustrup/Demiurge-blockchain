@@ -1,0 +1,966 @@
+/**
+ * GraphQL resolvers for chat system.
+ */
+
+import { chatDb, ChatUser, ChatMessage, ChatRoom, getDb } from "./chatDb";
+import { createPubSub, PubSub } from "@graphql-yoga/node";
+
+const DEMIURGE_RPC_URL = process.env.DEMIURGE_RPC_URL || "http://127.0.0.1:8545/rpc";
+import * as http from "http";
+
+export const pubsub = createPubSub<{
+  WORLD_CHAT: [ChatMessage & { sender: ChatUser }];
+  [key: `ROOM_${string}`]: [ChatMessage & { sender: ChatUser }];
+}>();
+
+/**
+ * Context type for GraphQL resolvers.
+ */
+export interface ChatContext {
+  currentUser: ChatUser | null;
+  resolvers: typeof resolvers;
+  pubsub: typeof pubsub;
+}
+
+/**
+ * Resolve current user from headers.
+ */
+export async function resolveCurrentUser(
+  address?: string,
+  username?: string
+): Promise<ChatUser | null> {
+  if (!address) {
+    return null;
+  }
+
+  // Get or create user
+  let user = chatDb.getOrCreateUser(address, username);
+  
+  // If username looks like an address, try to sync from chain
+  if (user.username.length >= 16 && /^[0-9a-f]+$/i.test(user.username)) {
+    // Sync username from chain (synchronous for immediate update)
+    try {
+      const response = await fetch(DEMIURGE_RPC_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "urgeid_get",
+          params: { address },
+          id: 1,
+        }),
+      });
+      
+      const data = await response.json();
+      if (data.result?.username && data.result.username !== user.username) {
+        // Update username in chat_users table
+        const db = getDb();
+        const existing = db
+          .prepare("SELECT id FROM chat_users WHERE username = ? AND address != ?")
+          .get(data.result.username, address);
+        
+        if (!existing) {
+          db.prepare("UPDATE chat_users SET username = ? WHERE address = ?")
+            .run(data.result.username, address);
+          // Re-fetch user with updated username
+          user = chatDb.getUserByAddress(address) || user;
+        }
+      }
+    } catch (e) {
+      // Silently fail - username sync is best-effort
+      console.debug(`Failed to sync username for ${address}:`, e);
+    }
+  }
+  
+  return user;
+}
+
+/**
+ * Resolver implementations.
+ */
+export const resolvers = {
+  async worldChatMessages(
+    args: { limit?: number; beforeId?: string },
+    context: ChatContext
+  ): Promise<any[]> {
+    try {
+      const worldRoom = chatDb.getOrCreateWorldRoom();
+      const beforeIdNum = args.beforeId ? parseInt(args.beforeId, 10) : undefined;
+      const messages = chatDb.getRoomMessages(
+        worldRoom.id,
+        args.limit || 50,
+        beforeIdNum
+      );
+
+      // Reverse to show newest at bottom and enrich with sender info
+      const enrichedMessages = await Promise.all(
+        messages.reverse().map(async (msg) => {
+          try {
+            return await enrichMessage(msg);
+          } catch (e: any) {
+            console.error(`Error enriching message ${msg.id}:`, e);
+            throw new Error(`Failed to enrich message: ${e.message}`);
+          }
+        })
+      );
+      return enrichedMessages;
+    } catch (e: any) {
+      console.error("Error in worldChatMessages:", e);
+      throw e;
+    }
+  },
+
+  async dmRooms(context: ChatContext): Promise<any[]> {
+    if (!context.currentUser) {
+      return [];
+    }
+
+    const rooms = chatDb.getDmRoomsForUser(context.currentUser.id);
+    
+    // Enrich with members and last message
+    return await Promise.all(rooms.map(async (room) => {
+      const members = chatDb.getRoomMembers(room.id).map((m) => ({
+        id: String(m.id),
+        address: m.address,
+        username: m.username,
+        displayName: m.display_name,
+        isArchon: m.is_archon === 1,
+      }));
+      
+      const lastMessage = chatDb.getLastMessage(room.id);
+      
+      return {
+        id: String(room.id),
+        type: room.type,
+        slug: room.slug,
+        members,
+        lastMessage: lastMessage ? await enrichMessage(lastMessage) : null,
+      };
+    }));
+  },
+
+  async roomMessages(
+    args: { roomId: string; limit?: number; beforeId?: string },
+    context: ChatContext
+  ): Promise<any[]> {
+    const roomId = parseInt(args.roomId, 10);
+    
+    // Check access (world room is open to all)
+    if (context.currentUser) {
+      const hasAccess = chatDb.isRoomMember(roomId, context.currentUser.id);
+      if (!hasAccess) {
+        throw new Error("Access denied to this room");
+      }
+    }
+
+    const beforeIdNum = args.beforeId ? parseInt(args.beforeId, 10) : undefined;
+    const messages = chatDb.getRoomMessages(
+      roomId,
+      args.limit || 50,
+      beforeIdNum
+    );
+
+    // Reverse to show newest at bottom
+    const enrichedMessages = await Promise.all(
+      messages.reverse().map(enrichMessage)
+    );
+    return enrichedMessages;
+  },
+
+  async sendWorldMessage(
+    args: { content: string; nftId?: string | null; mediaUrl?: string | null; mediaType?: string | null },
+    context: ChatContext
+  ): Promise<any> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    if (!args.content || args.content.trim().length === 0) {
+      throw new Error("Message content cannot be empty");
+    }
+
+    const worldRoom = chatDb.getOrCreateWorldRoom();
+    const message = chatDb.createMessage(
+      worldRoom.id,
+      context.currentUser.id,
+      args.content,
+      args.nftId || null,
+      args.mediaUrl || null,
+      args.mediaType || null
+    );
+
+    const enriched = await enrichMessage(message);
+    
+    // Publish to subscription
+    context.pubsub.publish("WORLD_CHAT", enriched);
+
+    return enriched;
+  },
+
+  async sendDirectMessage(
+    args: { toUsername: string; content: string; nftId?: string | null; mediaUrl?: string | null; mediaType?: string | null },
+    context: ChatContext
+  ): Promise<any> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    if (!args.content || args.content.trim().length === 0) {
+      throw new Error("Message content cannot be empty");
+    }
+
+    // Find recipient
+    const recipient = chatDb.getUserByUsername(args.toUsername);
+    if (!recipient) {
+      throw new Error(`Recipient not found: @${args.toUsername}`);
+    }
+
+    // Get or create DM room
+    const room = chatDb.getOrCreateDmRoom(
+      context.currentUser.id,
+      recipient.id
+    );
+
+    // Create message
+    const message = chatDb.createMessage(
+      room.id,
+      context.currentUser.id,
+      args.content,
+      args.nftId || null,
+      args.mediaUrl || null,
+      args.mediaType || null
+    );
+
+    const enriched = await enrichMessage(message);
+    
+    // Publish to subscription
+    context.pubsub.publish(`ROOM_${room.id}`, enriched);
+
+    return enriched;
+  },
+
+  async blurMedia(
+    args: { messageId: string },
+    context: ChatContext
+  ): Promise<any> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    const messageId = parseInt(args.messageId, 10);
+    if (isNaN(messageId)) {
+      throw new Error("Invalid message ID");
+    }
+
+    const blurredMessage = chatDb.blurMessage(messageId);
+    if (!blurredMessage) {
+      throw new Error("Message not found or does not contain media");
+    }
+
+    const enriched = await enrichMessage(blurredMessage);
+    
+    // Publish update to room subscription
+    context.pubsub.publish(`ROOM_${blurredMessage.room_id}`, enriched);
+    
+    // Also publish to world chat if it's a world message
+    const worldRoom = chatDb.getOrCreateWorldRoom();
+    if (blurredMessage.room_id === worldRoom.id) {
+      context.pubsub.publish("WORLD_CHAT", enriched);
+    }
+
+    return enriched;
+  },
+
+  async sendRoomMessage(
+    args: { roomId: string; content: string; nftId?: string | null; mediaUrl?: string | null; mediaType?: string | null },
+    context: ChatContext
+  ): Promise<any> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    if (!args.content || args.content.trim().length === 0) {
+      throw new Error("Message content cannot be empty");
+    }
+
+    const roomId = parseInt(args.roomId, 10);
+    if (isNaN(roomId)) {
+      throw new Error("Invalid room ID");
+    }
+
+    // Check if room exists
+    const room = chatDb.getRoomById(roomId);
+    if (!room) {
+      throw new Error("Room not found");
+    }
+
+    // Check if user is a member (for custom rooms) or allow for world room
+    if (room.type === "custom") {
+      if (!chatDb.isRoomMember(roomId, context.currentUser.id)) {
+        throw new Error("You must join this room before sending messages");
+      }
+    }
+
+    // Create message
+    const message = chatDb.createMessage(
+      roomId,
+      context.currentUser.id,
+      args.content,
+      args.nftId || null,
+      args.mediaUrl || null,
+      args.mediaType || null
+    );
+
+    const enriched = await enrichMessage(message);
+    
+    // Publish to subscription
+    context.pubsub.publish(`ROOM_${roomId}`, enriched);
+    
+    // Also publish to world chat if it's a world message
+    if (room.type === "world") {
+      context.pubsub.publish("WORLD_CHAT", enriched);
+    }
+
+    return enriched;
+  },
+
+  async customRooms(context: ChatContext): Promise<any[]> {
+    // Return all custom rooms (public listing)
+    // No authentication required to view rooms
+    const rooms = chatDb.getAllCustomRooms();
+    return await Promise.all(rooms.map(async (room) => {
+      const members = chatDb.getRoomMembers(room.id);
+      const moderators = chatDb.getRoomModerators(room.id);
+      const activeUsers = chatDb.getActiveUsersInRoom(room.id);
+      const lastMessage = chatDb.getLastMessage(room.id);
+      const musicQueue = chatDb.getRoomMusicQueue(room.id);
+      
+      const creator = room.creator_id 
+        ? (chatDb.getUserById(room.creator_id) || null)
+        : null;
+      
+      return {
+        id: String(room.id),
+        type: room.type,
+        slug: room.slug,
+        name: room.name,
+        description: room.description,
+        creator: creator ? {
+          id: String(creator.id),
+          address: creator.address,
+          username: creator.username,
+          displayName: creator.display_name || null,
+          isArchon: creator.is_archon === 1,
+        } : null,
+        moderators: moderators.map((m) => ({
+          id: String(m.id),
+          address: m.address,
+          username: m.username,
+          displayName: m.display_name || null,
+          isArchon: m.is_archon === 1,
+        })),
+        members: members.map((m) => ({
+          id: String(m.id),
+          address: m.address,
+          username: m.username,
+          displayName: m.display_name || null,
+          isArchon: m.is_archon === 1,
+        })),
+        activeUsers: activeUsers.map((u) => ({
+          id: String(u.id),
+          address: u.address,
+          username: u.username,
+          displayName: u.display_name || null,
+          isArchon: u.is_archon === 1,
+        })),
+        lastMessage: lastMessage ? await enrichMessage(lastMessage) : null,
+        settings: {
+          fontFamily: room.font_family || 'system-ui',
+          fontSize: room.font_size || 14,
+          rules: room.rules || null,
+        },
+        musicQueue: musicQueue.map((m) => ({
+          id: String(m.id),
+          roomId: String(m.room_id),
+          sourceType: m.source_type,
+          sourceUrl: m.source_url,
+          title: m.title || null,
+          artist: m.artist || null,
+          position: m.position,
+          isPlaying: m.is_playing === 1,
+          createdAt: m.created_at,
+        })),
+      };
+    }));
+  },
+
+  async roomSettings(args: { roomId: string }, context: ChatContext): Promise<any> {
+    const roomId = parseInt(args.roomId, 10);
+    const room = chatDb.getRoomById(roomId);
+    if (!room) {
+      throw new Error("Room not found");
+    }
+    return {
+      fontFamily: room.font_family || 'system-ui',
+      fontSize: room.font_size || 14,
+      rules: room.rules || null,
+    };
+  },
+
+  async roomSystemMessages(args: { roomId: string }, context: ChatContext): Promise<any[]> {
+    const roomId = parseInt(args.roomId, 10);
+    const messages = chatDb.getSystemMessages(roomId);
+    return messages.map((m) => ({
+      id: String(m.id),
+      roomId: String(m.room_id),
+      content: m.content,
+      intervalSeconds: m.interval_seconds,
+      lastSentAt: m.last_sent_at || null,
+      isActive: m.is_active === 1,
+      createdAt: m.created_at,
+    }));
+  },
+
+  async createCustomRoom(
+    args: { name: string; description?: string | null; slug: string },
+    context: ChatContext
+  ): Promise<any> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    // Validate slug is unique
+    const existing = chatDb.getRoomBySlug(args.slug);
+    if (existing) {
+      throw new Error("Room slug already taken");
+    }
+
+    // Create room
+    const room = chatDb.createCustomRoom(
+      args.name,
+      args.description || null,
+      context.currentUser.id,
+      args.slug
+    );
+
+    // Return enriched room
+    const members = chatDb.getRoomMembers(room.id);
+    const moderators = chatDb.getRoomModerators(room.id);
+    const musicQueue = chatDb.getRoomMusicQueue(room.id);
+
+    return {
+      id: String(room.id),
+      type: room.type,
+      slug: room.slug,
+      name: room.name,
+      description: room.description,
+      creator: {
+        id: String(context.currentUser.id),
+        address: context.currentUser.address,
+        username: context.currentUser.username,
+        displayName: context.currentUser.display_name || null,
+        isArchon: context.currentUser.is_archon === 1,
+      },
+      moderators: moderators.map((m) => ({
+        id: String(m.id),
+        address: m.address,
+        username: m.username,
+        displayName: m.display_name || null,
+        isArchon: m.is_archon === 1,
+      })),
+      members: members.map((m) => ({
+        id: String(m.id),
+        address: m.address,
+        username: m.username,
+        displayName: m.display_name || null,
+        isArchon: m.is_archon === 1,
+      })),
+      lastMessage: null,
+      settings: {
+        fontFamily: room.font_family || 'system-ui',
+        fontSize: room.font_size || 14,
+        rules: room.rules || null,
+      },
+      musicQueue: musicQueue.map((m) => ({
+        id: String(m.id),
+        roomId: String(m.room_id),
+        sourceType: m.source_type,
+        sourceUrl: m.source_url,
+        title: m.title || null,
+        artist: m.artist || null,
+        position: m.position,
+        isPlaying: m.is_playing === 1,
+        createdAt: m.created_at,
+      })),
+    };
+  },
+
+  async joinCustomRoom(
+    args: { roomId: string },
+    context: ChatContext
+  ): Promise<any> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    const roomId = parseInt(args.roomId, 10);
+    const room = chatDb.getRoomById(roomId);
+    if (!room || room.type !== 'custom') {
+      throw new Error("Room not found or not a custom room");
+    }
+
+    // Add user as member if not already
+    const members = chatDb.getRoomMembers(roomId);
+    const isMember = members.some(m => m.id === context.currentUser!.id);
+    
+    if (!isMember) {
+      const db = getDb();
+      db.prepare(
+        "INSERT INTO chat_room_members (room_id, user_id, is_moderator) VALUES (?, ?, 0)"
+      ).run(roomId, context.currentUser.id);
+    }
+
+    // Return enriched room
+    const updatedMembers = chatDb.getRoomMembers(roomId);
+    const moderators = chatDb.getRoomModerators(roomId);
+    const lastMessage = chatDb.getLastMessage(roomId);
+    const musicQueue = chatDb.getRoomMusicQueue(roomId);
+    
+    const creator = room.creator_id 
+      ? (chatDb.getUserById(room.creator_id) || null)
+      : null;
+
+    return {
+      id: String(room.id),
+      type: room.type,
+      slug: room.slug,
+      name: room.name,
+      description: room.description,
+      creator: creator ? {
+        id: String(creator.id),
+        address: creator.address,
+        username: creator.username,
+        displayName: creator.display_name || null,
+        isArchon: creator.is_archon === 1,
+      } : null,
+      moderators: moderators.map((m) => ({
+        id: String(m.id),
+        address: m.address,
+        username: m.username,
+        displayName: m.display_name || null,
+        isArchon: m.is_archon === 1,
+      })),
+      members: updatedMembers.map((m) => ({
+        id: String(m.id),
+        address: m.address,
+        username: m.username,
+        displayName: m.display_name || null,
+        isArchon: m.is_archon === 1,
+      })),
+      lastMessage: lastMessage ? await enrichMessage(lastMessage) : null,
+      settings: {
+        fontFamily: room.font_family || 'system-ui',
+        fontSize: room.font_size || 14,
+        rules: room.rules || null,
+      },
+      musicQueue: musicQueue.map((m) => ({
+        id: String(m.id),
+        roomId: String(m.room_id),
+        sourceType: m.source_type,
+        sourceUrl: m.source_url,
+        title: m.title || null,
+        artist: m.artist || null,
+        position: m.position,
+        isPlaying: m.is_playing === 1,
+        createdAt: m.created_at,
+      })),
+    };
+  },
+
+  async promoteToModerator(
+    args: { roomId: string; username: string },
+    context: ChatContext
+  ): Promise<boolean> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    const roomId = parseInt(args.roomId, 10);
+    
+    // Check if World Chat (never allow moderation changes)
+    const room = chatDb.getRoomById(roomId);
+    if (room && room.type === 'world') {
+      throw new Error("Cannot modify World Chat");
+    }
+
+    // Check if user is moderator
+    if (!chatDb.isRoomModerator(roomId, context.currentUser.id)) {
+      throw new Error("Only moderators can promote users");
+    }
+
+    // Find user by username
+    const user = chatDb.getUserByUsername(args.username);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Add as moderator
+    chatDb.addRoomModerator(roomId, user.id);
+    return true;
+  },
+
+  async removeModerator(
+    args: { roomId: string; username: string },
+    context: ChatContext
+  ): Promise<boolean> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    const roomId = parseInt(args.roomId, 10);
+    
+    // Check if World Chat (never allow moderation changes)
+    const room = chatDb.getRoomById(roomId);
+    if (room && room.type === 'world') {
+      throw new Error("Cannot modify World Chat");
+    }
+
+    // Check if user is moderator
+    if (!chatDb.isRoomModerator(roomId, context.currentUser.id)) {
+      throw new Error("Only moderators can remove moderators");
+    }
+
+    // Find user by username
+    const user = chatDb.getUserByUsername(args.username);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Don't allow removing the creator
+    if (room && room.creator_id === user.id) {
+      throw new Error("Cannot remove room creator as moderator");
+    }
+
+    // Remove moderator
+    chatDb.removeRoomModerator(roomId, user.id);
+    return true;
+  },
+
+  async updateRoomSettings(
+    args: { roomId: string; fontFamily?: string | null; fontSize?: number | null; rules?: string | null },
+    context: ChatContext
+  ): Promise<any> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    const roomId = parseInt(args.roomId, 10);
+    
+    // Check if World Chat (never allow settings changes)
+    const room = chatDb.getRoomById(roomId);
+    if (room && room.type === 'world') {
+      throw new Error("Cannot modify World Chat settings");
+    }
+
+    // Check if user is moderator
+    if (!chatDb.isRoomModerator(roomId, context.currentUser.id)) {
+      throw new Error("Only moderators can update room settings");
+    }
+
+    // Update settings
+    chatDb.updateRoomSettings(roomId, {
+      fontFamily: args.fontFamily || undefined,
+      fontSize: args.fontSize || undefined,
+      rules: args.rules || undefined,
+    });
+
+    // Return updated settings
+    const updatedRoom = chatDb.getRoomById(roomId);
+    return {
+      fontFamily: updatedRoom?.font_family || 'system-ui',
+      fontSize: updatedRoom?.font_size || 14,
+      rules: updatedRoom?.rules || null,
+    };
+  },
+
+  async createSystemMessage(
+    args: { roomId: string; content: string; intervalSeconds?: number | null },
+    context: ChatContext
+  ): Promise<any> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    const roomId = parseInt(args.roomId, 10);
+    
+    // Check if World Chat (never allow system messages)
+    const room = chatDb.getRoomById(roomId);
+    if (room && room.type === 'world') {
+      throw new Error("Cannot create system messages in World Chat");
+    }
+
+    // Check if user is moderator
+    if (!chatDb.isRoomModerator(roomId, context.currentUser.id)) {
+      throw new Error("Only moderators can create system messages");
+    }
+
+    const message = chatDb.createSystemMessage(
+      roomId,
+      args.content,
+      args.intervalSeconds || 3600
+    );
+
+    return {
+      id: String(message.id),
+      roomId: String(message.room_id),
+      content: message.content,
+      intervalSeconds: message.interval_seconds,
+      lastSentAt: message.last_sent_at || null,
+      isActive: message.is_active === 1,
+      createdAt: message.created_at,
+    };
+  },
+
+  async addMusicToQueue(
+    args: { roomId: string; sourceType: string; sourceUrl: string; title?: string | null; artist?: string | null },
+    context: ChatContext
+  ): Promise<any> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    const roomId = parseInt(args.roomId, 10);
+    
+    // Check if user is moderator (for custom rooms) or allow for World Chat
+    const room = chatDb.getRoomById(roomId);
+    if (room && room.type === 'custom') {
+      if (!chatDb.isRoomModerator(roomId, context.currentUser.id)) {
+        throw new Error("Only moderators can add music to custom rooms");
+      }
+    }
+
+    // Validate source type
+    const validTypes = ['spotify', 'soundcloud', 'youtube', 'nft'];
+    if (!validTypes.includes(args.sourceType.toLowerCase())) {
+      throw new Error(`Invalid source type. Must be one of: ${validTypes.join(', ')}`);
+    }
+
+    const musicItem = chatDb.addMusicToQueue(
+      roomId,
+      args.sourceType.toLowerCase(),
+      args.sourceUrl,
+      args.title || undefined,
+      args.artist || undefined
+    );
+
+    return {
+      id: String(musicItem.id),
+      roomId: String(musicItem.room_id),
+      sourceType: musicItem.source_type,
+      sourceUrl: musicItem.source_url,
+      title: musicItem.title || null,
+      artist: musicItem.artist || null,
+      position: musicItem.position,
+      isPlaying: musicItem.is_playing === 1,
+      createdAt: musicItem.created_at,
+    };
+  },
+
+  async setPlayingMusic(
+    args: { roomId: string; musicId?: string | null },
+    context: ChatContext
+  ): Promise<boolean> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    const roomId = parseInt(args.roomId, 10);
+    
+    // Check if user is moderator (for custom rooms) or allow for World Chat
+    const room = chatDb.getRoomById(roomId);
+    if (room && room.type === 'custom') {
+      if (!chatDb.isRoomModerator(roomId, context.currentUser.id)) {
+        throw new Error("Only moderators can control music in custom rooms");
+      }
+    }
+
+    const musicId = args.musicId ? parseInt(args.musicId, 10) : null;
+    chatDb.setPlayingMusic(roomId, musicId);
+    return true;
+  },
+
+  async removeMusicFromQueue(
+    args: { musicId: string },
+    context: ChatContext
+  ): Promise<boolean> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    const musicId = parseInt(args.musicId, 10);
+    
+    // Get the music item to find the room
+    const db = getDb();
+    const musicItem = db
+      .prepare("SELECT * FROM room_music_queue WHERE id = ?")
+      .get(musicId) as any;
+    
+    if (!musicItem) {
+      throw new Error("Music item not found");
+    }
+
+    const roomId = musicItem.room_id;
+    const room = chatDb.getRoomById(roomId);
+    
+    // Check if user is moderator (for custom rooms) or allow for World Chat
+    if (room && room.type === 'custom') {
+      if (!chatDb.isRoomModerator(roomId, context.currentUser.id)) {
+        throw new Error("Only moderators can remove music from custom rooms");
+      }
+    }
+
+    chatDb.removeMusicFromQueue(musicId);
+    return true;
+  },
+};
+
+/**
+ * Enrich a message with sender information.
+ */
+/**
+ * Sync username from chain if it looks like an address (async, non-blocking).
+ */
+async function syncUsernameFromChain(address: string, currentUsername: string): Promise<void> {
+  // Sync if username looks like an address (hex pattern) or matches address prefix
+  const usernameIsAddress = currentUsername.length >= 16 && /^[0-9a-f]+$/i.test(currentUsername);
+  const usernameMatchesAddress = currentUsername === address.slice(0, currentUsername.length);
+  
+  if (usernameIsAddress || usernameMatchesAddress) {
+    try {
+      console.log(`[syncUsernameFromChain] Fetching profile for ${address.slice(0, 8)}...`);
+      const response = await fetch(DEMIURGE_RPC_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "urgeid_get",
+          params: { address },
+          id: 1,
+        }),
+      });
+      
+      const data = await response.json();
+      console.log(`[syncUsernameFromChain] RPC response:`, JSON.stringify(data).slice(0, 200));
+      
+      if (data.result?.username && data.result.username !== currentUsername) {
+        console.log(`[syncUsernameFromChain] Updating username from "${currentUsername.slice(0, 16)}" to "${data.result.username}"`);
+        // Update username in chat_users table
+        const db = getDb();
+        
+        // Check if username is taken by a different user
+        const existing = db
+          .prepare("SELECT id, address FROM chat_users WHERE username = ? AND address != ?")
+          .get(data.result.username, address) as { id: number; address: string } | undefined;
+        
+        if (!existing) {
+          // Username is available, update it
+          const result = db.prepare("UPDATE chat_users SET username = ? WHERE address = ?")
+            .run(data.result.username, address);
+          console.log(`[syncUsernameFromChain] Updated ${result.changes} row(s) for address ${address.slice(0, 8)}...`);
+        } else {
+          // Username is taken by another user - check if that user's address matches
+          // This could happen if the same address was registered twice with different usernames
+          console.log(`[syncUsernameFromChain] Username "${data.result.username}" is taken by address ${existing.address.slice(0, 8)}...`);
+          
+          // If the existing user with this username has a different address, we have a conflict
+          // In this case, we should update the existing user's username to their address
+          // and then update our user to the chain username
+          if (existing.address !== address) {
+            console.log(`[syncUsernameFromChain] Resolving conflict: updating existing user ${existing.address.slice(0, 8)}... to use address as username`);
+            // Update the conflicting user to use their address as username
+            db.prepare("UPDATE chat_users SET username = ? WHERE id = ?")
+              .run(existing.address.slice(0, 16), existing.id);
+            
+            // Now update our user to the chain username
+            const result = db.prepare("UPDATE chat_users SET username = ? WHERE address = ?")
+              .run(data.result.username, address);
+            console.log(`[syncUsernameFromChain] Resolved conflict: updated ${result.changes} row(s) for address ${address.slice(0, 8)}...`);
+          } else {
+            // Same address, just update it
+            const result = db.prepare("UPDATE chat_users SET username = ? WHERE address = ?")
+              .run(data.result.username, address);
+            console.log(`[syncUsernameFromChain] Updated ${result.changes} row(s) for same address`);
+          }
+        }
+      } else if (!data.result?.username) {
+        console.log(`[syncUsernameFromChain] No username found in chain for address ${address.slice(0, 8)}...`);
+      } else {
+        console.log(`[syncUsernameFromChain] Username already matches: "${data.result.username}"`);
+      }
+    } catch (e) {
+      // Log errors for debugging
+      console.error(`[syncUsernameFromChain] Failed to sync username for ${address.slice(0, 8)}...:`, e);
+    }
+  } else {
+    console.log(`[syncUsernameFromChain] Skipping sync - username "${currentUsername}" doesn't look like an address`);
+  }
+}
+
+async function enrichMessage(message: ChatMessage): Promise<any> {
+  try {
+    const db = getDb();
+    let userRow = db
+      .prepare("SELECT * FROM chat_users WHERE id = ?")
+      .get(message.sender_id) as ChatUser | undefined;
+
+    if (!userRow) {
+      throw new Error(`Sender not found for message ${message.id}`);
+    }
+
+    // Always try to sync username from chain if:
+    // 1. Username looks like an address (hex pattern, >= 16 chars), OR
+    // 2. Username exactly matches the address (first 16 chars)
+    const usernameIsAddress = userRow.username.length >= 16 && /^[0-9a-f]+$/i.test(userRow.username);
+    const usernameMatchesAddress = userRow.username === userRow.address.slice(0, userRow.username.length);
+    
+    if (usernameIsAddress || usernameMatchesAddress) {
+      console.log(`[enrichMessage] Syncing username for address ${userRow.address.slice(0, 8)}... (current: ${userRow.username})`);
+      // Sync and wait for update, then re-fetch user
+      await syncUsernameFromChain(userRow.address, userRow.username);
+      // Re-fetch user to get updated username
+      userRow = db
+        .prepare("SELECT * FROM chat_users WHERE id = ?")
+        .get(message.sender_id) as ChatUser | undefined;
+      if (!userRow) {
+        throw new Error(`Sender not found for message ${message.id} after sync`);
+      }
+      console.log(`[enrichMessage] After sync: username = ${userRow.username}`);
+    }
+
+    const finalUserRow = userRow;
+
+    // Convert database fields to GraphQL schema format
+    return {
+      id: String(message.id),
+      roomId: String(message.room_id),
+      sender: {
+        id: String(finalUserRow.id),
+        address: finalUserRow.address,
+        username: finalUserRow.username,
+        displayName: finalUserRow.display_name || null,
+        isArchon: finalUserRow.is_archon === 1,
+      },
+      content: message.content,
+      nftId: message.nft_id || null,
+      mediaUrl: message.media_url || null,
+      mediaType: message.media_type || null,
+      isBlurred: message.is_blurred === 1,
+      createdAt: message.created_at,
+    };
+  } catch (e: any) {
+    console.error(`Error enriching message ${message.id}:`, e);
+    console.error("Message object:", message);
+    throw new Error(`Failed to enrich message ${message.id}: ${e.message}`);
+  }
+}
+

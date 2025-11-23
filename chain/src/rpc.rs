@@ -18,13 +18,15 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tower_http::cors::{Any, CorsLayer};
 
+#[cfg(debug_assertions)]
 use crate::config::DEV_FAUCET_AMOUNT;
 use crate::core::transaction::{Address, Transaction};
 use crate::node::Node;
 use crate::runtime::{
-    create_urgeid_profile, get_address_by_handle, get_urgeid_profile, record_syzygy, set_handle,
-    BankCgtModule, CGT_DECIMALS, CGT_MAX_SUPPLY, CGT_NAME, CGT_SYMBOL, FabricRootHash, ListingId,
-    NftDgenModule, NftId, RuntimeModule,
+    create_urgeid_profile, get_address_by_handle, get_address_by_username, get_urgeid_profile,
+    record_syzygy, set_handle, set_username, BankCgtModule, CGT_DECIMALS,
+    CGT_MAX_SUPPLY, CGT_NAME, CGT_SYMBOL, FabricRootHash, ListingId, NftDgenModule, NftId,
+    RuntimeModule,
 };
 
 /// JSON-RPC request envelope.
@@ -100,6 +102,27 @@ pub struct GetTxParams {
 pub struct GetTxHistoryParams {
     pub address: String, // hex string
     pub limit: Option<usize>, // optional limit, defaults to 50
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UrgeIDSetUsernameParams {
+    pub address: String, // hex string
+    pub username: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UrgeIDResolveUsernameParams {
+    pub username: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UrgeIDGetProfileByUsernameParams {
+    pub username: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UrgeIDGetProgressParams {
+    pub address: String, // hex string
 }
 
 #[derive(Debug, Deserialize)]
@@ -732,7 +755,10 @@ async fn handle_rpc(
                             "display_name": profile.display_name,
                             "bio": profile.bio,
                             "handle": profile.handle,
+                            "username": profile.username,
+                            "level": profile.level,
                             "syzygy_score": profile.syzygy_score,
+                            "total_cgt_earned_from_rewards": profile.total_cgt_earned_from_rewards.to_string(),
                             "badges": profile.badges,
                             "created_at_height": profile.created_at_height,
                         })),
@@ -788,7 +814,10 @@ async fn handle_rpc(
                         "display_name": profile.display_name,
                         "bio": profile.bio,
                         "handle": profile.handle,
+                        "username": profile.username,
+                        "level": profile.level,
                         "syzygy_score": profile.syzygy_score,
+                        "total_cgt_earned_from_rewards": profile.total_cgt_earned_from_rewards.to_string(),
                         "badges": profile.badges,
                         "created_at_height": profile.created_at_height,
                     }),
@@ -836,7 +865,9 @@ async fn handle_rpc(
                     jsonrpc: "2.0".to_string(),
                     result: Some(json!({
                         "address": hex::encode(profile.address),
+                        "level": profile.level,
                         "syzygy_score": profile.syzygy_score,
+                        "total_cgt_earned_from_rewards": profile.total_cgt_earned_from_rewards.to_string(),
                         "badges": profile.badges,
                     })),
                     error: None,
@@ -894,7 +925,10 @@ async fn handle_rpc(
                         "display_name": profile.display_name,
                         "bio": profile.bio,
                         "handle": profile.handle,
+                        "username": profile.username,
+                        "level": profile.level,
                         "syzygy_score": profile.syzygy_score,
+                        "total_cgt_earned_from_rewards": profile.total_cgt_earned_from_rewards.to_string(),
                         "badges": profile.badges,
                         "created_at_height": profile.created_at_height,
                     })),
@@ -942,7 +976,10 @@ async fn handle_rpc(
                                 "display_name": profile.display_name,
                                 "bio": profile.bio,
                                 "handle": profile.handle,
+                                "username": profile.username,
+                                "level": profile.level,
                                 "syzygy_score": profile.syzygy_score,
+                                "total_cgt_earned_from_rewards": profile.total_cgt_earned_from_rewards.to_string(),
                                 "badges": profile.badges,
                                 "created_at_height": profile.created_at_height,
                             })),
@@ -961,6 +998,254 @@ async fn handle_rpc(
                     jsonrpc: "2.0".to_string(),
                     result: Some(serde_json::Value::Null),
                     error: None,
+                    id,
+                }),
+            }
+        }
+        "urgeid_setUsername" => {
+            let params: UrgeIDSetUsernameParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(UrgeIDSetUsernameParams {
+                        address: String::new(),
+                        username: String::new(),
+                    }),
+                None => UrgeIDSetUsernameParams {
+                    address: String::new(),
+                    username: String::new(),
+                },
+            };
+
+            let address = match parse_address_hex(&params.address) {
+                Ok(addr) => addr,
+                Err(msg) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("invalid address: {}", msg),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            let result = node.with_state_mut(|state| {
+                set_username(state, &address, &params.username)
+            });
+
+            match result {
+                Ok(()) => {
+                    // Reload profile to return updated state
+                    let profile_opt = node.with_state(|state| get_urgeid_profile(state, &address));
+                    match profile_opt {
+                        Some(profile) => Json(JsonRpcResponse {
+                            jsonrpc: "2.0".to_string(),
+                            result: Some(json!({
+                                "address": hex::encode(profile.address),
+                                "username": profile.username,
+                            })),
+                            error: None,
+                            id,
+                        }),
+                        None => Json(JsonRpcResponse {
+                            jsonrpc: "2.0".to_string(),
+                            result: None,
+                            error: Some(JsonRpcError {
+                                code: -32603,
+                                message: "Profile not found after setting username".to_string(),
+                            }),
+                            id,
+                        }),
+                    }
+                }
+                Err(msg) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32603,
+                        message: format!("Failed to set username: {}", msg),
+                    }),
+                    id,
+                }),
+            }
+        }
+        "urgeid_resolveUsername" => {
+            let params: UrgeIDResolveUsernameParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(UrgeIDResolveUsernameParams {
+                        username: String::new(),
+                    }),
+                None => UrgeIDResolveUsernameParams {
+                    username: String::new(),
+                },
+            };
+
+            let address_opt = node.with_state(|state| {
+                get_address_by_username(state, &params.username)
+            });
+
+            match address_opt {
+                Ok(Some(addr)) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(json!({
+                        "address": hex::encode(addr),
+                    })),
+                    error: None,
+                    id,
+                }),
+                Ok(None) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32602,
+                        message: "Username not found".to_string(),
+                    }),
+                    id,
+                }),
+                Err(msg) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32602,
+                        message: format!("Invalid username: {}", msg),
+                    }),
+                    id,
+                }),
+            }
+        }
+        "urgeid_getProfileByUsername" => {
+            let params: UrgeIDGetProfileByUsernameParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(UrgeIDGetProfileByUsernameParams {
+                        username: String::new(),
+                    }),
+                None => UrgeIDGetProfileByUsernameParams {
+                    username: String::new(),
+                },
+            };
+
+            let address_opt = node.with_state(|state| {
+                get_address_by_username(state, &params.username)
+            });
+
+            match address_opt {
+                Ok(Some(addr)) => {
+                    let profile_opt = node.with_state(|state| get_urgeid_profile(state, &addr));
+                    match profile_opt {
+                        Some(profile) => Json(JsonRpcResponse {
+                            jsonrpc: "2.0".to_string(),
+                            result: Some(json!({
+                                "address": hex::encode(profile.address),
+                                "display_name": profile.display_name,
+                                "bio": profile.bio,
+                                "handle": profile.handle,
+                                "username": profile.username,
+                                "level": profile.level,
+                                "syzygy_score": profile.syzygy_score,
+                                "total_cgt_earned_from_rewards": profile.total_cgt_earned_from_rewards.to_string(),
+                                "badges": profile.badges,
+                                "created_at_height": profile.created_at_height,
+                            })),
+                            error: None,
+                            id,
+                        }),
+                        None => Json(JsonRpcResponse {
+                            jsonrpc: "2.0".to_string(),
+                            result: Some(serde_json::Value::Null),
+                            error: None,
+                            id,
+                        }),
+                    }
+                }
+                Ok(None) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(serde_json::Value::Null),
+                    error: None,
+                    id,
+                }),
+                Err(msg) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32602,
+                        message: format!("Invalid username: {}", msg),
+                    }),
+                    id,
+                }),
+            }
+        }
+        "urgeid_getProgress" => {
+            let params: UrgeIDGetProgressParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(UrgeIDGetProgressParams {
+                        address: String::new(),
+                    }),
+                None => UrgeIDGetProgressParams {
+                    address: String::new(),
+                },
+            };
+
+            let address = match parse_address_hex(&params.address) {
+                Ok(addr) => addr,
+                Err(msg) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("invalid address: {}", msg),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            let profile_opt = node.with_state(|state| get_urgeid_profile(state, &address));
+            match profile_opt {
+                Some(profile) => {
+                    use crate::runtime::urgeid_registry::level_threshold;
+                    
+                    let current_level = profile.level;
+                    let current_threshold = level_threshold(current_level);
+                    let next_threshold = level_threshold(current_level + 1);
+                    let syzygy_score = profile.syzygy_score;
+                    
+                    // Calculate progress ratio (0.0 to 1.0)
+                    let progress_denominator = next_threshold.saturating_sub(current_threshold);
+                    let progress_numerator = syzygy_score.saturating_sub(current_threshold);
+                    let progress_ratio = if progress_denominator > 0 {
+                        progress_numerator as f64 / progress_denominator as f64
+                    } else {
+                        0.0
+                    };
+                    
+                    Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: Some(json!({
+                            "address": hex::encode(profile.address),
+                            "level": profile.level,
+                            "syzygyScore": profile.syzygy_score,
+                            "currentLevelThreshold": current_threshold,
+                            "nextLevelThreshold": next_threshold,
+                            "progressRatio": progress_ratio,
+                            "totalCgtEarnedFromRewards": profile.total_cgt_earned_from_rewards.to_string(),
+                        })),
+                        error: None,
+                        id,
+                    })
+                }
+                None => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32602,
+                        message: "UrgeID profile not found".to_string(),
+                    }),
                     id,
                 }),
             }
@@ -1340,6 +1625,191 @@ async fn handle_rpc(
                 error: None,
                 id,
             })
+        }
+        "cgt_signTransaction" => {
+            // Attach signature to an unsigned transaction
+            let params: SignTxParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(SignTxParams {
+                        tx_hex: String::new(),
+                        signature: String::new(),
+                    }),
+                None => SignTxParams {
+                    tx_hex: String::new(),
+                    signature: String::new(),
+                },
+            };
+
+            // Decode unsigned transaction from hex
+            let tx_bytes = match hex::decode(&params.tx_hex) {
+                Ok(b) => b,
+                Err(e) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("invalid tx_hex: {}", e),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            let mut tx = match Transaction::from_bytes(&tx_bytes) {
+                Ok(t) => t,
+                Err(e) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("failed to deserialize transaction: {}", e),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            // Decode signature from hex (should be 64 bytes = 128 hex chars)
+            let signature_bytes = match hex::decode(&params.signature) {
+                Ok(b) => {
+                    if b.len() != 64 {
+                        return Json(JsonRpcResponse {
+                            jsonrpc: "2.0".to_string(),
+                            result: None,
+                            error: Some(JsonRpcError {
+                                code: -32602,
+                                message: format!("signature must be 64 bytes (got {} bytes)", b.len()),
+                            }),
+                            id,
+                        });
+                    }
+                    b
+                }
+                Err(e) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("invalid signature hex: {}", e),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            // Attach signature to transaction
+            tx.signature = signature_bytes;
+
+            // Re-serialize signed transaction
+            let signed_tx_bytes = match tx.to_bytes() {
+                Ok(b) => b,
+                Err(e) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32603,
+                            message: format!("failed to serialize signed transaction: {}", e),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            // Return hex-encoded signed transaction
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "tx_hex": hex::encode(&signed_tx_bytes),
+                })),
+                error: None,
+                id,
+            })
+        }
+        "cgt_getTransactionHistory" => {
+            let params: GetTxHistoryParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(GetTxHistoryParams {
+                        address: String::new(),
+                        limit: Some(50),
+                    }),
+                None => GetTxHistoryParams {
+                    address: String::new(),
+                    limit: Some(50),
+                },
+            };
+
+            let address = match parse_address_hex(&params.address) {
+                Ok(addr) => addr,
+                Err(msg) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("invalid address: {}", msg),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            let limit = params.limit.unwrap_or(50);
+            let tx_hashes = node.get_transactions_for_address(&address, limit);
+
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "transactions": tx_hashes,
+                })),
+                error: None,
+                id,
+            })
+        }
+        "cgt_getTransaction" => {
+            let params: GetTxParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(GetTxParams {
+                        tx_hash: String::new(),
+                    }),
+                None => GetTxParams {
+                    tx_hash: String::new(),
+                },
+            };
+
+            let tx = node.get_transaction_by_hash(&params.tx_hash);
+            match tx {
+                Some(t) => {
+                    let tx_hash = t.hash().unwrap_or_default();
+                    Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: Some(json!({
+                            "from": hex::encode(t.from),
+                            "nonce": t.nonce,
+                            "module_id": t.module_id,
+                            "call_id": t.call_id,
+                            "payload": hex::encode(&t.payload),
+                            "fee": t.fee,
+                            "signature": hex::encode(&t.signature),
+                            "hash": hex::encode(&tx_hash),
+                        })),
+                        error: None,
+                        id,
+                    })
+                }
+                None => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(serde_json::Value::Null),
+                    error: None,
+                    id,
+                }),
+            }
         }
         _ => Json(JsonRpcResponse {
             jsonrpc: "2.0".to_string(),
