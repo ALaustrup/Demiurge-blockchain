@@ -58,6 +58,14 @@ export default function ChatPage() {
   const [archivedDms, setArchivedDms] = useState<Set<string>>(new Set());
   const [hoveredDm, setHoveredDm] = useState<string | null>(null);
   const [hoveredRoom, setHoveredRoom] = useState<string | null>(null);
+  const [roomSettingsFontFamily, setRoomSettingsFontFamily] = useState<string>("");
+  const [roomSettingsFontSize, setRoomSettingsFontSize] = useState<number>(14);
+  const [roomSettingsRules, setRoomSettingsRules] = useState<string>("");
+  const [showAddMusic, setShowAddMusic] = useState(false);
+  const [newMusicSourceType, setNewMusicSourceType] = useState<string>("spotify");
+  const [newMusicSourceUrl, setNewMusicSourceUrl] = useState<string>("");
+  const [newMusicTitle, setNewMusicTitle] = useState<string>("");
+  const [newMusicArtist, setNewMusicArtist] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const contextMenuRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1416,11 +1424,11 @@ export default function ChatPage() {
       )}
 
       {/* Room Settings Panel */}
-      {showRoomSettings && activeRoom?.type === "custom" && isMod && (
+      {showRoomSettings && activeRoom?.type === "custom" && isMod && activeCustomRoom && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/70">
-          <div className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900 p-6 shadow-xl">
+          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg border border-zinc-700 bg-zinc-900 p-6 shadow-xl">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Room Settings</h3>
+              <h3 className="text-lg font-semibold">Room Settings: {activeCustomRoom.name}</h3>
               <button
                 onClick={() => setShowRoomSettings(false)}
                 className="rounded p-1 text-zinc-400 hover:text-zinc-200"
@@ -1428,21 +1436,253 @@ export default function ChatPage() {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="space-y-4 text-sm">
+            
+            <div className="space-y-6">
+              {/* Font Settings */}
               <div>
-                <p className="mb-2 text-zinc-300">Room: <span className="font-semibold">{activeCustomRoom?.name}</span></p>
-                <p className="text-xs text-zinc-500">Settings panel - Full implementation coming soon</p>
+                <h4 className="mb-2 text-sm font-semibold text-zinc-300">Font Settings</h4>
+                <div className="space-y-3 rounded-lg border border-zinc-700 bg-zinc-800 p-4">
+                  <div>
+                    <label className="mb-1 block text-xs text-zinc-400">Font Family</label>
+                    <select
+                      value={roomSettingsFontFamily || activeCustomRoom.settings?.fontFamily || "system-ui"}
+                      onChange={(e) => setRoomSettingsFontFamily(e.target.value)}
+                      className="w-full rounded border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-zinc-200"
+                    >
+                      <option value="system-ui">System UI</option>
+                      <option value="Arial">Arial</option>
+                      <option value="Helvetica">Helvetica</option>
+                      <option value="Times New Roman">Times New Roman</option>
+                      <option value="Courier New">Courier New</option>
+                      <option value="Georgia">Georgia</option>
+                      <option value="Verdana">Verdana</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-zinc-400">Font Size</label>
+                    <input
+                      type="number"
+                      min="10"
+                      max="24"
+                      value={roomSettingsFontSize || activeCustomRoom.settings?.fontSize || 14}
+                      onChange={(e) => setRoomSettingsFontSize(parseInt(e.target.value) || 14)}
+                      className="w-full rounded border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-zinc-200"
+                    />
+                  </div>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await graphqlRequest<{ updateRoomSettings: any }>(
+                          MUTATIONS.UPDATE_ROOM_SETTINGS,
+                          {
+                            roomId: activeRoom.roomId,
+                            fontFamily: roomSettingsFontFamily || activeCustomRoom.settings?.fontFamily,
+                            fontSize: roomSettingsFontSize || activeCustomRoom.settings?.fontSize,
+                          },
+                          getChatHeaders(currentAddress, currentUsername)
+                        );
+                        await loadCustomRooms();
+                        alert("Font settings updated!");
+                      } catch (err: any) {
+                        alert(err.message || "Failed to update settings");
+                      }
+                    }}
+                    className="w-full rounded bg-rose-500 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-600"
+                  >
+                    Update Font Settings
+                  </button>
+                </div>
               </div>
-              <div className="rounded-lg border border-zinc-700 bg-zinc-800 p-3">
-                <p className="text-xs text-zinc-400">As a moderator, you can:</p>
-                <ul className="mt-2 list-disc list-inside space-y-1 text-xs text-zinc-500">
-                  <li>Update room name, description, and rules</li>
-                  <li>Manage moderators</li>
-                  <li>Create system messages</li>
-                  <li>Manage music queue</li>
-                  <li>Customize font and styling</li>
-                </ul>
+
+              {/* Room Rules */}
+              <div>
+                <h4 className="mb-2 text-sm font-semibold text-zinc-300">Room Rules</h4>
+                <div className="rounded-lg border border-zinc-700 bg-zinc-800 p-4">
+                  <textarea
+                    value={roomSettingsRules || activeCustomRoom.settings?.rules || ""}
+                    onChange={(e) => setRoomSettingsRules(e.target.value)}
+                    placeholder="Enter room rules here..."
+                    rows={4}
+                    className="w-full rounded border border-zinc-600 bg-zinc-700 px-3 py-2 text-sm text-zinc-200"
+                  />
+                  <button
+                    onClick={async () => {
+                      try {
+                        await graphqlRequest<{ updateRoomSettings: any }>(
+                          MUTATIONS.UPDATE_ROOM_SETTINGS,
+                          {
+                            roomId: activeRoom.roomId,
+                            rules: roomSettingsRules,
+                          },
+                          getChatHeaders(currentAddress, currentUsername)
+                        );
+                        await loadCustomRooms();
+                        alert("Room rules updated!");
+                      } catch (err: any) {
+                        alert(err.message || "Failed to update rules");
+                      }
+                    }}
+                    className="mt-2 w-full rounded bg-rose-500 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-600"
+                  >
+                    Update Rules
+                  </button>
+                </div>
               </div>
+
+              {/* Music Queue */}
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-zinc-300">Music Queue</h4>
+                  <button
+                    onClick={() => setShowAddMusic(true)}
+                    className="rounded bg-rose-500 px-3 py-1 text-xs font-semibold text-white hover:bg-rose-600"
+                  >
+                    <Music className="mr-1 inline h-3 w-3" />
+                    Add Music
+                  </button>
+                </div>
+                <div className="rounded-lg border border-zinc-700 bg-zinc-800 p-4">
+                  {activeCustomRoom.musicQueue && activeCustomRoom.musicQueue.length > 0 ? (
+                    <div className="space-y-2">
+                      {activeCustomRoom.musicQueue.map((music) => (
+                        <div key={music.id} className="flex items-center justify-between rounded bg-zinc-700 p-2">
+                          <div className="flex-1">
+                            <div className="text-sm text-zinc-200">
+                              {music.title || music.sourceUrl}
+                            </div>
+                            {music.artist && (
+                              <div className="text-xs text-zinc-400">{music.artist}</div>
+                            )}
+                            <div className="text-xs text-zinc-500">{music.sourceType}</div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {music.isPlaying && (
+                              <span className="text-xs text-rose-400">▶ Playing</span>
+                            )}
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await graphqlRequest<{ removeMusicFromQueue: boolean }>(
+                                    MUTATIONS.REMOVE_MUSIC_FROM_QUEUE,
+                                    { musicId: music.id },
+                                    getChatHeaders(currentAddress, currentUsername)
+                                  );
+                                  await loadCustomRooms();
+                                } catch (err: any) {
+                                  alert(err.message || "Failed to remove music");
+                                }
+                              }}
+                              className="rounded bg-zinc-600 px-2 py-1 text-xs text-zinc-300 hover:bg-zinc-500"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-zinc-500">No music in queue. Add some to get started!</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Music Modal */}
+      {showAddMusic && activeRoom?.type === "custom" && isMod && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+          <div className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-900 p-6 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Add Music to Queue</h3>
+              <button
+                onClick={() => {
+                  setShowAddMusic(false);
+                  setNewMusicSourceUrl("");
+                  setNewMusicTitle("");
+                  setNewMusicArtist("");
+                }}
+                className="rounded p-1 text-zinc-400 hover:text-zinc-200"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1 block text-sm text-zinc-300">Source Type</label>
+                <select
+                  value={newMusicSourceType}
+                  onChange={(e) => setNewMusicSourceType(e.target.value)}
+                  className="w-full rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-zinc-200"
+                >
+                  <option value="spotify">Spotify</option>
+                  <option value="soundcloud">SoundCloud</option>
+                  <option value="youtube">YouTube Music</option>
+                  <option value="nft">NFT Music File</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm text-zinc-300">Source URL</label>
+                <input
+                  type="text"
+                  value={newMusicSourceUrl}
+                  onChange={(e) => setNewMusicSourceUrl(e.target.value)}
+                  placeholder="Enter music URL..."
+                  className="w-full rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-zinc-200"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm text-zinc-300">Title (Optional)</label>
+                <input
+                  type="text"
+                  value={newMusicTitle}
+                  onChange={(e) => setNewMusicTitle(e.target.value)}
+                  placeholder="Song title..."
+                  className="w-full rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-zinc-200"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm text-zinc-300">Artist (Optional)</label>
+                <input
+                  type="text"
+                  value={newMusicArtist}
+                  onChange={(e) => setNewMusicArtist(e.target.value)}
+                  placeholder="Artist name..."
+                  className="w-full rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-zinc-200"
+                />
+              </div>
+              <button
+                onClick={async () => {
+                  if (!newMusicSourceUrl.trim()) {
+                    alert("Please enter a source URL");
+                    return;
+                  }
+                  try {
+                    await graphqlRequest<{ addMusicToQueue: any }>(
+                      MUTATIONS.ADD_MUSIC_TO_QUEUE,
+                      {
+                        roomId: activeRoom.roomId,
+                        sourceType: newMusicSourceType,
+                        sourceUrl: newMusicSourceUrl,
+                        title: newMusicTitle || null,
+                        artist: newMusicArtist || null,
+                      },
+                      getChatHeaders(currentAddress, currentUsername)
+                    );
+                    await loadCustomRooms();
+                    setShowAddMusic(false);
+                    setNewMusicSourceUrl("");
+                    setNewMusicTitle("");
+                    setNewMusicArtist("");
+                  } catch (err: any) {
+                    alert(err.message || "Failed to add music");
+                  }
+                }}
+                className="w-full rounded bg-rose-500 px-4 py-2 font-semibold text-white hover:bg-rose-600"
+              >
+                Add to Queue
+              </button>
             </div>
           </div>
         </div>
