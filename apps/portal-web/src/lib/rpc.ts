@@ -336,8 +336,15 @@ export async function buildBuyListingTx(
 /**
  * Get NFTs owned by an address.
  */
-export async function getNftsByOwner(owner: string): Promise<{ nfts: number[] }> {
-  return callRpc<{ nfts: number[] }>("cgt_getNftsByOwner", { owner });
+export async function getNftsByOwner(owner: string): Promise<{ nfts: NftMetadata[] }> {
+  return callRpc<{ nfts: NftMetadata[] }>("cgt_getNftsByOwner", { address: owner });
+}
+
+/**
+ * Get a single NFT by ID.
+ */
+export async function getNft(nftId: number): Promise<NftMetadata | null> {
+  return callRpc<NftMetadata | null>("cgt_getNft", { nft_id: nftId });
 }
 
 export async function getTransactionHistory(
