@@ -398,6 +398,12 @@ export default function ChatPage() {
       loadWorldMessages();
     } else if (activeRoom?.type === "custom") {
       loadRoomMessages(activeRoom.roomId);
+      // Load room settings for editing
+      if (activeRoom.room.settings) {
+        setRoomSettingsFontFamily(activeRoom.room.settings.fontFamily || "");
+        setRoomSettingsFontSize(activeRoom.room.settings.fontSize || 14);
+        setRoomSettingsRules(activeRoom.room.settings.rules || "");
+      }
       // Check if room has rules and show them
       if (activeRoom.room.settings?.rules) {
         const hasSeenRules = localStorage.getItem(`demiurge_room_rules_${activeRoom.roomId}`);
