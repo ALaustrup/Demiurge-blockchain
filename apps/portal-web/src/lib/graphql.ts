@@ -227,6 +227,29 @@ export const QUERIES = {
       }
     }
   `,
+  USER_CHAT_ANALYTICS: `
+    query UserChatAnalytics($address: String!) {
+      userChatAnalytics(address: $address) {
+        totalMessages
+        worldChatMessages
+        dmMessages
+        customRoomMessages
+        roomsCreated
+        roomsModerated
+        mediaShared
+        firstMessageAt
+        lastMessageAt
+      }
+    }
+  `,
+  USER_MESSAGE_ACTIVITY: `
+    query UserMessageActivity($address: String!) {
+      userMessageActivity(address: $address) {
+        date
+        count
+      }
+    }
+  `,
 };
 
 export const MUTATIONS = {
