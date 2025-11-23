@@ -655,6 +655,25 @@ export const chatDb = {
   },
 
   /**
+   * Leave a custom room (remove user from room members).
+   */
+  leaveCustomRoom(roomId: number, userId: number): boolean {
+    const db = getDb();
+    const room = db.prepare("SELECT type FROM chat_rooms WHERE id = ?").get(roomId) as { type: string } | undefined;
+    if (!room || room.type !== "custom") {
+      return false;
+    }
+    
+    // Remove from members
+    db.prepare("DELETE FROM chat_room_members WHERE room_id = ? AND user_id = ?").run(roomId, userId);
+    
+    // Also remove from moderators if they were one
+    db.prepare("DELETE FROM chat_room_moderators WHERE room_id = ? AND user_id = ?").run(roomId, userId);
+    
+    return true;
+  },
+
+  /**
    * Get custom rooms for a user (rooms they're a member of).
    */
   getCustomRoomsForUser(userId: number): ChatRoom[] {

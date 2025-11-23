@@ -412,6 +412,11 @@ export const MUTATIONS = {
       }
     }
   `,
+  LEAVE_CUSTOM_ROOM: `
+    mutation LeaveCustomRoom($roomId: ID!) {
+      leaveCustomRoom(roomId: $roomId)
+    }
+  `,
   PROMOTE_TO_MODERATOR: `
     mutation PromoteToModerator($roomId: ID!, $username: String!) {
       promoteToModerator(roomId: $roomId, username: $username)

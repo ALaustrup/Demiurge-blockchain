@@ -577,6 +577,30 @@ export const resolvers = {
     };
   },
 
+  async leaveCustomRoom(
+    args: { roomId: string },
+    context: ChatContext
+  ): Promise<boolean> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+    const roomId = parseInt(args.roomId, 10);
+    const room = chatDb.getRoomById(roomId);
+    if (!room) {
+      throw new Error("Room not found");
+    }
+    if (room.type !== "custom") {
+      throw new Error("Can only leave custom rooms");
+    }
+    
+    const success = chatDb.leaveCustomRoom(roomId, context.currentUser.id);
+    if (!success) {
+      throw new Error("Failed to leave room");
+    }
+    
+    return true;
+  },
+
   async promoteToModerator(
     args: { roomId: string; username: string },
     context: ChatContext

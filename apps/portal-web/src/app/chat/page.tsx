@@ -542,6 +542,37 @@ export default function ChatPage() {
     }
   };
 
+  const handleLeaveRoom = async (roomId: string) => {
+    if (!currentAddress) return;
+
+    if (!confirm("Are you sure you want to leave this room?")) {
+      return;
+    }
+
+    try {
+      await graphqlRequest<{ leaveCustomRoom: boolean }>(
+        MUTATIONS.LEAVE_CUSTOM_ROOM,
+        { roomId },
+        getChatHeaders(currentAddress, currentUsername)
+      );
+      
+      // Remove room from custom rooms list
+      setCustomRooms(customRooms.filter((r) => r.id !== roomId));
+      
+      // If this was the active room, close it
+      if (activeRoom?.type === "custom" && activeRoom.roomId === roomId) {
+        setActiveRoom(null);
+        setActiveView(null);
+      }
+      
+      // Reload custom rooms to get updated list
+      await loadCustomRooms();
+    } catch (err: any) {
+      console.error("Failed to leave room:", err);
+      alert(err.message || "Failed to leave room");
+    }
+  };
+
   const handleCreateRoom = async () => {
     if (!newRoomName.trim() || !newRoomSlug.trim() || !currentAddress) {
       alert("Please fill in room name and slug");
@@ -880,62 +911,76 @@ export default function ChatPage() {
           {/* Custom Rooms (appears right after World Chat) */}
           {customRooms.length > 0 && (
             <div className="border-t border-zinc-800">
-              {customRooms.map((room) => (
-                <div
-                  key={room.id}
-                  className="relative"
-                  onMouseEnter={() => setHoveredRoom(room.id)}
-                  onMouseLeave={() => setHoveredRoom(null)}
-                >
-                  <button
-                    onClick={() => {
-                      const isMember = room.members?.some((m) => m.address === currentAddress);
-                      if (isMember) {
-                        handleOpenCustomRoom(room);
-                      } else {
-                        handleJoinCustomRoom(room.id);
-                      }
-                    }}
-                    className={`w-full px-4 py-3 text-left hover:bg-zinc-800 ${
-                      activeRoom?.type === "custom" && activeRoom.roomId === room.id
-                        ? "bg-zinc-800"
-                        : ""
-                    }`}
+              {customRooms.map((room) => {
+                const isMember = room.members?.some((m) => m.address === currentAddress);
+                return (
+                  <div
+                    key={room.id}
+                    className="relative"
+                    onMouseEnter={() => setHoveredRoom(room.id)}
+                    onMouseLeave={() => setHoveredRoom(null)}
                   >
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="h-5 w-5" />
-                      <div className="flex-1">
-                        <div className="font-semibold">{room.name || `Room ${room.id}`}</div>
-                        {room.description && (
-                          <div className="truncate text-xs text-zinc-400">{room.description}</div>
-                        )}
-                      </div>
+                    <button
+                      onClick={() => {
+                        if (isMember) {
+                          handleOpenCustomRoom(room);
+                        } else {
+                          handleJoinCustomRoom(room.id);
+                        }
+                      }}
+                      className={`w-full px-4 py-3 text-left hover:bg-zinc-800 ${
+                        activeRoom?.type === "custom" && activeRoom.roomId === room.id
+                          ? "bg-zinc-800"
+                          : ""
+                      }`}
+                    >
                       <div className="flex items-center gap-2">
-                        {isRoomModerator(room) && (
-                          <div title="Moderator">
-                            <Shield className="h-4 w-4 text-rose-400" />
-                          </div>
-                        )}
-                        <div className="relative">
-                          <Users className="h-4 w-4 text-zinc-400" />
-                          {hoveredRoom === room.id && room.activeUsers && room.activeUsers.length > 0 && (
-                            <div className="absolute right-0 top-full mt-1 z-50 w-48 rounded-lg border border-zinc-700 bg-zinc-900 p-2 shadow-xl">
-                              <div className="text-xs font-semibold text-zinc-300 mb-1">Active Users ({room.activeUsers.length})</div>
-                              <div className="space-y-1 max-h-48 overflow-y-auto">
-                                {room.activeUsers.map((user) => (
-                                  <div key={user.id} className="text-xs text-zinc-400">
-                                    @{user.username}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
+                        <MessageSquare className="h-5 w-5" />
+                        <div className="flex-1">
+                          <div className="font-semibold">{room.name || `Room ${room.id}`}</div>
+                          {room.description && (
+                            <div className="truncate text-xs text-zinc-400">{room.description}</div>
                           )}
                         </div>
+                        <div className="flex items-center gap-2">
+                          {isRoomModerator(room) && (
+                            <div title="Moderator">
+                              <Shield className="h-4 w-4 text-rose-400" />
+                            </div>
+                          )}
+                          <div className="relative">
+                            <Users className="h-4 w-4 text-zinc-400" />
+                            {hoveredRoom === room.id && room.activeUsers && room.activeUsers.length > 0 && (
+                              <div className="absolute right-0 top-full mt-1 z-50 w-48 rounded-lg border border-zinc-700 bg-zinc-900 p-2 shadow-xl">
+                                <div className="text-xs font-semibold text-zinc-300 mb-1">Active Users ({room.activeUsers.length})</div>
+                                <div className="space-y-1 max-h-48 overflow-y-auto">
+                                  {room.activeUsers.map((user) => (
+                                    <div key={user.id} className="text-xs text-zinc-400">
+                                      @{user.username}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </button>
-                </div>
-              ))}
+                    </button>
+                    {hoveredRoom === room.id && isMember && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLeaveRoom(room.id);
+                        }}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 rounded bg-rose-600 px-2 py-1 text-xs font-semibold text-white hover:bg-rose-700 z-10"
+                        title="Leave Room"
+                      >
+                        Leave
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
 

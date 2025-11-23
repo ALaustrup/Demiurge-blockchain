@@ -220,6 +220,15 @@ const MutationType = new GraphQLObjectType({
         return context.resolvers.joinCustomRoom(args, context);
       },
     },
+    leaveCustomRoom: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      args: {
+        roomId: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.leaveCustomRoom(args, context);
+      },
+    },
     promoteToModerator: {
       type: new GraphQLNonNull(GraphQLBoolean),
       args: {
