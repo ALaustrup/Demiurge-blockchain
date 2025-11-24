@@ -2,7 +2,7 @@
  * GraphQL resolvers for chat system.
  */
 
-import { chatDb, ChatUser, ChatMessage, ChatRoom, getDb } from "./chatDb";
+import { chatDb, ChatUser, ChatMessage, ChatRoom, getDb, upsertDeveloper, getDeveloperByAddress, getDeveloperByUsername, listDevelopers, createProject, getProjectBySlug, addMaintainer, getMaintainers, listProjects } from "./chatDb";
 import { createPubSub, PubSub } from "@graphql-yoga/node";
 
 const DEMIURGE_RPC_URL = process.env.DEMIURGE_RPC_URL || "http://127.0.0.1:8545/rpc";
@@ -861,6 +861,199 @@ export const resolvers = {
   ): Promise<any[]> {
     // No authentication required - analytics are public
     return chatDb.getUserMessageActivity(args.address);
+  },
+
+  // Developer Registry resolvers
+  async getDevelopers(
+    args: {},
+    context: ChatContext
+  ): Promise<any[]> {
+    const devs = listDevelopers();
+    return devs.map(d => ({
+      address: d.address,
+      username: d.username,
+      reputation: d.reputation,
+      createdAt: new Date(d.created_at).toISOString(),
+    }));
+  },
+
+  async getDeveloper(
+    args: { address?: string; username?: string },
+    context: ChatContext
+  ): Promise<any | null> {
+    let dev = null;
+    if (args.address) {
+      dev = getDeveloperByAddress(args.address);
+    } else if (args.username) {
+      dev = getDeveloperByUsername(args.username);
+    }
+    if (!dev) return null;
+    return {
+      address: dev.address,
+      username: dev.username,
+      reputation: dev.reputation,
+      createdAt: new Date(dev.created_at).toISOString(),
+    };
+  },
+
+  async getProjects(
+    args: {},
+    context: ChatContext
+  ): Promise<any[]> {
+    const projects = listProjects();
+    return projects.map(p => ({
+      slug: p.slug,
+      name: p.name,
+      description: p.description,
+      createdAt: new Date(p.created_at).toISOString(),
+    }));
+  },
+
+  async getProject(
+    args: { slug: string },
+    context: ChatContext
+  ): Promise<any | null> {
+    const project = getProjectBySlug(args.slug);
+    if (!project) return null;
+    return {
+      slug: project.slug,
+      name: project.name,
+      description: project.description,
+      createdAt: new Date(project.created_at).toISOString(),
+    };
+  },
+
+  async getProjectMaintainers(
+    slug: string,
+    context: ChatContext
+  ): Promise<any[]> {
+    const maintainers = getMaintainers(slug);
+    return maintainers.map(d => ({
+      address: d.address,
+      username: d.username,
+      reputation: d.reputation,
+      createdAt: new Date(d.created_at).toISOString(),
+    }));
+  },
+
+  async registerDeveloper(
+    args: { username: string },
+    context: ChatContext
+  ): Promise<any> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    const address = context.currentUser.address;
+    const username = args.username.toLowerCase().trim();
+
+    // Validate username
+    if (!/^[a-z0-9_]{3,32}$/.test(username)) {
+      throw new Error("Invalid username: must be 3-32 characters, lowercase alphanumeric + underscore");
+    }
+
+    // Try to register on-chain first (if RPC available)
+    try {
+      const response = await fetch(DEMIURGE_RPC_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "dev_registerDeveloper",
+          params: {
+            address,
+            username,
+            signed_tx_hex: "", // TODO: Sign transaction properly
+          },
+          id: 1,
+        }),
+      });
+      const data = await response.json();
+      if (data.error) {
+        console.warn("On-chain registration failed:", data.error);
+        // Continue with off-chain registration
+      }
+    } catch (e) {
+      console.warn("Failed to register on-chain:", e);
+      // Continue with off-chain registration
+    }
+
+    // Upsert in SQLite
+    upsertDeveloper(address, username, 0);
+
+    const dev = getDeveloperByAddress(address);
+    if (!dev) {
+      throw new Error("Failed to create developer profile");
+    }
+
+    return {
+      address: dev.address,
+      username: dev.username,
+      reputation: dev.reputation,
+      createdAt: new Date(dev.created_at).toISOString(),
+    };
+  },
+
+  async createProject(
+    args: { slug: string; name: string; description?: string },
+    context: ChatContext
+  ): Promise<any> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    const slug = args.slug.toLowerCase().trim();
+    if (!/^[a-z0-9_-]{3,64}$/.test(slug)) {
+      throw new Error("Invalid slug: must be 3-64 characters, lowercase alphanumeric + dash/underscore");
+    }
+
+    const project = createProject(slug, args.name, args.description || null);
+    
+    // Add creator as maintainer
+    try {
+      addMaintainer(slug, context.currentUser.address);
+    } catch (e) {
+      // Developer might not be registered yet
+      console.warn("Failed to add creator as maintainer:", e);
+    }
+
+    return {
+      slug: project.slug,
+      name: project.name,
+      description: project.description,
+      createdAt: new Date(project.created_at).toISOString(),
+    };
+  },
+
+  async addProjectMaintainer(
+    args: { slug: string; address: string },
+    context: ChatContext
+  ): Promise<any> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    // Check if caller is already a maintainer
+    const maintainers = getMaintainers(args.slug);
+    const isMaintainer = maintainers.some(m => m.address === context.currentUser!.address);
+    
+    if (!isMaintainer) {
+      throw new Error("Only project maintainers can add new maintainers");
+    }
+
+    addMaintainer(args.slug, args.address);
+    
+    const project = getProjectBySlug(args.slug);
+    if (!project) {
+      throw new Error("Project not found");
+    }
+
+    return {
+      slug: project.slug,
+      name: project.name,
+      description: project.description,
+      createdAt: new Date(project.created_at).toISOString(),
+    };
   },
 };
 

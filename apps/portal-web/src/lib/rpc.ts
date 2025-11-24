@@ -249,7 +249,7 @@ export type UserAnalytics = {
 };
 
 export async function getUserAnalytics(address: string): Promise<UserAnalytics> {
-  const response = await callRpc("urgeid_getAnalytics", { address });
+  const response = await callRpc("urgeid_getAnalytics", { address }) as { error?: { message: string }, result?: UserAnalytics };
   if (response.error) {
     throw new Error(response.error.message || "Failed to get user analytics");
   }

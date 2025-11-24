@@ -1,0 +1,175 @@
+# TypeScript SDK Guide
+
+The Demiurge TypeScript SDK provides a high-level interface for building dApps on Demiurge.
+
+## Installation
+
+For now, the SDK is available as a local package. In the future, it will be published to npm.
+
+```bash
+# In your project directory
+npm install file:../../sdk/ts-sdk
+# or
+pnpm add file:../../sdk/ts-sdk
+```
+
+## Basic Setup
+
+```typescript
+import { DemiurgeSDK } from '@demiurge/ts-sdk';
+
+const sdk = new DemiurgeSDK({
+  rpcUrl: 'http://127.0.0.1:8545/rpc',
+  retries: 3,
+  retryDelay: 1000,
+  timeout: 30000,
+});
+```
+
+## Get CGT Balance
+
+```typescript
+// Get balance as smallest units (string)
+const balance = await sdk.cgt.getBalance('0x...');
+
+// Get balance as human-readable number
+const balanceFormatted = await sdk.cgt.getBalanceFormatted('0x...');
+console.log(`${balanceFormatted} CGT`);
+```
+
+## Send CGT
+
+```typescript
+import { signTransactionHex } from '@demiurge/ts-sdk';
+
+const from = '0x...';
+const to = '0x...';
+const amount = 10.5; // CGT
+const privateKey = '0x...'; // Your private key
+
+// Build transaction
+const { unsignedTxHex, nonce } = await sdk.cgt.buildTransfer(from, to, amount);
+
+// Sign transaction
+const signatureHex = await signTransactionHex(unsignedTxHex, privateKey);
+
+// Submit (note: SDK will have a helper for this)
+const txHash = await sdk.cgt.sendRawTransaction(unsignedTxHex);
+console.log(`Transaction sent: ${txHash}`);
+```
+
+## UrgeID Operations
+
+```typescript
+// Get profile
+const profile = await sdk.urgeid.getProfile('0x...');
+console.log(`@${profile.username} - Level ${profile.level}`);
+
+// Resolve username to address
+const address = await sdk.urgeid.resolveUsername('myusername');
+if (address) {
+  console.log(`@myusername → ${address}`);
+}
+
+// Get progress
+const progress = await sdk.urgeid.getProgress('0x...');
+console.log(`Syzygy: ${progress.syzygyScore}, Progress: ${progress.progressRatio * 100}%`);
+```
+
+## NFT Operations
+
+```typescript
+// Get NFTs by owner
+const nfts = await sdk.nft.getNftsByOwner('0x...');
+console.log(`Owns ${nfts.length} NFTs`);
+
+// Get specific NFT
+const nft = await sdk.nft.getNft(123);
+console.log(`NFT #${nft.id} - Fabric: ${nft.fabric_root_hash}`);
+```
+
+## Marketplace Operations
+
+```typescript
+// Get all listings
+const listings = await sdk.marketplace.getAllListings();
+console.log(`${listings.length} active listings`);
+
+// Get specific listing
+const listing = await sdk.marketplace.getListing(1);
+console.log(`Listing #${listing.id}: ${listing.price} CGT`);
+```
+
+## Error Handling
+
+```typescript
+try {
+  const balance = await sdk.cgt.getBalanceFormatted('0x...');
+} catch (error) {
+  if (error.message.includes('Connection failed')) {
+    console.error('Cannot reach Demiurge node. Is it running?');
+  } else {
+    console.error('Error:', error.message);
+  }
+}
+```
+
+## Utility Functions
+
+```typescript
+import { formatCgt, formatAddress, isValidAddress } from '@demiurge/ts-sdk';
+
+// Format CGT for display
+const formatted = formatCgt('100000000'); // "1.00000000"
+
+// Format address
+const short = formatAddress('0x...'); // "0x12345678...abcdef"
+
+// Validate address
+if (isValidAddress(address)) {
+  // Address is valid
+}
+```
+
+## Complete Example
+
+```typescript
+import { DemiurgeSDK, signTransactionHex } from '@demiurge/ts-sdk';
+
+async function example() {
+  const sdk = new DemiurgeSDK({ rpcUrl: 'http://127.0.0.1:8545/rpc' });
+  
+  const address = '0x...';
+  const privateKey = '0x...';
+  
+  // Get balance
+  const balance = await sdk.cgt.getBalanceFormatted(address);
+  console.log(`Balance: ${balance} CGT`);
+  
+  // Get profile
+  const profile = await sdk.urgeid.getProfile(address);
+  console.log(`Welcome, @${profile.username}!`);
+  
+  // Get NFTs
+  const nfts = await sdk.nft.getNftsByOwner(address);
+  console.log(`You own ${nfts.length} NFTs`);
+  
+  // Send CGT (example)
+  // const { unsignedTxHex } = await sdk.cgt.buildTransfer(address, '0x...', 1.0);
+  // const sig = await signTransactionHex(unsignedTxHex, privateKey);
+  // await sdk.cgt.sendRawTransaction(unsignedTxHex);
+}
+
+example().catch(console.error);
+```
+
+## Next Steps
+
+- See the [Rust SDK guide](/docs/developers/sdk-rust) for server-side development
+- Check out [templates](/docs/developers/templates) for starter projects
+- Explore the [full API reference](../../../sdk/ts-sdk/README.md)
+
+---
+
+**The flame burns eternal. The code serves the will.**
+

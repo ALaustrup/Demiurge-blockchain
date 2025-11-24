@@ -157,6 +157,39 @@ function createSchema(db: Database.Database) {
     )
   `);
 
+  // developers
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS developers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      address TEXT NOT NULL UNIQUE,
+      username TEXT NOT NULL UNIQUE,
+      reputation INTEGER NOT NULL DEFAULT 0,
+      created_at INTEGER NOT NULL
+    )
+  `);
+
+  // projects
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS projects (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      slug TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL,
+      description TEXT,
+      created_at INTEGER NOT NULL
+    )
+  `);
+
+  // project_maintainers
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS project_maintainers (
+      project_id INTEGER NOT NULL,
+      developer_id INTEGER NOT NULL,
+      PRIMARY KEY (project_id, developer_id),
+      FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+      FOREIGN KEY (developer_id) REFERENCES developers(id) ON DELETE CASCADE
+    )
+  `);
+
   // room_music_queue (music playlist per room)
   db.exec(`
     CREATE TABLE IF NOT EXISTS room_music_queue (
@@ -288,6 +321,102 @@ export interface ChatMessage {
 /**
  * Helper functions for common queries.
  */
+// Developer Registry functions
+
+export function upsertDeveloper(
+  address: string,
+  username: string,
+  reputation: number = 0
+): void {
+  const db = getDb();
+  const stmt = db.prepare(`
+    INSERT INTO developers (address, username, reputation, created_at)
+    VALUES (?, ?, ?, ?)
+    ON CONFLICT(address) DO UPDATE SET
+      username = excluded.username,
+      reputation = excluded.reputation
+  `);
+  stmt.run(address, username, reputation, Date.now());
+}
+
+export function getDeveloperByAddress(address: string): any | null {
+  const db = getDb();
+  const stmt = db.prepare("SELECT * FROM developers WHERE address = ?");
+  const row = stmt.get(address) as any;
+  return row || null;
+}
+
+export function getDeveloperByUsername(username: string): any | null {
+  const db = getDb();
+  const stmt = db.prepare("SELECT * FROM developers WHERE username = ?");
+  const row = stmt.get(username) as any;
+  return row || null;
+}
+
+export function listDevelopers(): any[] {
+  const db = getDb();
+  const stmt = db.prepare("SELECT * FROM developers ORDER BY reputation DESC, created_at DESC");
+  return stmt.all() as any[];
+}
+
+export function createProject(
+  slug: string,
+  name: string,
+  description: string | null = null
+): any {
+  const db = getDb();
+  const stmt = db.prepare(`
+    INSERT INTO projects (slug, name, description, created_at)
+    VALUES (?, ?, ?, ?)
+  `);
+  const result = stmt.run(slug, name, description, Date.now());
+  return getProjectBySlug(slug);
+}
+
+export function getProjectBySlug(slug: string): any | null {
+  const db = getDb();
+  const stmt = db.prepare("SELECT * FROM projects WHERE slug = ?");
+  const row = stmt.get(slug) as any;
+  return row || null;
+}
+
+export function addMaintainer(projectSlug: string, devAddress: string): void {
+  const db = getDb();
+  const project = getProjectBySlug(projectSlug);
+  const developer = getDeveloperByAddress(devAddress);
+  
+  if (!project || !developer) {
+    throw new Error("Project or developer not found");
+  }
+
+  const stmt = db.prepare(`
+    INSERT OR IGNORE INTO project_maintainers (project_id, developer_id)
+    VALUES (?, ?)
+  `);
+  stmt.run(project.id, developer.id);
+}
+
+export function getMaintainers(projectSlug: string): any[] {
+  const db = getDb();
+  const project = getProjectBySlug(projectSlug);
+  if (!project) {
+    return [];
+  }
+
+  const stmt = db.prepare(`
+    SELECT d.* FROM developers d
+    INNER JOIN project_maintainers pm ON d.id = pm.developer_id
+    WHERE pm.project_id = ?
+  `);
+  return stmt.all(project.id) as any[];
+}
+
+export function listProjects(): any[] {
+  const db = getDb();
+  const stmt = db.prepare("SELECT * FROM projects ORDER BY created_at DESC");
+  return stmt.all() as any[];
+}
+
 export const chatDb = {
   /**
    * Get or create a chat user by address.

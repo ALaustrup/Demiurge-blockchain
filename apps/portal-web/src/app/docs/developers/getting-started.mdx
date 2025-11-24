@@ -1,0 +1,92 @@
+# Developer Guide: Getting Started
+
+Welcome to the Demiurge Developer Platform. This guide will help you get started building on Demiurge.
+
+## What is the Developer Registry?
+
+The Developer Registry is an on-chain and off-chain system for tracking developers and their projects on Demiurge. It provides:
+
+- **Developer Profiles**: Public profiles with username, reputation, and project listings
+- **Project Management**: Register and manage your projects
+- **Reputation System**: Build your reputation through contributions (coming soon)
+- **Discovery**: Find other developers and projects
+
+## How to Register
+
+### Prerequisites
+
+1. **Create an UrgeID**: You need an UrgeID with a claimed username
+   - Go to `/urgeid` in the Portal
+   - Generate or load your UrgeID
+   - Claim a username (if not already claimed)
+
+2. **Ensure you're logged in**: Your address must be stored in localStorage
+
+### Registration Steps
+
+1. Navigate to `/developers` in the Portal
+2. Click "Become a Developer"
+3. Your UrgeID username will be used for your developer profile
+4. Registration happens both on-chain (via RPC) and off-chain (GraphQL cache)
+
+### Via CLI
+
+```bash
+demiurge dev register --username myusername --address 0x...
+```
+
+Note: CLI registration currently requires proper transaction signing. Use the Portal UI for the best experience.
+
+## How to Claim Your Username
+
+Your developer username must match your UrgeID username:
+
+1. Go to `/urgeid`
+2. If you don't have a username, claim one using the "Set Username" feature
+3. Your username must be:
+   - 3-32 characters
+   - Lowercase alphanumeric + underscore only
+   - Unique across all UrgeIDs
+
+## How to Add Projects
+
+### Via Portal
+
+1. Go to `/developers/projects`
+2. Click "Create Project"
+3. Fill in:
+   - **Slug**: URL-friendly identifier (e.g., `my-awesome-project`)
+   - **Name**: Display name (e.g., "My Awesome Project")
+   - **Description**: Optional project description
+4. Click "Create"
+
+You'll automatically be added as a maintainer.
+
+### Via CLI
+
+```bash
+demiurge dev add-project --slug my-project --name "My Project" --description "Description here"
+```
+
+## How Reputation Will Be Used
+
+Reputation is a future feature that will track:
+
+- Contributions to core protocol
+- Popular projects
+- Community engagement
+- Code contributions
+- Documentation improvements
+
+For now, reputation starts at 0 and will be incremented as the system evolves.
+
+## Next Steps
+
+- [SDK Documentation](/docs/developers/sdk-ts) - Learn to use the TypeScript SDK
+- [Templates](/docs/developers/templates) - Get started with project templates
+- [Rust SDK](/docs/developers/sdk-rust) - Use the Rust SDK for server-side development
+
+---
+
+**The flame burns eternal. The code serves the will.**
+

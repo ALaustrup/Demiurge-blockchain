@@ -26,7 +26,8 @@ use crate::runtime::{
     create_urgeid_profile, get_address_by_handle, get_address_by_username, get_urgeid_profile,
     record_syzygy, set_handle, set_username, BankCgtModule, CGT_DECIMALS,
     CGT_MAX_SUPPLY, CGT_NAME, CGT_SYMBOL, FabricRootHash, ListingId, NftDgenModule, NftId,
-    RuntimeModule,
+    RuntimeModule, get_all_developers, get_developer_by_username, get_developer_profile,
+    get_project_maintainers, DeveloperProfile,
 };
 
 /// JSON-RPC request envelope.
@@ -170,6 +171,31 @@ pub struct GetListingParams {
 #[derive(Debug, Deserialize)]
 pub struct GetFabricAssetParams {
     pub fabric_root_hash: String, // hex string
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RegisterDeveloperParams {
+    pub address: String,
+    pub username: String,
+    pub signed_tx_hex: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct GetDeveloperProfileParams {
+    pub address: Option<String>,
+    pub username: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct AddProjectParams {
+    pub address: String,
+    pub project_slug: String,
+    pub signed_tx_hex: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct GetProjectMaintainersParams {
+    pub project_slug: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -2186,6 +2212,215 @@ async fn handle_rpc(
                     id,
                 }),
             }
+        }
+        "dev_registerDeveloper" => {
+            let params: RegisterDeveloperParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(RegisterDeveloperParams {
+                        address: String::new(),
+                        username: String::new(),
+                        signed_tx_hex: String::new(),
+                    }),
+                None => RegisterDeveloperParams {
+                    address: String::new(),
+                    username: String::new(),
+                    signed_tx_hex: String::new(),
+                },
+            };
+
+            let address = match parse_address_hex(&params.address) {
+                Ok(addr) => addr,
+                Err(msg) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("invalid address: {}", msg),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            // TODO: Verify signed transaction
+            // For now, just register directly
+            let result = node.with_state_mut(|state| {
+                crate::runtime::register_developer(address, params.username, 0, state)
+            });
+
+            match result {
+                Ok(_) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(json!({ "ok": true })),
+                    error: None,
+                    id,
+                }),
+                Err(msg) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32000,
+                        message: msg,
+                    }),
+                    id,
+                }),
+            }
+        }
+        "dev_getDeveloperProfile" => {
+            let params: GetDeveloperProfileParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(GetDeveloperProfileParams {
+                        address: None,
+                        username: None,
+                    }),
+                None => GetDeveloperProfileParams {
+                    address: None,
+                    username: None,
+                },
+            };
+
+            let profile_opt = if let Some(addr_str) = params.address {
+                let address = match parse_address_hex(&addr_str) {
+                    Ok(addr) => addr,
+                    Err(_) => {
+                        return Json(JsonRpcResponse {
+                            jsonrpc: "2.0".to_string(),
+                            result: Some(serde_json::Value::Null),
+                            error: None,
+                            id,
+                        });
+                    }
+                };
+                node.with_state(|state| get_developer_profile(&address, state))
+            } else if let Some(username) = params.username {
+                node.with_state(|state| {
+                    get_developer_by_username(&username, state)
+                        .and_then(|addr| get_developer_profile(&addr, state))
+                })
+            } else {
+                None
+            };
+
+            match profile_opt {
+                Some(profile) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(json!({
+                        "address": hex::encode(profile.address),
+                        "username": profile.username,
+                        "projects": profile.projects,
+                        "reputation": profile.reputation,
+                        "created_at": profile.created_at,
+                    })),
+                    error: None,
+                    id,
+                }),
+                None => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(serde_json::Value::Null),
+                    error: None,
+                    id,
+                }),
+            }
+        }
+        "dev_getDevelopers" => {
+            let developers = node.with_state(|state| get_all_developers(state));
+            let profiles: Vec<DeveloperProfile> = developers
+                .iter()
+                .filter_map(|addr| node.with_state(|state| get_developer_profile(addr, state)))
+                .collect();
+
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!(profiles.iter().map(|p| json!({
+                    "address": hex::encode(p.address),
+                    "username": p.username,
+                    "projects": p.projects,
+                    "reputation": p.reputation,
+                    "created_at": p.created_at,
+                })).collect::<Vec<_>>())),
+                error: None,
+                id,
+            })
+        }
+        "dev_addProject" => {
+            let params: AddProjectParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(AddProjectParams {
+                        address: String::new(),
+                        project_slug: String::new(),
+                        signed_tx_hex: String::new(),
+                    }),
+                None => AddProjectParams {
+                    address: String::new(),
+                    project_slug: String::new(),
+                    signed_tx_hex: String::new(),
+                },
+            };
+
+            let address = match parse_address_hex(&params.address) {
+                Ok(addr) => addr,
+                Err(msg) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("invalid address: {}", msg),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            // TODO: Verify signed transaction
+            let result = node.with_state_mut(|state| {
+                crate::runtime::add_project(address, params.project_slug, state)
+            });
+
+            match result {
+                Ok(_) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(json!({ "ok": true })),
+                    error: None,
+                    id,
+                }),
+                Err(msg) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32000,
+                        message: msg,
+                    }),
+                    id,
+                }),
+            }
+        }
+        "dev_getProjectMaintainers" => {
+            let params: GetProjectMaintainersParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(GetProjectMaintainersParams {
+                        project_slug: String::new(),
+                    }),
+                None => GetProjectMaintainersParams {
+                    project_slug: String::new(),
+                },
+            };
+
+            let maintainers = node.with_state(|state| {
+                get_project_maintainers(&params.project_slug, state)
+            });
+
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!(maintainers.iter().map(|addr| hex::encode(addr)).collect::<Vec<_>>())),
+                error: None,
+                id,
+            })
         }
         "cgt_getTransaction" => {
             let params: GetTxParams = match req.params.as_ref() {

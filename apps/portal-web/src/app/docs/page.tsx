@@ -172,16 +172,36 @@ export default function DocsPage() {
         </Card>
 
         <Card>
-          <h2 className="mb-3 text-xl font-semibold">SDK Guides</h2>
+          <h2 className="mb-3 text-xl font-semibold">Developer Guide</h2>
           <p className="mb-4 text-zinc-400">
-            TypeScript and Rust SDK tutorials and examples.
+            Get started building on Demiurge: SDKs, templates, Developer Registry, and best practices.
           </p>
-          <a
-            href="#"
-            className="text-zinc-300 hover:text-zinc-50 underline"
-          >
-            Coming soon →
-          </a>
+          <div className="space-y-2">
+            <a
+              href="/docs/developers/getting-started"
+              className="block text-rose-400 hover:text-rose-300 underline text-sm"
+            >
+              Getting Started →
+            </a>
+            <a
+              href="/docs/developers/sdk-ts"
+              className="block text-rose-400 hover:text-rose-300 underline text-sm"
+            >
+              TypeScript SDK →
+            </a>
+            <a
+              href="/docs/developers/sdk-rust"
+              className="block text-rose-400 hover:text-rose-300 underline text-sm"
+            >
+              Rust SDK →
+            </a>
+            <a
+              href="/docs/developers/templates"
+              className="block text-rose-400 hover:text-rose-300 underline text-sm"
+            >
+              Templates →
+            </a>
+          </div>
         </Card>
       </div>
     </main>

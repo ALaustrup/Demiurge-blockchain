@@ -560,22 +560,22 @@ export default function FabricPage() {
                 <X className="h-5 w-5" />
               </button>
 
-              <div className={`h-64 ${asset.gradient} relative overflow-hidden`}>
+              <div className={`h-64 ${selectedAsset.gradient} relative overflow-hidden`}>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-8xl">{asset.icon}</span>
+                  <span className="text-8xl">{selectedAsset.icon}</span>
                 </div>
-                <div className={`absolute inset-0 bg-gradient-to-t ${asset.color} opacity-20`} />
+                <div className={`absolute inset-0 bg-gradient-to-t ${selectedAsset.color} opacity-20`} />
               </div>
 
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h2 className="text-2xl font-bold text-zinc-50 mb-2">{asset.name}</h2>
+                    <h2 className="text-2xl font-bold text-zinc-50 mb-2">{selectedAsset.name}</h2>
                     <div className="flex items-center gap-2 text-sm text-zinc-400">
                       <User className="h-4 w-4" />
-                      <span>@{asset.creatorUsername}</span>
+                      <span>@{selectedAsset.creatorUsername}</span>
                       <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-xs capitalize">
-                        {asset.category}
+                        {selectedAsset.category}
                       </span>
                     </div>
                   </div>
@@ -591,7 +591,7 @@ export default function FabricPage() {
                   </button>
                 </div>
 
-                <p className="text-zinc-300 mb-6">{asset.description}</p>
+                <p className="text-zinc-300 mb-6">{selectedAsset.description}</p>
 
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
@@ -599,29 +599,29 @@ export default function FabricPage() {
                       <Eye className="h-4 w-4" />
                       Views
                     </div>
-                    <div className="text-xl font-semibold text-zinc-50">{asset.views.toLocaleString()}</div>
+                    <div className="text-xl font-semibold text-zinc-50">{selectedAsset.views.toLocaleString()}</div>
                   </div>
                   <div className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4">
                     <div className="flex items-center gap-2 text-sm text-zinc-400 mb-1">
                       <Heart className="h-4 w-4" />
                       Likes
                     </div>
-                    <div className="text-xl font-semibold text-zinc-50">{asset.likes.toLocaleString()}</div>
+                    <div className="text-xl font-semibold text-zinc-50">{selectedAsset.likes.toLocaleString()}</div>
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-zinc-400">Fabric Hash</span>
-                    <code className="text-zinc-300 font-mono text-xs">{asset.fabricHash.slice(0, 16)}...</code>
+                    <code className="text-zinc-300 font-mono text-xs">{selectedAsset.fabricHash.slice(0, 16)}...</code>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-zinc-400">Created</span>
-                    <span className="text-zinc-300">{new Date(asset.createdAt).toLocaleDateString()}</span>
+                    <span className="text-zinc-300">{new Date(selectedAsset.createdAt).toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-zinc-400">Creator Address</span>
-                    <code className="text-zinc-300 font-mono text-xs">{asset.creator.slice(0, 12)}...</code>
+                    <code className="text-zinc-300 font-mono text-xs">{selectedAsset.creator.slice(0, 12)}...</code>
                   </div>
                 </div>
 
@@ -650,7 +650,7 @@ function AssetCard({
   isLiked,
   onLike,
   onClick,
-  size = "medium",
+  size = "medium" as CardSize,
 }: {
   asset: FabricAsset;
   isLiked: boolean;
@@ -703,7 +703,7 @@ function AssetCard({
     },
   };
 
-  const classes = sizeClasses[size];
+  const classes = sizeClasses[size as CardSize];
 
   return (
     <motion.div
@@ -761,7 +761,7 @@ function AssetCard({
             {asset.name}
           </h3>
           <div className={`flex items-center ${classes.meta} text-zinc-400 ${size === "medium" ? "mb-1" : "mb-2"}`}>
-            <User className={size === "small" ? "h-2.5 w-2.5" : "h-3 w-3"} />
+            <User className="h-3 w-3" />
             <span className="truncate">@{asset.creatorUsername}</span>
             {size === "large" && (
               <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-500 capitalize flex-shrink-0">

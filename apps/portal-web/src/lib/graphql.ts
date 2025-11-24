@@ -578,3 +578,13 @@ export interface RoomMusicItem {
   createdAt: string;
 }
 
+/**
+ * Simple GraphQL query helper (for developers pages)
+ */
+export async function graphqlQuery(
+  query: string,
+  headers?: Record<string, string>
+): Promise<any> {
+  return graphqlRequest(query, undefined, headers);
+}
+

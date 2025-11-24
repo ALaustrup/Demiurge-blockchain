@@ -1,0 +1,126 @@
+# Rust SDK Guide
+
+The Demiurge Rust SDK provides server-side tools and integration for building on Demiurge.
+
+## Installation
+
+Add to your `Cargo.toml`:
+
+```toml
+[dependencies]
+demiurge-rust-sdk = { path = "../../sdk/rust-sdk" }
+tokio = { version = "1.0", features = ["full"] }
+```
+
+## Basic Setup
+
+```rust
+use demiurge_rust_sdk::DemiurgeSDK;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let sdk = DemiurgeSDK::new("http://127.0.0.1:8545/rpc");
+    
+    // Use SDK...
+    
+    Ok(())
+}
+```
+
+## Get CGT Balance
+
+```rust
+let balance = sdk.cgt().get_balance("0x...").await?;
+println!("Balance: {} CGT", balance);
+```
+
+## Get UrgeID Profile
+
+```rust
+let profile = sdk.urgeid().get_profile("0x...").await?;
+println!("Username: @{}", profile.username);
+println!("Level: {}", profile.level);
+println!("Syzygy Score: {}", profile.syzygy_score);
+```
+
+## Get NFTs
+
+```rust
+let nfts = sdk.nft().get_nfts_by_owner("0x...").await?;
+println!("Owns {} NFTs", nfts.len());
+
+for nft in nfts {
+    println!("NFT #{} - Fabric: {}", nft.id, nft.fabric_root_hash);
+}
+```
+
+## Marketplace Operations
+
+```rust
+// Get all listings
+let listings = sdk.marketplace().get_all_listings().await?;
+println!("Active listings: {}", listings.len());
+
+// Get specific listing
+let listing = sdk.marketplace().get_listing(1).await?;
+println!("Listing #{}: {} CGT", listing.id, listing.price);
+```
+
+## Error Handling
+
+```rust
+match sdk.cgt().get_balance("0x...").await {
+    Ok(balance) => println!("Balance: {}", balance),
+    Err(e) => eprintln!("Error: {}", e),
+}
+```
+
+## Complete Example
+
+```rust
+use demiurge_rust_sdk::DemiurgeSDK;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let sdk = DemiurgeSDK::new("http://127.0.0.1:8545/rpc");
+    let address = "0x...";
+    
+    // Get balance
+    let balance = sdk.cgt().get_balance(address).await?;
+    println!("Balance: {}", balance);
+    
+    // Get profile
+    let profile = sdk.urgeid().get_profile(address).await?;
+    println!("Welcome, @{}!", profile.username);
+    
+    // Get NFTs
+    let nfts = sdk.nft().get_nfts_by_owner(address).await?;
+    println!("You own {} NFTs", nfts.len());
+    
+    Ok(())
+}
+```
+
+## Advanced: Custom Client Configuration
+
+```rust
+use demiurge_rust_sdk::DemiurgeClient;
+use std::time::Duration;
+
+let client = DemiurgeClient::new("http://127.0.0.1:8545/rpc")
+    .with_retries(5)
+    .with_retry_delay(Duration::from_millis(2000));
+
+let sdk = DemiurgeSDK::new("http://127.0.0.1:8545/rpc");
+```
+
+## Next Steps
+
+- See the [TypeScript SDK guide](/docs/developers/sdk-ts) for client-side development
+- Check out [templates](/docs/developers/templates) for starter projects
+- Explore the [full API reference](../../../sdk/rust-sdk/README.md)
+
+---
+
+**The flame burns eternal. The code serves the will.**
+

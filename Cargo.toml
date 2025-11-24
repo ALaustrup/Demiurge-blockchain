@@ -7,6 +7,8 @@ members = [
     "runtime/abyss_registry",
     "runtime/avatars_profiles",
     "indexer/ingestor-rs",
+    "sdk/rust-sdk",
+    "cli",
 ]
 resolver = "2"
 

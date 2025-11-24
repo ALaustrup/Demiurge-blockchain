@@ -12,6 +12,7 @@ pub mod urgeid_registry;
 pub mod bank_cgt;
 pub mod fabric_manager;
 pub mod nft_dgen;
+pub mod developer_registry;
 
 pub use abyss_registry::{get_all_active_listings, get_listing, AbyssRegistryModule, ListingId};
 pub use urgeid_registry::{
@@ -25,6 +26,11 @@ pub use bank_cgt::{
 };
 pub use fabric_manager::{get_fabric_asset, FabricManagerModule, FabricRootHash};
 pub use nft_dgen::{get_nft, get_nfts_by_owner, NftDgenModule, NftId};
+pub use developer_registry::{
+    add_project, get_all_developers, get_developer_by_username, get_developer_profile,
+    get_project_maintainers, register_developer, DeveloperProfile,
+    DeveloperRegistryModule,
+};
 
 /// Trait that all runtime modules must implement.
 ///
@@ -80,6 +86,7 @@ impl Runtime {
             .with_module(Box::new(NftDgenModule::new()))
             .with_module(Box::new(FabricManagerModule::new()))
             .with_module(Box::new(AbyssRegistryModule::new()))
+            .with_module(Box::new(DeveloperRegistryModule::new()))
     }
 
     /// Dispatch a transaction to the appropriate runtime module.
@@ -116,7 +123,7 @@ mod tests {
     #[test]
     fn test_runtime_with_default_modules() {
         let runtime = Runtime::with_default_modules();
-        assert_eq!(runtime.modules.len(), 5);
+        assert_eq!(runtime.modules.len(), 6);
     }
 
     #[test]

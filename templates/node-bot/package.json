@@ -1,0 +1,21 @@
+{
+  "name": "demiurge-node-bot-template",
+  "version": "0.1.0",
+  "description": "Node.js bot template for Demiurge Blockchain",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@demiurge/ts-sdk": "file:../../sdk/ts-sdk",
+    "axios": "^1.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  }
+}
+

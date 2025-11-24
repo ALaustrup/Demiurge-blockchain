@@ -1,0 +1,218 @@
+# Developer Templates
+
+Demiurge provides production-ready templates to help you build quickly.
+
+## Available Templates
+
+All templates are located in the `/templates` directory of the Demiurge repository.
+
+### 🟢 Web App Template
+
+**Location:** `templates/web-app/`
+
+Full-featured Next.js + TypeScript dApp with:
+- UrgeID generation/login
+- CGT balance & transfers
+- NFT viewer
+- Marketplace integration
+- Chat integration
+- Fabric gallery example
+
+**Quick Start:**
+```bash
+cd templates/web-app
+pnpm install
+cp .env.example .env.local
+# Edit .env.local with your RPC and GraphQL URLs
+pnpm dev
+```
+
+### 🟠 Mobile App Template
+
+**Location:** `templates/mobile-app/`
+
+React Native + Expo mobile app with:
+- UrgeID wallet
+- CGT transfers
+- NFT gallery
+- World chat
+
+**Quick Start:**
+```bash
+cd templates/mobile-app
+pnpm install
+npx expo start
+```
+
+### 🔵 Rust Server Template
+
+**Location:** `templates/rust-service/`
+
+Axum-based server backend with:
+- UrgeID profile fetching
+- NFT operations
+- CGT transaction handling
+
+**Quick Start:**
+```bash
+cd templates/rust-service
+cargo run
+```
+
+### 🟣 Node Bot Template
+
+**Location:** `templates/node-bot/`
+
+Archon-like microservice with:
+- GraphQL chat integration
+- Auto-responses
+- CGT microrewards
+
+**Quick Start:**
+```bash
+cd templates/node-bot
+pnpm install
+pnpm start
+```
+
+### 🟡 Game Engine Template
+
+**Location:** `templates/game-engine/`
+
+Lightweight game client with:
+- UrgeID login
+- NFT fetching
+- CGT microtransactions
+
+**Quick Start:**
+```bash
+cd templates/game-engine
+mkdir build && cd build
+cmake ..
+make
+./demiurge-game
+```
+
+## How to Clone/Copy a Template
+
+1. **Copy the template directory:**
+   ```bash
+   cp -r templates/web-app my-dapp
+   cd my-dapp
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   pnpm install  # or npm install
+   ```
+
+3. **Configure environment:**
+   ```bash
+   cp .env.example .env.local
+   # Edit .env.local with your settings
+   ```
+
+4. **Start developing:**
+   ```bash
+   pnpm dev  # or npm run dev
+   ```
+
+## How to Wire RPC URLs and Keys
+
+### Environment Variables
+
+All templates use environment variables for configuration:
+
+**Web/Mobile Apps:**
+```env
+NEXT_PUBLIC_DEMIURGE_RPC_URL=http://127.0.0.1:8545/rpc
+NEXT_PUBLIC_ABYSS_GATEWAY_URL=http://localhost:4000/graphql
+```
+
+**Rust/Node:**
+```env
+DEMIURGE_RPC_URL=http://127.0.0.1:8545/rpc
+ABYSS_GATEWAY_URL=http://localhost:4000/graphql
+```
+
+### SDK Initialization
+
+**TypeScript:**
+```typescript
+import { DemiurgeSDK } from '@demiurge/ts-sdk';
+
+const sdk = new DemiurgeSDK({
+  rpcUrl: process.env.NEXT_PUBLIC_DEMIURGE_RPC_URL || 'http://127.0.0.1:8545/rpc',
+});
+```
+
+**Rust:**
+```rust
+use demiurge_rust_sdk::DemiurgeSDK;
+
+let rpc_url = env::var("DEMIURGE_RPC_URL")
+    .unwrap_or_else(|_| "http://127.0.0.1:8545/rpc".to_string());
+let sdk = DemiurgeSDK::new(&rpc_url);
+```
+
+### Private Keys
+
+**Never commit private keys to version control!**
+
+Store keys securely:
+- **Browser/Web**: localStorage (for development)
+- **Server**: Environment variables or secure key management
+- **Mobile**: Secure storage (Keychain/Keystore)
+
+Example:
+```typescript
+// Load from localStorage (web)
+const privateKey = localStorage.getItem('demiurge_private_key');
+
+// Or from environment (server)
+const privateKey = process.env.DEMIURGE_PRIVATE_KEY;
+```
+
+## Customization
+
+Templates are starting points. Customize them:
+
+1. **Modify UI/UX** to match your brand
+2. **Add features** specific to your use case
+3. **Integrate external services** as needed
+4. **Deploy** to your preferred platform
+
+## Deployment
+
+### Web Apps (Vercel/Netlify)
+
+```bash
+pnpm build
+# Deploy the `out` or `.next` directory
+```
+
+### Mobile Apps
+
+```bash
+# Build for production
+npx expo build:android
+npx expo build:ios
+```
+
+### Rust Services
+
+```bash
+cargo build --release
+# Deploy the binary
+```
+
+## Next Steps
+
+- [Getting Started Guide](/docs/developers/getting-started)
+- [TypeScript SDK](/docs/developers/sdk-ts)
+- [Rust SDK](/docs/developers/sdk-rust)
+
+---
+
+**The flame burns eternal. The code serves the will.**
+

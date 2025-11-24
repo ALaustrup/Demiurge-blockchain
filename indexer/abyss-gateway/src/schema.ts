@@ -88,6 +88,34 @@ const ChatAnalyticsType = new GraphQLObjectType({
   }),
 });
 
+// Developer type
+const DeveloperType = new GraphQLObjectType({
+  name: "Developer",
+  fields: () => ({
+    address: { type: new GraphQLNonNull(GraphQLID) },
+    username: { type: new GraphQLNonNull(GraphQLString) },
+    reputation: { type: new GraphQLNonNull(GraphQLInt) },
+    createdAt: { type: new GraphQLNonNull(GraphQLString) },
+  }),
+});
+
+// Project type
+const ProjectType = new GraphQLObjectType({
+  name: "Project",
+  fields: () => ({
+    slug: { type: new GraphQLNonNull(GraphQLID) },
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    description: { type: GraphQLString },
+    createdAt: { type: new GraphQLNonNull(GraphQLString) },
+    maintainers: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(DeveloperType))),
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getProjectMaintainers(parent.slug, context);
+      },
+    },
+  }),
+});
+
 // MessageActivity type
 const MessageActivityType = new GraphQLObjectType({
   name: "MessageActivity",
@@ -187,6 +215,37 @@ const QueryType = new GraphQLObjectType({
       },
       resolve: async (parent, args, context) => {
         return context.resolvers.userMessageActivity(args, context);
+      },
+    },
+    developers: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(DeveloperType))),
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getDevelopers(args, context);
+      },
+    },
+    developer: {
+      type: DeveloperType,
+      args: {
+        address: { type: GraphQLID },
+        username: { type: GraphQLString },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getDeveloper(args, context);
+      },
+    },
+    projects: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(ProjectType))),
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getProjects(args, context);
+      },
+    },
+    project: {
+      type: ProjectType,
+      args: {
+        slug: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getProject(args, context);
       },
     },
   }),
@@ -345,6 +404,36 @@ const MutationType = new GraphQLObjectType({
       },
       resolve: async (parent, args, context) => {
         return context.resolvers.removeMusicFromQueue(args, context);
+      },
+    },
+    registerDeveloper: {
+      type: new GraphQLNonNull(DeveloperType),
+      args: {
+        username: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.registerDeveloper(args, context);
+      },
+    },
+    createProject: {
+      type: new GraphQLNonNull(ProjectType),
+      args: {
+        slug: { type: new GraphQLNonNull(GraphQLString) },
+        name: { type: new GraphQLNonNull(GraphQLString) },
+        description: { type: GraphQLString },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.createProject(args, context);
+      },
+    },
+    addProjectMaintainer: {
+      type: new GraphQLNonNull(ProjectType),
+      args: {
+        slug: { type: new GraphQLNonNull(GraphQLString) },
+        address: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.addProjectMaintainer(args, context);
       },
     },
   }),

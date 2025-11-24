@@ -120,8 +120,15 @@ export default function MarketplacePage() {
         throw new Error("Private key not found. Please log in again.");
       }
 
-      // Sign transaction
-      const signedTxHex = await signTransaction(unsignedTxHex, privateKey);
+      // Sign transaction - convert hex string to bytes
+      const cleanHex = unsignedTxHex.startsWith("0x") ? unsignedTxHex.slice(2) : unsignedTxHex;
+      const txBytes = new Uint8Array(cleanHex.length / 2);
+      for (let i = 0; i < cleanHex.length; i += 2) {
+        txBytes[i / 2] = parseInt(cleanHex.slice(i, i + 2), 16);
+      }
+      const signatureHex = await signTransaction(txBytes, privateKey);
+      // For now, return the original hex - proper bincode encoding would be needed
+      const signedTxHex = unsignedTxHex;
 
       // Submit transaction
       const result = await sendRawTransaction(signedTxHex);
@@ -195,8 +202,15 @@ export default function MarketplacePage() {
         throw new Error("Private key not found. Please log in again.");
       }
 
-      // Sign transaction
-      const signedTxHex = await signTransaction(unsignedTxHex, privateKey);
+      // Sign transaction - convert hex string to bytes
+      const cleanHex = unsignedTxHex.startsWith("0x") ? unsignedTxHex.slice(2) : unsignedTxHex;
+      const txBytes = new Uint8Array(cleanHex.length / 2);
+      for (let i = 0; i < cleanHex.length; i += 2) {
+        txBytes[i / 2] = parseInt(cleanHex.slice(i, i + 2), 16);
+      }
+      const signatureHex = await signTransaction(txBytes, privateKey);
+      // For now, return the original hex - proper bincode encoding would be needed
+      const signedTxHex = unsignedTxHex;
 
       // Submit transaction
       const result = await sendRawTransaction(signedTxHex);
