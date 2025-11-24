@@ -1,0 +1,128 @@
+# Recursion Game Engine Prelude
+
+The Recursion Engine is Demiurge's chain-native game engine, designed to create immersive experiences that seamlessly integrate with blockchain events.
+
+## Vision
+
+Recursion Engine enables developers to build games and interactive experiences where:
+
+- **On-chain events trigger in-game reactions** (NFT mints spawn objects, CGT transfers unlock features)
+- **Game state can be persisted on-chain** via state snapshots
+- **Assets are loaded directly from Fabric** (the decentralized storage layer)
+- **Players interact with real blockchain assets** inside the game
+- **Recursion Objects live eternally on-chain** as permanent game entities
+
+## Architecture
+
+### Components
+
+1. **Recursion Engine (C++)**
+   - Located in `engine/recursion/`
+   - Minimal C++20 skeleton with tick loop and event hooks
+   - Future: GPU rendering, physics, networking
+
+2. **Recursion Registry (On-Chain)**
+   - Runtime module: `chain/src/runtime/recursion_registry.rs`
+   - Stores world metadata (ID, owner, title, description, Fabric root hash)
+   - RPC methods: `recursion_createWorld`, `recursion_getWorld`, `recursion_listWorldsByOwner`
+
+3. **Portal Integration**
+   - RPC helpers in `apps/portal-web/src/lib/rpc.ts`
+   - Documentation and developer UI hooks
+
+## Current Status (Prelude)
+
+This is a **prelude** implementation. The engine currently provides:
+
+- ✅ Basic world structure (`RecursionWorld` class)
+- ✅ Tick loop for game simulation
+- ✅ Chain event application hooks
+- ✅ State snapshot export
+- ✅ On-chain world registry
+
+## Future Milestones
+
+The Recursion Engine will evolve to include:
+
+- **GPU-Accelerated Rendering** (Raylib or similar)
+- **Physics Simulation** (collision detection, dynamics)
+- **Entity-Component-System** architecture
+- **Real-Time Multiplayer** networking
+- **Direct Fabric Integration** (load assets from IPFS/Arweave)
+- **NFT → In-Game Object Binding** (mint NFT, see it in game)
+- **CGT Microtransaction Hooks** (in-game purchases)
+- **Archon AI Integration** (NPCs powered by Archon agents)
+- **Recursion Object Persistence** (game entities stored on-chain)
+
+## Getting Started
+
+### Building the Engine
+
+```bash
+cd engine/recursion
+mkdir build && cd build
+cmake ..
+cmake --build .
+./recursion
+```
+
+### Creating a World
+
+Use the RPC method or Portal UI:
+
+```typescript
+import { recursionCreateWorld } from "@/lib/rpc";
+
+const world = await recursionCreateWorld(
+  ownerAddress,
+  "my_world_id",
+  "My Game World",
+  "A description of my world",
+  fabricRootHash // Optional: pointer to Fabric asset
+);
+```
+
+### Reacting to Chain Events
+
+In your game code, use `applyChainEvent()`:
+
+```cpp
+world.applyChainEvent("nft_mint", R"({"nft_id": 123, "owner": "0x..."})");
+// Your game logic spawns the NFT as an in-game object
+```
+
+## Integration Points
+
+### With Dev Capsules
+
+Recursion Worlds can be associated with Dev Capsules for project-bound execution environments.
+
+### With Fabric
+
+Worlds can reference Fabric assets via `fabric_root_hash`, enabling decentralized asset loading.
+
+### With NFTs
+
+NFTs minted on-chain can be automatically spawned as in-game objects when the world processes chain events.
+
+### With CGT
+
+CGT transfers can trigger in-game purchases, unlocks, or rewards.
+
+## Documentation
+
+- **Engine README**: `engine/recursion/README.md`
+- **Runtime Module**: `chain/src/runtime/recursion_registry.rs`
+- **RPC Methods**: See `chain/src/rpc.rs` for `recursion_*` methods
+
+## Next Steps
+
+1. Explore the C++ skeleton in `engine/recursion/`
+2. Create a world via Portal or RPC
+3. Build your game logic using the tick loop and event hooks
+4. Watch for future milestones that add rendering, physics, and networking
+
+---
+
+*The Recursion Engine is the foundation for chain-native gaming on Demiurge. This prelude sets the stage for a full-featured game engine that blurs the line between blockchain and gameplay.*
+

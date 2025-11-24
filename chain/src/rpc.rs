@@ -27,7 +27,11 @@ use crate::runtime::{
     record_syzygy, set_handle, set_username, BankCgtModule, CGT_DECIMALS,
     CGT_MAX_SUPPLY, CGT_NAME, CGT_SYMBOL, FabricRootHash, ListingId, NftDgenModule, NftId,
     RuntimeModule, get_all_developers, get_developer_by_username, get_developer_profile,
-    get_project_maintainers, DeveloperProfile,
+    get_project_maintainers, DeveloperProfile, create_capsule, get_capsule, list_capsules_by_owner,
+    update_capsule_status, CapsuleStatus,
+};
+use crate::runtime::{
+    create_world, get_world, list_worlds_by_owner, RecursionWorldMeta,
 };
 
 /// JSON-RPC request envelope.
@@ -181,6 +185,11 @@ pub struct RegisterDeveloperParams {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct ClaimDevNftParams {
+    pub address: String, // hex address
+}
+
+#[derive(Debug, Deserialize)]
 pub struct GetDeveloperProfileParams {
     pub address: Option<String>,
     pub username: Option<String>,
@@ -196,6 +205,48 @@ pub struct AddProjectParams {
 #[derive(Debug, Deserialize)]
 pub struct GetProjectMaintainersParams {
     pub project_slug: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DevCapsuleCreateParams {
+    pub owner: String, // hex address
+    pub project_slug: String,
+    pub notes: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DevCapsuleGetParams {
+    pub id: u64,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DevCapsuleListByOwnerParams {
+    pub owner: String, // hex address
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DevCapsuleUpdateStatusParams {
+    pub id: u64,
+    pub status: String, // "draft" | "live" | "paused" | "archived"
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RecursionCreateWorldParams {
+    pub owner: String, // hex address
+    pub world_id: String,
+    pub title: String,
+    pub description: String,
+    pub fabric_root_hash: String, // hex-encoded Fabric root hash
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RecursionGetWorldParams {
+    pub world_id: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RecursionListWorldsByOwnerParams {
+    pub owner: String, // hex address
 }
 
 #[derive(Debug, Deserialize)]
@@ -2268,6 +2319,87 @@ async fn handle_rpc(
                 }),
             }
         }
+        "dev_claimDevNft" => {
+            let params: ClaimDevNftParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(ClaimDevNftParams {
+                        address: String::new(),
+                    }),
+                None => ClaimDevNftParams {
+                    address: String::new(),
+                },
+            };
+
+            let address = match parse_address_hex(&params.address) {
+                Ok(addr) => addr,
+                Err(msg) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("invalid address: {}", msg),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            // Claim DEV NFT by dispatching to developer_registry module
+            let result = node.with_state_mut(|state| {
+                use crate::core::transaction::Transaction;
+                let dev_module = crate::runtime::DeveloperRegistryModule::new();
+                let tx = Transaction {
+                    from: address,
+                    nonce: 0,
+                    module_id: "developer_registry".to_string(),
+                    call_id: "claim_dev_nft".to_string(),
+                    payload: vec![],
+                    fee: 0,
+                    signature: vec![],
+                };
+                dev_module.dispatch("claim_dev_nft", &tx, state)
+            });
+
+            match result {
+                Ok(_) => {
+                    // Get the minted NFT ID by checking owner's NFTs
+                    let nft_id = node.with_state(|state| {
+                        use crate::runtime::nft_dgen::{get_nfts_by_owner, get_nft, FABRIC_ROOT_DEV_BADGE};
+                        let owner_nfts = get_nfts_by_owner(state, &address);
+                        // Find the DEV Badge NFT
+                        for id in owner_nfts {
+                            if let Some(nft) = get_nft(state, id) {
+                                if nft.fabric_root_hash == FABRIC_ROOT_DEV_BADGE {
+                                    return Some(id);
+                                }
+                            }
+                        }
+                        None
+                    });
+
+                    Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: Some(json!({
+                            "ok": true,
+                            "nft_id": nft_id,
+                        })),
+                        error: None,
+                        id,
+                    })
+                }
+                Err(msg) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32000,
+                        message: msg,
+                    }),
+                    id,
+                }),
+            }
+        }
         "dev_getDeveloperProfile" => {
             let params: GetDeveloperProfileParams = match req.params.as_ref() {
                 Some(raw) => serde_json::from_value(raw.clone())
@@ -2461,6 +2593,388 @@ async fn handle_rpc(
                     id,
                 }),
             }
+        }
+        "devCapsule_create" => {
+            let params: DevCapsuleCreateParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(DevCapsuleCreateParams {
+                        owner: String::new(),
+                        project_slug: String::new(),
+                        notes: String::new(),
+                    }),
+                None => DevCapsuleCreateParams {
+                    owner: String::new(),
+                    project_slug: String::new(),
+                    notes: String::new(),
+                },
+            };
+
+            let owner_addr = match parse_address_hex(&params.owner) {
+                Ok(addr) => addr,
+                Err(msg) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("Invalid owner address: {}", msg),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            let current_height = node.chain_info().height;
+
+            let result = node.with_state_mut(|state| {
+                create_capsule(state, &owner_addr, &params.project_slug, &params.notes, current_height)
+            });
+
+            match result {
+                Ok(capsule) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(json!({
+                        "id": capsule.id,
+                        "owner": hex::encode(capsule.owner),
+                        "project_slug": capsule.project_slug,
+                        "status": match capsule.status {
+                            CapsuleStatus::Draft => "draft",
+                            CapsuleStatus::Live => "live",
+                            CapsuleStatus::Paused => "paused",
+                            CapsuleStatus::Archived => "archived",
+                        },
+                        "created_at": capsule.created_at,
+                        "updated_at": capsule.updated_at,
+                        "notes": capsule.notes,
+                    })),
+                    error: None,
+                    id,
+                }),
+                Err(msg) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32000,
+                        message: msg,
+                    }),
+                    id,
+                }),
+            }
+        }
+        "devCapsule_get" => {
+            let params: DevCapsuleGetParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(DevCapsuleGetParams { id: 0 }),
+                None => DevCapsuleGetParams { id: 0 },
+            };
+
+            let capsule_opt = node.with_state(|state| get_capsule(state, params.id));
+
+            match capsule_opt {
+                Some(capsule) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(json!({
+                        "id": capsule.id,
+                        "owner": hex::encode(capsule.owner),
+                        "project_slug": capsule.project_slug,
+                        "status": match capsule.status {
+                            CapsuleStatus::Draft => "draft",
+                            CapsuleStatus::Live => "live",
+                            CapsuleStatus::Paused => "paused",
+                            CapsuleStatus::Archived => "archived",
+                        },
+                        "created_at": capsule.created_at,
+                        "updated_at": capsule.updated_at,
+                        "notes": capsule.notes,
+                    })),
+                    error: None,
+                    id,
+                }),
+                None => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(serde_json::Value::Null),
+                    error: None,
+                    id,
+                }),
+            }
+        }
+        "devCapsule_listByOwner" => {
+            let params: DevCapsuleListByOwnerParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(DevCapsuleListByOwnerParams {
+                        owner: String::new(),
+                    }),
+                None => DevCapsuleListByOwnerParams {
+                    owner: String::new(),
+                },
+            };
+
+            let owner_addr = match parse_address_hex(&params.owner) {
+                Ok(addr) => addr,
+                Err(msg) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("Invalid owner address: {}", msg),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            let capsules = node.with_state(|state| list_capsules_by_owner(state, &owner_addr));
+
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!(capsules.iter().map(|capsule| json!({
+                    "id": capsule.id,
+                    "owner": hex::encode(capsule.owner),
+                    "project_slug": capsule.project_slug,
+                    "status": match capsule.status {
+                        CapsuleStatus::Draft => "draft",
+                        CapsuleStatus::Live => "live",
+                        CapsuleStatus::Paused => "paused",
+                        CapsuleStatus::Archived => "archived",
+                    },
+                    "created_at": capsule.created_at,
+                    "updated_at": capsule.updated_at,
+                    "notes": capsule.notes,
+                })).collect::<Vec<_>>())),
+                error: None,
+                id,
+            })
+        }
+        "devCapsule_updateStatus" => {
+            let params: DevCapsuleUpdateStatusParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(DevCapsuleUpdateStatusParams {
+                        id: 0,
+                        status: String::new(),
+                    }),
+                None => DevCapsuleUpdateStatusParams {
+                    id: 0,
+                    status: String::new(),
+                },
+            };
+
+            let status = match params.status.as_str() {
+                "draft" => CapsuleStatus::Draft,
+                "live" => CapsuleStatus::Live,
+                "paused" => CapsuleStatus::Paused,
+                "archived" => CapsuleStatus::Archived,
+                _ => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: "Invalid status. Must be one of: draft, live, paused, archived".to_string(),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            let current_height = node.chain_info().height;
+
+            let result = node.with_state_mut(|state| {
+                // Verify capsule exists and get it first
+                let capsule_opt = get_capsule(state, params.id);
+                match capsule_opt {
+                    Some(_) => update_capsule_status(state, params.id, status, current_height),
+                    None => Err("Capsule not found".to_string()),
+                }
+            });
+
+            match result {
+                Ok(capsule) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(json!({
+                        "id": capsule.id,
+                        "owner": hex::encode(capsule.owner),
+                        "project_slug": capsule.project_slug,
+                        "status": match capsule.status {
+                            CapsuleStatus::Draft => "draft",
+                            CapsuleStatus::Live => "live",
+                            CapsuleStatus::Paused => "paused",
+                            CapsuleStatus::Archived => "archived",
+                        },
+                        "created_at": capsule.created_at,
+                        "updated_at": capsule.updated_at,
+                        "notes": capsule.notes,
+                    })),
+                    error: None,
+                    id,
+                }),
+                Err(msg) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32000,
+                        message: msg,
+                    }),
+                    id,
+                }),
+            }
+        }
+        "recursion_createWorld" => {
+            let params: RecursionCreateWorldParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(RecursionCreateWorldParams {
+                        owner: String::new(),
+                        world_id: String::new(),
+                        title: String::new(),
+                        description: String::new(),
+                        fabric_root_hash: String::new(),
+                    }),
+                None => RecursionCreateWorldParams {
+                    owner: String::new(),
+                    world_id: String::new(),
+                    title: String::new(),
+                    description: String::new(),
+                    fabric_root_hash: String::new(),
+                },
+            };
+
+            let owner_addr = match parse_address_hex(&params.owner) {
+                Ok(addr) => addr,
+                Err(msg) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("Invalid owner address: {}", msg),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            let current_height = node.chain_info().height;
+
+            let result = node.with_state_mut(|state| {
+                create_world(
+                    state,
+                    &owner_addr,
+                    params.world_id,
+                    params.title,
+                    params.description,
+                    params.fabric_root_hash,
+                    current_height,
+                )
+            });
+
+            match result {
+                Ok(world) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(json!({
+                        "world_id": world.world_id,
+                        "owner": hex::encode(world.owner),
+                        "title": world.title,
+                        "description": world.description,
+                        "fabric_root_hash": world.fabric_root_hash,
+                        "created_at": world.created_at,
+                    })),
+                    error: None,
+                    id,
+                }),
+                Err(msg) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32000,
+                        message: msg,
+                    }),
+                    id,
+                }),
+            }
+        }
+        "recursion_getWorld" => {
+            let params: RecursionGetWorldParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(RecursionGetWorldParams {
+                        world_id: String::new(),
+                    }),
+                None => RecursionGetWorldParams {
+                    world_id: String::new(),
+                },
+            };
+
+            let world_opt = node.with_state(|state| get_world(state, &params.world_id));
+
+            match world_opt {
+                Some(world) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(json!({
+                        "world_id": world.world_id,
+                        "owner": hex::encode(world.owner),
+                        "title": world.title,
+                        "description": world.description,
+                        "fabric_root_hash": world.fabric_root_hash,
+                        "created_at": world.created_at,
+                    })),
+                    error: None,
+                    id,
+                }),
+                None => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(serde_json::Value::Null),
+                    error: None,
+                    id,
+                }),
+            }
+        }
+        "recursion_listWorldsByOwner" => {
+            let params: RecursionListWorldsByOwnerParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(RecursionListWorldsByOwnerParams {
+                        owner: String::new(),
+                    }),
+                None => RecursionListWorldsByOwnerParams {
+                    owner: String::new(),
+                },
+            };
+
+            let owner_addr = match parse_address_hex(&params.owner) {
+                Ok(addr) => addr,
+                Err(msg) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("Invalid owner address: {}", msg),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            let worlds = node.with_state(|state| list_worlds_by_owner(state, &owner_addr));
+
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!(worlds.iter().map(|world| json!({
+                    "world_id": world.world_id,
+                    "owner": hex::encode(world.owner),
+                    "title": world.title,
+                    "description": world.description,
+                    "fabric_root_hash": world.fabric_root_hash,
+                    "created_at": world.created_at,
+                })).collect::<Vec<_>>())),
+                error: None,
+                id,
+            })
         }
         _ => Json(JsonRpcResponse {
             jsonrpc: "2.0".to_string(),

@@ -1,0 +1,177 @@
+# Mobile & Pocket Studio
+
+Demiurge is designed to be mobile-first. The portal works beautifully on phones, and the upcoming **Demiurge Pocket Studio** mobile app will provide native experiences for creators on the go.
+
+## Vision
+
+Demiurge is a mobile-first controllable blockchain for creators. Whether you're on desktop, tablet, or phone, you have full control over your UrgeID, CGT, NFTs, and creative works.
+
+**Pocket Studio** is the upcoming native mobile app that will provide:
+
+- Native iOS and Android experiences
+- Full blockchain interaction
+- Camera integration for minting NFTs
+- Push notifications for transactions and messages
+- Offline-first architecture
+- Biometric authentication
+
+## PWA Support
+
+The Demiurge Portal is a Progressive Web App (PWA). You can:
+
+- **Install on Android**: Open the portal in Chrome, tap the menu, and select "Add to Home Screen"
+- **Install on iOS**: Open in Safari, tap Share, then "Add to Home Screen"
+- **Offline Access**: Basic shell and offline page available when disconnected
+
+### Installation
+
+1. Visit the portal on your mobile device
+2. Look for the install prompt (Android) or use the browser menu (iOS)
+3. The portal will appear as an app icon on your home screen
+4. Launch it like any native app
+
+## Mobile API Surface
+
+The portal exposes a clean API surface that Pocket Studio will consume. All functions are available in `lib/mobileApi.ts`:
+
+### Auth / Identity
+
+```typescript
+import { loadLocalWallet, saveLocalWallet, createUrgeId, loginWithUrgeId } from '@/lib/mobileApi';
+
+// Load existing wallet
+const wallet = await loadLocalWallet();
+
+// Create new UrgeID
+const newWallet = await createUrgeId();
+await saveLocalWallet(newWallet);
+
+// Login with address or username
+const loggedIn = await loginWithUrgeId('@myusername');
+```
+
+### Profile & Progress
+
+```typescript
+import { getMyProfile, getMyProgress, getMyDeveloperProfile } from '@/lib/mobileApi';
+
+const profile = await getMyProfile(address);
+// { address, username, level, syzygyScore, badges }
+
+const progress = await getMyProgress(address);
+// { level, syzygyScore, progressRatio, nextLevelThreshold }
+
+const devProfile = await getMyDeveloperProfile(address);
+```
+
+### Economy
+
+```typescript
+import { getMyBalance, sendCgt, getMyNfts } from '@/lib/mobileApi';
+
+const balance = await getMyBalance(address);
+// "1.23456789"
+
+await sendCgt({
+  from: address,
+  toHandleOrAddress: '@recipient', // or full address
+  amount: 1.5,
+  privateKey: privateKey,
+});
+
+const nfts = await getMyNfts(address);
+```
+
+### Developer Registry
+
+```typescript
+import { getMyProjects, createProject, getDeveloperProjects } from '@/lib/mobileApi';
+
+const myProjects = await getMyProjects(address);
+
+await createProject({
+  slug: 'my-project',
+  name: 'My Project',
+  description: 'Description here',
+  address: address,
+});
+
+const otherDevProjects = await getDeveloperProjects('username');
+```
+
+### Chat
+
+```typescript
+import { getWorldChatMessages, sendWorldMessage, getDmRooms, sendDm } from '@/lib/mobileApi';
+
+const messages = await getWorldChatMessages(50);
+
+await sendWorldMessage({
+  content: 'Hello world!',
+  address: address,
+  username: profile?.username,
+});
+
+const dmRooms = await getDmRooms(address);
+
+await sendDm({
+  toHandleOrUrgeId: '@username',
+  content: 'Private message',
+  address: address,
+  username: profile?.username,
+});
+```
+
+## Pocket Studio Preview
+
+Visit `/pocket` in the portal to see a preview of what the Pocket Studio mobile app will look like.
+
+The preview includes:
+
+- **Home Tab**: Quick stats, CGT balance, NFT count, quick actions
+- **Wallet Tab**: Full wallet view with transaction history
+- **Create Tab**: Quick access to minting flows
+- **Dev Tab**: Developer projects and tools
+- **Chat Tab**: Simplified world chat interface
+
+On desktop, the preview appears in a phone frame. On mobile, it's full-screen.
+
+## Future Mobile App Architecture
+
+The Pocket Studio app (coming soon) will:
+
+1. **Use the same APIs**: All functions in `mobileApi.ts` are designed to work identically in React Native
+2. **Respect the same identity model**: UrgeID, usernames, and signing work the same way
+3. **Share the same SDK**: Uses `demiurge-ts-sdk` internally
+4. **Sync with portal**: Same wallet, same data, same experience
+
+### React Native Integration
+
+```typescript
+// In a React Native app
+import { getMyProfile, sendCgt } from '@demiurge/ts-sdk/mobile';
+
+// Works exactly the same as in the web portal
+const profile = await getMyProfile(address);
+```
+
+## Responsive Design
+
+All portal pages are optimized for mobile:
+
+- **Touch-friendly**: All buttons are at least 44px tall
+- **Stacked layouts**: Grids become single-column on small screens
+- **Bottom navigation**: Mobile tab bar for easy thumb access
+- **Full-width modals**: Sheets slide up from bottom on mobile
+- **Optimized spacing**: Reduced padding and margins on small screens
+
+## Next Steps
+
+- [Getting Started](/docs/developers/getting-started) - Register as a developer
+- [TypeScript SDK](/docs/developers/sdk-ts) - Learn the SDK
+- [Templates](/docs/developers/templates) - Start building
+
+---
+
+**The flame burns eternal. The code serves the will.**
+

@@ -201,6 +201,24 @@ export default function DocsPage() {
             >
               Templates →
             </a>
+            <a
+              href="/docs/developers/mobile"
+              className="block text-rose-400 hover:text-rose-300 underline text-sm"
+            >
+              Mobile & Pocket Studio →
+            </a>
+            <a
+              href="/docs/developers/dev-capsules"
+              className="block text-rose-400 hover:text-rose-300 underline text-sm"
+            >
+              Dev Capsules →
+            </a>
+            <a
+              href="/docs/developers/recursion"
+              className="block text-rose-400 hover:text-rose-300 underline text-sm"
+            >
+              Recursion Engine Prelude →
+            </a>
           </div>
         </Card>
       </div>

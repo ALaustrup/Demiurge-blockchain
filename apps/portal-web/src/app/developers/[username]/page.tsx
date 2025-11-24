@@ -37,9 +37,11 @@ export default function DeveloperProfilePage() {
   const loadDeveloper = async () => {
     try {
       setLoading(true);
+      // Normalize username for query (lowercase, trim, remove @ if present)
+      const normalizedUsername = username.toLowerCase().trim().replace(/^@/, "");
       const query = `
         query {
-          developer(username: "${username}") {
+          developer(username: "${normalizedUsername}") {
             address
             username
             reputation
@@ -47,9 +49,26 @@ export default function DeveloperProfilePage() {
           }
         }
       `;
-      const data = await graphqlQuery(query);
-      if (data?.data?.developer) {
-        setDeveloper(data.data.developer);
+      console.log("Loading developer:", normalizedUsername);
+      const response = await graphqlQuery(query);
+      console.log("GraphQL raw response:", JSON.stringify(response, null, 2));
+      
+      // graphqlRequest returns json.data from GraphQL response
+      // GraphQL response structure: { data: { developer: ... }, errors: [...] }
+      // graphqlRequest returns: { developer: ... } (just the data part)
+      // But checking the developers page, it uses response.data.developers
+      // So the response might be: { data: { developer: ... } }
+      // Check both patterns to be safe
+      let developer = null;
+      if (response?.developer) {
+        developer = response.developer;
+      } else if (response?.data?.developer) {
+        developer = response.data.developer;
+      }
+      
+      if (developer) {
+        setDeveloper(developer);
+        console.log("✅ Developer loaded:", developer);
         
         // Load projects (simplified - would need a proper query)
         const projectsQuery = `
@@ -67,9 +86,18 @@ export default function DeveloperProfilePage() {
           // For now, show all projects (would need proper filtering)
           setProjects(projectsData.data.projects.slice(0, 5));
         }
+      } else {
+        console.error("❌ Developer not found!");
+        console.error("Response type:", typeof response);
+        console.error("Response keys:", response ? Object.keys(response) : "null");
+        console.error("Full response:", response);
+        console.error("Tried username:", normalizedUsername);
+        // Set developer to null explicitly so "Developer not found" shows
+        setDeveloper(null);
       }
     } catch (err) {
       console.error("Failed to load developer:", err);
+      setDeveloper(null);
     } finally {
       setLoading(false);
     }
@@ -148,7 +176,7 @@ export default function DeveloperProfilePage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Link
               href={`/urgeid?sendTo=${developer.address}`}
               className="p-4 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 transition-colors flex items-center gap-3"

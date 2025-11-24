@@ -16,9 +16,28 @@ use crate::runtime::urgeid_registry::is_archon;
 const PREFIX_NFT: &[u8] = b"nft:token:";
 const KEY_NFT_COUNTER: &[u8] = b"nft:counter";
 const PREFIX_OWNER_NFTS: &[u8] = b"nft:owner:";
+const PREFIX_DEV_NFT: &[u8] = b"nft:dev_badge:";
+
+/// Special fabric root hash for DEV Badge NFTs
+/// This is a constant that identifies DEV Badge NFTs: 0xDEVBADGE00000000000000000000000000000000
+pub const FABRIC_ROOT_DEV_BADGE: [u8; 32] = [
+    0xDE, 0x5B, 0xAD, 0x6E, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+];
 
 /// NFT ID type
 pub type NftId = u64;
+
+/// NFT class/type enumeration
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+pub enum NftClass {
+    /// Standard D-GEN NFT
+    DGen,
+    /// Developer Badge NFT (minted automatically for registered developers)
+    DevBadge,
+}
 
 /// D-GEN NFT metadata
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -31,6 +50,10 @@ pub struct DGenMetadata {
     // Simple royalty: a single address + percentage (0-10000 = basis points).
     pub royalty_recipient: Option<Address>,
     pub royalty_bps: u16,
+    /// NFT class/type. None for legacy NFTs (defaults to DGen behavior).
+    /// Some(NftClass::DevBadge) for developer badge NFTs.
+    #[serde(default)]
+    pub class: Option<NftClass>,
 }
 
 /// Mint D-GEN parameters
@@ -113,6 +136,87 @@ pub fn get_nfts_by_owner(state: &State, owner: &Address) -> Vec<NftId> {
     load_owner_nfts(state, owner)
 }
 
+/// Check if a developer already has a DEV Badge NFT
+fn has_dev_badge(state: &State, owner: &Address) -> bool {
+    let dev_badge_key = {
+        let mut key = Vec::from(PREFIX_DEV_NFT);
+        key.extend_from_slice(owner);
+        key
+    };
+    state.get_raw(&dev_badge_key).is_some()
+}
+
+/// Store the DEV Badge NFT ID for a developer
+fn store_dev_badge(state: &mut State, owner: &Address, nft_id: NftId) -> Result<(), String> {
+    let dev_badge_key = {
+        let mut key = Vec::from(PREFIX_DEV_NFT);
+        key.extend_from_slice(owner);
+        key
+    };
+    let bytes = bincode::serialize(&nft_id).map_err(|e| e.to_string())?;
+    state.put_raw(dev_badge_key, bytes).map_err(|e| e.to_string())
+}
+
+/// System function to mint a DEV Badge NFT for a registered developer.
+/// This can only be called by the Developer Registry module (or other trusted system modules).
+/// 
+/// # Arguments
+/// - `state`: Mutable reference to chain state
+/// - `owner`: Address of the developer receiving the badge
+/// - `dev_username`: Username of the developer (for metadata)
+/// - `caller_module_id`: Module ID of the caller (must be "developer_registry")
+/// 
+/// # Returns
+/// - `Ok(NftId)` with the minted NFT ID on success
+/// - `Err(String)` if the caller is not authorized or the developer already has a badge
+pub fn system_mint_dev_nft(
+    state: &mut State,
+    owner: &Address,
+    _dev_username: &str,
+    caller_module_id: &str,
+) -> Result<NftId, String> {
+    // Only Developer Registry can call this
+    if caller_module_id != "developer_registry" {
+        return Err("system_mint_dev_nft: only developer_registry can call this function".to_string());
+    }
+
+    // Check if developer already has a DEV Badge
+    if has_dev_badge(state, owner) {
+        return Err("Developer already has a DEV Badge NFT".to_string());
+    }
+
+    // Get next NFT ID
+    let mut next_id = get_next_nft_id(state);
+    let token_id = next_id;
+    next_id = next_id.checked_add(1).ok_or("nft id overflow")?;
+    set_next_nft_id(state, next_id)?;
+
+    // Create DEV Badge metadata
+    let meta = DGenMetadata {
+        creator: *owner, // Self-created (or could be system address)
+        owner: *owner,
+        fabric_root_hash: FABRIC_ROOT_DEV_BADGE,
+        forge_model_id: None,
+        forge_prompt_hash: None,
+        royalty_recipient: None,
+        royalty_bps: 0,
+        class: Some(NftClass::DevBadge),
+    };
+
+    // Store NFT
+    store_nft(state, token_id, &meta)?;
+
+    // Index under owner
+    let mut owner_list = load_owner_nfts(state, owner);
+    owner_list.push(token_id);
+    store_owner_nfts(state, owner, &owner_list)?;
+
+    // Store DEV Badge reference
+    store_dev_badge(state, owner, token_id)?;
+
+    Ok(token_id)
+}
+
 /// NftDgenModule handles D-GEN NFT operations
 pub struct NftDgenModule;
 
@@ -157,6 +261,7 @@ fn handle_mint_dgen(tx: &Transaction, state: &mut State) -> Result<(), String> {
         forge_prompt_hash: params.forge_prompt_hash,
         royalty_recipient: params.royalty_recipient,
         royalty_bps: params.royalty_bps,
+        class: None, // Standard D-GEN NFT
     };
 
     store_nft(state, token_id, &meta)?;

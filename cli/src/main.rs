@@ -138,6 +138,42 @@ enum DevCommands {
         /// Project slug
         slug: String,
     },
+    /// Dev Capsule operations
+    Capsule {
+        #[command(subcommand)]
+        command: CapsuleCommands,
+    },
+}
+
+#[derive(Subcommand)]
+enum CapsuleCommands {
+    /// List capsules by owner
+    List {
+        /// Owner address
+        #[arg(long)]
+        owner: String,
+    },
+    /// Create a new capsule
+    Create {
+        /// Owner address
+        #[arg(long)]
+        owner: String,
+        /// Project slug
+        #[arg(long)]
+        project: String,
+        /// Notes/description
+        #[arg(long)]
+        notes: String,
+    },
+    /// Update capsule status
+    Status {
+        /// Capsule ID
+        #[arg(long)]
+        id: u64,
+        /// New status (draft, live, paused, archived)
+        #[arg(long)]
+        status: String,
+    },
 }
 
 #[tokio::main]
@@ -337,6 +373,72 @@ async fn main() -> anyhow::Result<()> {
                     eprintln!("Note: Use Portal UI at /developers/projects");
                     eprintln!("Slug: {}, Name: {}", slug, name);
                     if let Some(d) = description { eprintln!("Description: {}", d); }
+                }
+                DevCommands::Capsule { command } => {
+                    match command {
+                        CapsuleCommands::List { owner } => {
+                            match sdk.client().call::<serde_json::Value>(
+                                "devCapsule_listByOwner",
+                                Some(serde_json::json!({ "owner": owner }))
+                            ).await {
+                                Ok(result) => {
+                                    if let Some(capsules) = result.as_array() {
+                                        println!("Capsules ({}):", capsules.len());
+                                        for cap in capsules {
+                                            if let (Some(id), Some(status), Some(project), Some(notes)) = (
+                                                cap.get("id").and_then(|v| v.as_u64()),
+                                                cap.get("status").and_then(|v| v.as_str()),
+                                                cap.get("project_slug").and_then(|v| v.as_str()),
+                                                cap.get("notes").and_then(|v| v.as_str())
+                                            ) {
+                                                println!("  #{} [{}] {} - {}", id, status, project, notes);
+                                            }
+                                        }
+                                    } else {
+                                        println!("No capsules found");
+                                    }
+                                }
+                                Err(e) => eprintln!("Error: {}", e),
+                            }
+                        }
+                        CapsuleCommands::Create { owner, project, notes } => {
+                            match sdk.client().call::<serde_json::Value>(
+                                "devCapsule_create",
+                                Some(serde_json::json!({
+                                    "owner": owner,
+                                    "project_slug": project,
+                                    "notes": notes
+                                }))
+                            ).await {
+                                Ok(result) => {
+                                    println!("Capsule created successfully!");
+                                    println!("{}", serde_json::to_string_pretty(&result)?);
+                                }
+                                Err(e) => eprintln!("Error: {}", e),
+                            }
+                        }
+                        CapsuleCommands::Status { id, status } => {
+                            let valid_statuses = ["draft", "live", "paused", "archived"];
+                            if !valid_statuses.contains(&status.as_str()) {
+                                eprintln!("Error: Invalid status. Must be one of: {}", valid_statuses.join(", "));
+                                return Ok(());
+                            }
+                            
+                            match sdk.client().call::<serde_json::Value>(
+                                "devCapsule_updateStatus",
+                                Some(serde_json::json!({
+                                    "id": id,
+                                    "status": status
+                                }))
+                            ).await {
+                                Ok(result) => {
+                                    println!("Capsule status updated successfully!");
+                                    println!("{}", serde_json::to_string_pretty(&result)?);
+                                }
+                                Err(e) => eprintln!("Error: {}", e),
+                            }
+                        }
+                    }
                 }
                 DevCommands::ShowProject { slug } => {
                     let gateway_url = std::env::var("ABYSS_GATEWAY_URL")

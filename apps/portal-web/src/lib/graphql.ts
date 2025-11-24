@@ -250,6 +250,45 @@ export const QUERIES = {
       }
     }
   `,
+  DEV_CAPSULES_BY_PROJECT: `
+    query DevCapsulesByProject($projectSlug: String!) {
+      devCapsulesByProject(projectSlug: $projectSlug) {
+        id
+        owner
+        projectSlug
+        status
+        createdAt
+        updatedAt
+        notes
+      }
+    }
+  `,
+  DEV_CAPSULES_BY_OWNER: `
+    query DevCapsulesByOwner($owner: String!) {
+      devCapsulesByOwner(owner: $owner) {
+        id
+        owner
+        projectSlug
+        status
+        createdAt
+        updatedAt
+        notes
+      }
+    }
+  `,
+  DEV_CAPSULE: `
+    query DevCapsule($id: ID!) {
+      devCapsule(id: $id) {
+        id
+        owner
+        projectSlug
+        status
+        createdAt
+        updatedAt
+        notes
+      }
+    }
+  `,
 };
 
 export const MUTATIONS = {
@@ -497,6 +536,32 @@ export const MUTATIONS = {
       removeMusicFromQueue(musicId: $musicId)
     }
   `,
+  CREATE_DEV_CAPSULE: `
+    mutation CreateDevCapsule($owner: String!, $projectSlug: String!, $notes: String!) {
+      createDevCapsule(owner: $owner, projectSlug: $projectSlug, notes: $notes) {
+        id
+        owner
+        projectSlug
+        status
+        createdAt
+        updatedAt
+        notes
+      }
+    }
+  `,
+  UPDATE_DEV_CAPSULE_STATUS: `
+    mutation UpdateDevCapsuleStatus($id: ID!, $status: String!) {
+      updateDevCapsuleStatus(id: $id, status: $status) {
+        id
+        owner
+        projectSlug
+        status
+        createdAt
+        updatedAt
+        notes
+      }
+    }
+  `,
 };
 
 // Type definitions
@@ -586,5 +651,56 @@ export async function graphqlQuery(
   headers?: Record<string, string>
 ): Promise<any> {
   return graphqlRequest(query, undefined, headers);
+}
+
+// Dev Capsules helper functions
+
+export interface DevCapsule {
+  id: string;
+  owner: string;
+  projectSlug: string;
+  status: "draft" | "live" | "paused" | "archived";
+  createdAt: number;
+  updatedAt: number;
+  notes: string;
+}
+
+export async function getDevCapsulesByProject(
+  projectSlug: string
+): Promise<DevCapsule[]> {
+  const response = await graphqlRequest<{ devCapsulesByProject: DevCapsule[] }>(
+    QUERIES.DEV_CAPSULES_BY_PROJECT,
+    { projectSlug }
+  );
+  return response.devCapsulesByProject;
+}
+
+export async function createDevCapsule(
+  owner: string,
+  projectSlug: string,
+  notes: string,
+  address?: string,
+  username?: string
+): Promise<DevCapsule> {
+  const response = await graphqlRequest<{ createDevCapsule: DevCapsule }>(
+    MUTATIONS.CREATE_DEV_CAPSULE,
+    { owner, projectSlug, notes },
+    getChatHeaders(address, username)
+  );
+  return response.createDevCapsule;
+}
+
+export async function updateDevCapsuleStatus(
+  id: string,
+  status: "draft" | "live" | "paused" | "archived",
+  address?: string,
+  username?: string
+): Promise<DevCapsule> {
+  const response = await graphqlRequest<{ updateDevCapsuleStatus: DevCapsule }>(
+    MUTATIONS.UPDATE_DEV_CAPSULE_STATUS,
+    { id, status },
+    getChatHeaders(address, username)
+  );
+  return response.updateDevCapsuleStatus;
 }
 

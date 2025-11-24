@@ -889,7 +889,7 @@ export default function ChatPage() {
   return (
     <div className="flex h-screen bg-zinc-950 text-zinc-100">
       {/* Sidebar */}
-      <div className="w-80 border-r border-zinc-800 bg-zinc-900">
+      <div className="hidden md:block w-80 border-r border-zinc-800 bg-zinc-900">
         <div className="border-b border-zinc-800 p-4">
           <h1 className="text-xl font-bold">Chat</h1>
         </div>

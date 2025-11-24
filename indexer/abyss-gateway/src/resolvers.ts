@@ -2,7 +2,7 @@
  * GraphQL resolvers for chat system.
  */
 
-import { chatDb, ChatUser, ChatMessage, ChatRoom, getDb, upsertDeveloper, getDeveloperByAddress, getDeveloperByUsername, listDevelopers, createProject, getProjectBySlug, addMaintainer, getMaintainers, listProjects } from "./chatDb";
+import { chatDb, ChatUser, ChatMessage, ChatRoom, getDb, upsertDeveloper, getDeveloperByAddress, getDeveloperByUsername, listDevelopers, createProject, getProjectBySlug, addMaintainer, getMaintainers, listProjects, upsertDevCapsule, getDevCapsuleById, getDevCapsulesByOwner, getDevCapsulesByProject } from "./chatDb";
 import { createPubSub, PubSub } from "@graphql-yoga/node";
 
 const DEMIURGE_RPC_URL = process.env.DEMIURGE_RPC_URL || "http://127.0.0.1:8545/rpc";
@@ -885,9 +885,14 @@ export const resolvers = {
     if (args.address) {
       dev = getDeveloperByAddress(args.address);
     } else if (args.username) {
-      dev = getDeveloperByUsername(args.username);
+      // Normalize username (lowercase, trim) for lookup
+      const normalizedUsername = args.username.toLowerCase().trim();
+      dev = getDeveloperByUsername(normalizedUsername);
     }
-    if (!dev) return null;
+    if (!dev) {
+      console.log("Developer not found:", args);
+      return null;
+    }
     return {
       address: dev.address,
       username: dev.username,
@@ -952,6 +957,42 @@ export const resolvers = {
       throw new Error("Invalid username: must be 3-32 characters, lowercase alphanumeric + underscore");
     }
 
+    // Check if username is already taken by a different address
+    const existingByUsername = getDeveloperByUsername(username);
+    if (existingByUsername && existingByUsername.address.toLowerCase() !== address.toLowerCase()) {
+      throw new Error(`Username "${username}" is already registered to a different address. Please choose a different username.`);
+    }
+
+    // Check if address already has a developer record
+    const existingByAddress = getDeveloperByAddress(address);
+    if (existingByAddress) {
+      // If address is already registered, allow updating username if it matches the provided username
+      if (existingByAddress.username.toLowerCase() === username.toLowerCase()) {
+        // Already registered with this username - return existing profile
+        return {
+          address: existingByAddress.address,
+          username: existingByAddress.username,
+          reputation: existingByAddress.reputation,
+          createdAt: new Date(existingByAddress.created_at).toISOString(),
+        };
+      } else {
+        // Address is registered but with a different username
+        // Allow updating to the new username if it's not taken
+        if (existingByUsername) {
+          throw new Error(`Username "${username}" is already taken. Your current developer profile uses username "${existingByAddress.username}".`);
+        }
+        // Update the username
+        upsertDeveloper(address, username, existingByAddress.reputation);
+        const updated = getDeveloperByAddress(address);
+        return {
+          address: updated.address,
+          username: updated.username,
+          reputation: updated.reputation,
+          createdAt: new Date(updated.created_at).toISOString(),
+        };
+      }
+    }
+
     // Try to register on-chain first (if RPC available)
     try {
       const response = await fetch(DEMIURGE_RPC_URL, {
@@ -970,10 +1011,19 @@ export const resolvers = {
       });
       const data = await response.json();
       if (data.error) {
+        // Check if error is about username already taken or address already registered
+        const errorMsg = data.error.message || "";
+        if (errorMsg.includes("already taken") || errorMsg.includes("already registered")) {
+          throw new Error(errorMsg);
+        }
         console.warn("On-chain registration failed:", data.error);
         // Continue with off-chain registration
       }
-    } catch (e) {
+    } catch (e: any) {
+      // If it's a user-facing error, re-throw it
+      if (e.message && (e.message.includes("already taken") || e.message.includes("already registered"))) {
+        throw e;
+      }
       console.warn("Failed to register on-chain:", e);
       // Continue with off-chain registration
     }
@@ -1054,6 +1104,264 @@ export const resolvers = {
       description: project.description,
       createdAt: new Date(project.created_at).toISOString(),
     };
+  },
+
+  // Dev Capsules resolvers
+  async getDevCapsulesByOwner(
+    args: { owner: string },
+    context: ChatContext
+  ): Promise<any[]> {
+    // Try to fetch from chain RPC first, then cache in SQLite
+    try {
+      const response = await fetch(DEMIURGE_RPC_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "devCapsule_listByOwner",
+          params: { owner: args.owner },
+          id: 1,
+        }),
+      });
+      const data = await response.json();
+      if (data.result && Array.isArray(data.result)) {
+        // Cache in SQLite
+        for (const capsule of data.result) {
+          upsertDevCapsule(
+            capsule.id,
+            capsule.owner,
+            capsule.project_slug,
+            capsule.status,
+            capsule.created_at,
+            capsule.updated_at,
+            capsule.notes
+          );
+        }
+        return data.result.map((c: any) => ({
+          id: String(c.id),
+          owner: c.owner,
+          projectSlug: c.project_slug,
+          status: c.status,
+          createdAt: c.created_at,
+          updatedAt: c.updated_at,
+          notes: c.notes,
+        }));
+      }
+    } catch (e) {
+      console.warn("Failed to fetch capsules from chain:", e);
+    }
+
+    // Fallback to SQLite
+    const capsules = getDevCapsulesByOwner(args.owner);
+    return capsules.map(c => ({
+      id: String(c.id),
+      owner: c.owner_address,
+      projectSlug: c.project_slug,
+      status: c.status,
+      createdAt: c.created_at,
+      updatedAt: c.updated_at,
+      notes: c.notes,
+    }));
+  },
+
+  async getDevCapsulesByProject(
+    args: { projectSlug: string },
+    context: ChatContext
+  ): Promise<any[]> {
+    // For now, just read from SQLite (could sync from chain if needed)
+    const capsules = getDevCapsulesByProject(args.projectSlug);
+    return capsules.map(c => ({
+      id: String(c.id),
+      owner: c.owner_address,
+      projectSlug: c.project_slug,
+      status: c.status,
+      createdAt: c.created_at,
+      updatedAt: c.updated_at,
+      notes: c.notes,
+    }));
+  },
+
+  async getDevCapsule(
+    args: { id: string },
+    context: ChatContext
+  ): Promise<any | null> {
+    const id = parseInt(args.id, 10);
+    if (isNaN(id)) {
+      return null;
+    }
+
+    // Try chain RPC first
+    try {
+      const response = await fetch(DEMIURGE_RPC_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "devCapsule_get",
+          params: { id },
+          id: 1,
+        }),
+      });
+      const data = await response.json();
+      if (data.result && data.result !== null) {
+        // Cache in SQLite
+        upsertDevCapsule(
+          data.result.id,
+          data.result.owner,
+          data.result.project_slug,
+          data.result.status,
+          data.result.created_at,
+          data.result.updated_at,
+          data.result.notes
+        );
+        return {
+          id: String(data.result.id),
+          owner: data.result.owner,
+          projectSlug: data.result.project_slug,
+          status: data.result.status,
+          createdAt: data.result.created_at,
+          updatedAt: data.result.updated_at,
+          notes: data.result.notes,
+        };
+      }
+    } catch (e) {
+      console.warn("Failed to fetch capsule from chain:", e);
+    }
+
+    // Fallback to SQLite
+    const capsule = getDevCapsuleById(id);
+    if (!capsule) {
+      return null;
+    }
+    return {
+      id: String(capsule.id),
+      owner: capsule.owner_address,
+      projectSlug: capsule.project_slug,
+      status: capsule.status,
+      createdAt: capsule.created_at,
+      updatedAt: capsule.updated_at,
+      notes: capsule.notes,
+    };
+  },
+
+  async createDevCapsule(
+    args: { owner: string; projectSlug: string; notes: string },
+    context: ChatContext
+  ): Promise<any> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    // Call chain RPC to create capsule
+    try {
+      const response = await fetch(DEMIURGE_RPC_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "devCapsule_create",
+          params: {
+            owner: args.owner,
+            project_slug: args.projectSlug,
+            notes: args.notes,
+          },
+          id: 1,
+        }),
+      });
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error.message || "Failed to create capsule");
+      }
+      if (data.result) {
+        // Cache in SQLite
+        upsertDevCapsule(
+          data.result.id,
+          data.result.owner,
+          data.result.project_slug,
+          data.result.status,
+          data.result.created_at,
+          data.result.updated_at,
+          data.result.notes
+        );
+        return {
+          id: String(data.result.id),
+          owner: data.result.owner,
+          projectSlug: data.result.project_slug,
+          status: data.result.status,
+          createdAt: data.result.created_at,
+          updatedAt: data.result.updated_at,
+          notes: data.result.notes,
+        };
+      }
+    } catch (e: any) {
+      throw new Error(`Failed to create capsule: ${e.message}`);
+    }
+    throw new Error("Failed to create capsule: no result from RPC");
+  },
+
+  async updateDevCapsuleStatus(
+    args: { id: string; status: string },
+    context: ChatContext
+  ): Promise<any> {
+    if (!context.currentUser) {
+      throw new Error("Authentication required");
+    }
+
+    const id = parseInt(args.id, 10);
+    if (isNaN(id)) {
+      throw new Error("Invalid capsule ID");
+    }
+
+    // Validate status
+    const validStatuses = ["draft", "live", "paused", "archived"];
+    if (!validStatuses.includes(args.status)) {
+      throw new Error(`Invalid status. Must be one of: ${validStatuses.join(", ")}`);
+    }
+
+    // Call chain RPC to update status
+    try {
+      const response = await fetch(DEMIURGE_RPC_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "devCapsule_updateStatus",
+          params: {
+            id,
+            status: args.status,
+          },
+          id: 1,
+        }),
+      });
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error.message || "Failed to update capsule status");
+      }
+      if (data.result) {
+        // Cache in SQLite
+        upsertDevCapsule(
+          data.result.id,
+          data.result.owner,
+          data.result.project_slug,
+          data.result.status,
+          data.result.created_at,
+          data.result.updated_at,
+          data.result.notes
+        );
+        return {
+          id: String(data.result.id),
+          owner: data.result.owner,
+          projectSlug: data.result.project_slug,
+          status: data.result.status,
+          createdAt: data.result.created_at,
+          updatedAt: data.result.updated_at,
+          notes: data.result.notes,
+        };
+      }
+    } catch (e: any) {
+      throw new Error(`Failed to update capsule status: ${e.message}`);
+    }
+    throw new Error("Failed to update capsule status: no result from RPC");
   },
 };
 

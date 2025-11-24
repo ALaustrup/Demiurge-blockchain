@@ -13,6 +13,8 @@ pub mod bank_cgt;
 pub mod fabric_manager;
 pub mod nft_dgen;
 pub mod developer_registry;
+pub mod dev_capsules;
+pub mod recursion_registry;
 
 pub use abyss_registry::{get_all_active_listings, get_listing, AbyssRegistryModule, ListingId};
 pub use urgeid_registry::{
@@ -25,11 +27,18 @@ pub use bank_cgt::{
     CGT_MAX_SUPPLY, CGT_NAME, CGT_SYMBOL, BankCgtModule,
 };
 pub use fabric_manager::{get_fabric_asset, FabricManagerModule, FabricRootHash};
-pub use nft_dgen::{get_nft, get_nfts_by_owner, NftDgenModule, NftId};
+pub use nft_dgen::{get_nft, get_nfts_by_owner, NftDgenModule, NftId, NftClass, FABRIC_ROOT_DEV_BADGE, system_mint_dev_nft};
 pub use developer_registry::{
     add_project, get_all_developers, get_developer_by_username, get_developer_profile,
     get_project_maintainers, register_developer, DeveloperProfile,
     DeveloperRegistryModule,
+};
+pub use dev_capsules::{
+    create_capsule, get_capsule, list_capsules_by_owner, list_capsules_by_project,
+    update_capsule_status, update_capsule_notes, CapsuleStatus, DevCapsule, DevCapsulesModule,
+};
+pub use recursion_registry::{
+    create_world, get_world, list_worlds_by_owner, RecursionWorldMeta, RecursionRegistryModule,
 };
 
 /// Trait that all runtime modules must implement.
@@ -87,6 +96,8 @@ impl Runtime {
             .with_module(Box::new(FabricManagerModule::new()))
             .with_module(Box::new(AbyssRegistryModule::new()))
             .with_module(Box::new(DeveloperRegistryModule::new()))
+            .with_module(Box::new(DevCapsulesModule::new()))
+            .with_module(Box::new(RecursionRegistryModule::new()))
     }
 
     /// Dispatch a transaction to the appropriate runtime module.
@@ -123,7 +134,7 @@ mod tests {
     #[test]
     fn test_runtime_with_default_modules() {
         let runtime = Runtime::with_default_modules();
-        assert_eq!(runtime.modules.len(), 6);
+        assert_eq!(runtime.modules.len(), 8);
     }
 
     #[test]

@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use super::RuntimeModule;
 use crate::core::state::State;
 use crate::core::transaction::{Address, Transaction};
+use crate::runtime::nft_dgen::system_mint_dev_nft;
 
 const PREFIX_DEVELOPER_PROFILE: &[u8] = b"developer/profile:";
 const PREFIX_DEVELOPER_USERNAME: &[u8] = b"developer/username:";
@@ -99,6 +100,21 @@ pub fn register_developer(
     all_developers.push(address);
     let all_bytes = bincode::serialize(&all_developers).map_err(|e| e.to_string())?;
     state.put_raw(all_key, all_bytes).map_err(|e| e.to_string())?;
+
+    // Auto-mint DEV Badge NFT for the new developer
+    // This is called from within the developer_registry module, so caller_module_id is "developer_registry"
+    match system_mint_dev_nft(state, &address, &username, "developer_registry") {
+        Ok(_nft_id) => {
+            // DEV Badge minted successfully (log or handle as needed)
+            // The NFT is now owned by the developer
+        }
+        Err(_e) => {
+            // If minting fails, we still want registration to succeed
+            // The developer can claim their badge later via dev_claimDevNft
+            // Log the error but don't fail registration
+            // In production, you might want to log this to a monitoring system
+        }
+    }
 
     Ok(())
 }
@@ -223,6 +239,14 @@ impl RuntimeModule for DeveloperRegistryModule {
                 let params: RegisterDeveloperParams = bincode::deserialize(&tx.payload)
                     .map_err(|_| "Invalid register_developer params")?;
                 register_developer(tx.from, params.username, 0, state) // TODO: get current height
+            }
+            "claim_dev_nft" => {
+                // Allow existing developers to claim their DEV Badge NFT
+                let profile = get_developer_profile(&tx.from, state)
+                    .ok_or_else(|| "Developer not registered".to_string())?;
+                system_mint_dev_nft(state, &tx.from, &profile.username, "developer_registry")
+                    .map(|_| ())
+                    .map_err(|e| format!("Failed to mint DEV Badge: {}", e))
             }
             "add_project" => {
                 let params: AddProjectParams = bincode::deserialize(&tx.payload)

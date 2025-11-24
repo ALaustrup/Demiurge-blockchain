@@ -190,6 +190,19 @@ function createSchema(db: Database.Database) {
     )
   `);
 
+  // dev_capsules
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS dev_capsules (
+      id INTEGER PRIMARY KEY,
+      owner_address TEXT NOT NULL,
+      project_slug TEXT NOT NULL,
+      status TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL,
+      notes TEXT NOT NULL
+    )
+  `);
+
   // room_music_queue (music playlist per room)
   db.exec(`
     CREATE TABLE IF NOT EXISTS room_music_queue (
@@ -329,14 +342,26 @@ export function upsertDeveloper(
   reputation: number = 0
 ): void {
   const db = getDb();
-  const stmt = db.prepare(`
-    INSERT INTO developers (address, username, reputation, created_at)
-    VALUES (?, ?, ?, ?)
-    ON CONFLICT(address) DO UPDATE SET
-      username = excluded.username,
-      reputation = excluded.reputation
-  `);
-  stmt.run(address, username, reputation, Date.now());
+  
+  // Check if address already exists
+  const existing = getDeveloperByAddress(address);
+  
+  if (existing) {
+    // Update existing record
+    const stmt = db.prepare(`
+      UPDATE developers
+      SET username = ?, reputation = ?
+      WHERE address = ?
+    `);
+    stmt.run(username, reputation, address);
+  } else {
+    // Insert new record
+    const stmt = db.prepare(`
+      INSERT INTO developers (address, username, reputation, created_at)
+      VALUES (?, ?, ?, ?)
+    `);
+    stmt.run(address, username, reputation, Date.now());
+  }
 }
 
 export function getDeveloperByAddress(address: string): any | null {
@@ -348,9 +373,13 @@ export function getDeveloperByAddress(address: string): any | null {
 
 export function getDeveloperByUsername(username: string): any | null {
   const db = getDb();
-  const stmt = db.prepare("SELECT * FROM developers WHERE username = ?");
-  const row = stmt.get(username) as any;
-  return row || null;
+  // Normalize username for lookup (lowercase, trim)
+  const normalizedUsername = username.toLowerCase().trim();
+  // Get all developers and filter (since SQLite doesn't support LOWER in WHERE easily)
+  const stmt = db.prepare("SELECT * FROM developers");
+  const allDevs = stmt.all() as any[];
+  const dev = allDevs.find(d => (d.username || "").toLowerCase().trim() === normalizedUsername);
+  return dev || null;
 }
 
 export function listDevelopers(): any[] {
@@ -415,6 +444,50 @@ export function listProjects(): any[] {
   const db = getDb();
   const stmt = db.prepare("SELECT * FROM projects ORDER BY created_at DESC");
   return stmt.all() as any[];
+}
+
+// Dev Capsules functions
+
+export function upsertDevCapsule(
+  id: number,
+  ownerAddress: string,
+  projectSlug: string,
+  status: string,
+  createdAt: number,
+  updatedAt: number,
+  notes: string
+): void {
+  const db = getDb();
+  const stmt = db.prepare(`
+    INSERT INTO dev_capsules (id, owner_address, project_slug, status, created_at, updated_at, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      owner_address = excluded.owner_address,
+      project_slug = excluded.project_slug,
+      status = excluded.status,
+      updated_at = excluded.updated_at,
+      notes = excluded.notes
+  `);
+  stmt.run(id, ownerAddress, projectSlug, status, createdAt, updatedAt, notes);
+}
+
+export function getDevCapsuleById(id: number): any | null {
+  const db = getDb();
+  const stmt = db.prepare("SELECT * FROM dev_capsules WHERE id = ?");
+  const row = stmt.get(id) as any;
+  return row || null;
+}
+
+export function getDevCapsulesByOwner(ownerAddress: string): any[] {
+  const db = getDb();
+  const stmt = db.prepare("SELECT * FROM dev_capsules WHERE owner_address = ? ORDER BY created_at DESC");
+  return stmt.all(ownerAddress) as any[];
+}
+
+export function getDevCapsulesByProject(projectSlug: string): any[] {
+  const db = getDb();
+  const stmt = db.prepare("SELECT * FROM dev_capsules WHERE project_slug = ? ORDER BY created_at DESC");
+  return stmt.all(projectSlug) as any[];
 }
 
 export const chatDb = {

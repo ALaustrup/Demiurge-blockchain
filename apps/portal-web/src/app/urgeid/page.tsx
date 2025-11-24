@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Wallet, Coins, Sparkles, ArrowLeft, Lock, Eye, EyeOff, BarChart3, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Wallet, Coins, Sparkles, ArrowLeft, Lock, Eye, EyeOff, BarChart3, Plus, ChevronLeft, ChevronRight, Code, BookOpen, Download, Settings, ExternalLink } from "lucide-react";
 import QRCode from "react-qr-code";
 import {
   callRpc,
@@ -19,9 +19,13 @@ import {
   setUsername,
   resolveUsername,
   getUrgeIdProgress,
+  devClaimDevNft,
+  isDevBadgeNft,
   type UrgeIDProfile,
   type UrgeIDProgress,
+  type NftMetadata,
 } from "@/lib/rpc";
+import { graphqlQuery } from "@/lib/graphql";
 import { signTransaction } from "@/lib/signing";
 import { formatUrgeId } from "@/lib/urgeid";
 import { exportVault, importVault } from "@/lib/vault";
@@ -75,6 +79,11 @@ export default function UrgeIDPage() {
   const [mintError, setMintError] = useState<string | null>(null);
   const [nftCarouselIndex, setNftCarouselIndex] = useState(0);
   const [isArchon, setIsArchon] = useState<boolean>(false);
+  const [isDeveloper, setIsDeveloper] = useState<boolean>(false);
+  const [developerProfile, setDeveloperProfile] = useState<any>(null);
+  const [devBadgeNft, setDevBadgeNft] = useState<NftMetadata | null>(null);
+  const [claimingDevNft, setClaimingDevNft] = useState(false);
+  const [claimDevNftError, setClaimDevNftError] = useState<string | null>(null);
 
   // Check if user already has a wallet on mount
   useEffect(() => {
@@ -170,7 +179,12 @@ export default function UrgeIDPage() {
       const nftsRes = await callRpc<{ nfts: Nft[] }>("cgt_getNftsByOwner", {
         address: addr,
       });
-      setNfts(nftsRes.nfts || []);
+      const loadedNfts = nftsRes.nfts || [];
+      setNfts(loadedNfts);
+
+      // Check for DEV Badge NFT
+      const devBadge = loadedNfts.find((nft: any) => isDevBadgeNft(nft as NftMetadata));
+      setDevBadgeNft(devBadge as NftMetadata || null);
 
       // Check Archon status
       try {
@@ -180,6 +194,44 @@ export default function UrgeIDPage() {
         setIsArchon(archonRes.is_archon || false);
       } catch (err) {
         setIsArchon(false);
+      }
+
+      // Check developer status
+      try {
+        // Normalize address for GraphQL query (remove 0x prefix if present)
+        let normalizedAddr = addr.toLowerCase().trim();
+        if (normalizedAddr.startsWith("0x")) {
+          normalizedAddr = normalizedAddr.slice(2);
+        }
+        
+        const devQuery = `
+          query {
+            developer(address: "${normalizedAddr}") {
+              address
+              username
+              reputation
+              createdAt
+            }
+          }
+        `;
+        const devData = await graphqlQuery(devQuery);
+        console.log("Developer query response:", devData);
+        
+        // Handle different response structures
+        const dev = devData?.developer || devData?.data?.developer;
+        if (dev) {
+          console.log("✅ Developer found:", dev);
+          setIsDeveloper(true);
+          setDeveloperProfile(dev);
+        } else {
+          console.log("❌ No developer found for address:", normalizedAddr);
+          setIsDeveloper(false);
+          setDeveloperProfile(null);
+        }
+      } catch (err) {
+        console.error("Failed to check developer status:", err);
+        setIsDeveloper(false);
+        setDeveloperProfile(null);
       }
 
       // Load progression data
@@ -284,6 +336,29 @@ export default function UrgeIDPage() {
   const shortenAddress = (addr: string) => {
     if (addr.length <= 12) return addr;
     return `${addr.slice(0, 6)}...${addr.slice(-6)}`;
+  };
+
+  // Claim DEV Badge NFT
+  const handleClaimDevNft = async () => {
+    if (!address || !isDeveloper || claimingDevNft) return;
+    
+    setClaimingDevNft(true);
+    setClaimDevNftError(null);
+    
+    try {
+      const result = await devClaimDevNft(address);
+      if (result.ok) {
+        // Refresh dashboard to show the new NFT
+        await loadDashboard(address);
+        setClaimDevNftError(null);
+      } else {
+        setClaimDevNftError("Failed to claim DEV Badge NFT");
+      }
+    } catch (err: any) {
+      setClaimDevNftError(err?.message || "Failed to claim DEV Badge NFT");
+    } finally {
+      setClaimingDevNft(false);
+    }
   };
 
   // Mint Test NFT
@@ -641,7 +716,7 @@ export default function UrgeIDPage() {
 
   // Dashboard view
   return (
-    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-8 px-6 py-12">
+    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 sm:gap-8 px-4 sm:px-6 py-6 sm:py-12">
       {/* Security Modal */}
       <AnimatePresence>
         {showSecurityModal && (
@@ -719,12 +794,12 @@ export default function UrgeIDPage() {
           animate={{ opacity: 1, y: 0 }}
         >
           {/* Header with Username */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               {profile.username ? (
-                <h1 className="text-3xl font-semibold text-sky-400">@{profile.username}</h1>
+                <h1 className="text-2xl sm:text-3xl font-semibold text-sky-400">@{profile.username}</h1>
               ) : (
-                <h1 className="text-3xl font-semibold text-slate-400">Username not claimed yet</h1>
+                <h1 className="text-2xl sm:text-3xl font-semibold text-slate-400">Username not claimed yet</h1>
               )}
               <div className="mt-2 flex items-center gap-2">
                 <code className="font-mono text-xs text-slate-400">
@@ -733,14 +808,14 @@ export default function UrgeIDPage() {
                 <button
                   type="button"
                   onClick={() => navigator.clipboard.writeText(profile.address)}
-                  className="text-xs text-slate-500 hover:text-slate-300"
+                  className="min-h-[44px] min-w-[44px] px-2 text-xs text-slate-500 hover:text-slate-300"
                 >
                   Copy
                 </button>
               </div>
             </div>
             {profile.badges.length > 0 && (
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {profile.badges.map((badge) => (
                   <span
                     key={badge}
@@ -785,7 +860,7 @@ export default function UrgeIDPage() {
                       }
                     }}
                     disabled={!usernameInput.trim()}
-                    className="rounded-md border border-slate-600 px-3 py-1 text-[12px] text-slate-50 hover:bg-slate-800 disabled:opacity-50"
+                    className="min-h-[44px] rounded-md border border-slate-600 px-4 py-2 text-sm text-slate-50 hover:bg-slate-800 disabled:opacity-50"
                   >
                     Claim
                   </button>
@@ -802,8 +877,192 @@ export default function UrgeIDPage() {
             </section>
           )}
 
+          {/* Developer Section */}
+          {isDeveloper && (
+            <section className="rounded-lg border border-violet-800 bg-violet-950/30 p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-violet-300 flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  Developer Profile
+                </h3>
+                <a
+                  href="/developers"
+                  className="text-xs text-violet-400 hover:text-violet-300"
+                >
+                  View Profile →
+                </a>
+              </div>
+              
+              {developerProfile && (
+                <div className="mb-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-violet-400">Username:</span>
+                    <span className="text-sm font-semibold text-violet-200">
+                      @{developerProfile.username}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-violet-400">Reputation:</span>
+                    <span className="text-sm font-semibold text-violet-200">
+                      {developerProfile.reputation || 0}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* DEV Badge NFT Display */}
+              {devBadgeNft ? (
+                <div className="rounded-lg border border-violet-700 bg-violet-900/30 p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-violet-400" />
+                      <span className="text-sm font-semibold text-violet-200">
+                        DEV Badge NFT
+                      </span>
+                    </div>
+                    <span className="text-xs text-violet-400 font-mono">
+                      #{devBadgeNft.id}
+                    </span>
+                  </div>
+                  <p className="text-xs text-violet-300/80">
+                    Verified Demiurge Developer
+                  </p>
+                  <div className="mt-2 flex gap-2">
+                    <a
+                      href="/developers"
+                      className="flex-1 rounded-md border border-violet-700 bg-violet-900/50 px-3 py-1.5 text-xs text-violet-200 hover:bg-violet-900/70 text-center"
+                    >
+                      Developer Portal
+                    </a>
+                    <a
+                      href="/fabric"
+                      className="flex-1 rounded-md border border-violet-700 bg-violet-900/50 px-3 py-1.5 text-xs text-violet-200 hover:bg-violet-900/70 text-center"
+                    >
+                      View in Fabric
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-lg border border-violet-700 bg-violet-900/20 p-3">
+                  <p className="text-xs text-violet-300/80 mb-3">
+                    You're a registered developer! Claim your DEV Badge NFT to showcase your status.
+                  </p>
+                  <button
+                    onClick={handleClaimDevNft}
+                    disabled={claimingDevNft}
+                    className="w-full rounded-md border border-violet-600 bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {claimingDevNft ? "Claiming..." : "Claim DEV Badge NFT"}
+                  </button>
+                  {claimDevNftError && (
+                    <p className="mt-2 text-xs text-rose-400">{claimDevNftError}</p>
+                  )}
+                </div>
+              )}
+
+              {/* Developer Quick Links */}
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <a
+                  href="/developers/projects"
+                  className="rounded-md border border-violet-700 bg-violet-900/30 px-3 py-2 text-xs text-violet-200 hover:bg-violet-900/50 text-center"
+                >
+                  My Projects
+                </a>
+                <a
+                  href="/docs/developers"
+                  className="rounded-md border border-violet-700 bg-violet-900/30 px-3 py-2 text-xs text-violet-200 hover:bg-violet-900/50 text-center"
+                >
+                  Developer Docs
+                </a>
+              </div>
+
+              {/* Developer Settings & Onboarding */}
+              <div className="mt-4 rounded-lg border border-violet-700 bg-violet-900/20 p-3">
+                <h4 className="text-xs font-semibold text-violet-300 mb-3 flex items-center gap-2">
+                  <Settings className="h-3.5 w-3.5" />
+                  Getting Started
+                </h4>
+                
+                <div className="space-y-2">
+                  {/* Getting Started Guide */}
+                  <a
+                    href="/docs/developers/getting-started"
+                    className="flex items-center justify-between rounded-md border border-violet-700/50 bg-violet-900/30 px-3 py-2 text-xs text-violet-200 hover:bg-violet-900/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="h-3.5 w-3.5" />
+                      <span>Getting Started Guide</span>
+                    </div>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+
+                  {/* SDKs */}
+                  <div className="rounded-md border border-violet-700/50 bg-violet-900/30 p-2">
+                    <div className="text-xs font-medium text-violet-300 mb-1.5">SDKs</div>
+                    <div className="flex gap-2">
+                      <a
+                        href="/docs/developers/sdk-ts"
+                        className="flex-1 rounded border border-violet-700/50 bg-violet-900/40 px-2 py-1.5 text-[10px] text-violet-200 hover:bg-violet-900/60 text-center"
+                      >
+                        TypeScript
+                      </a>
+                      <a
+                        href="/docs/developers/sdk-rust"
+                        className="flex-1 rounded border border-violet-700/50 bg-violet-900/40 px-2 py-1.5 text-[10px] text-violet-200 hover:bg-violet-900/60 text-center"
+                      >
+                        Rust
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Templates */}
+                  <a
+                    href="/docs/developers/templates"
+                    className="flex items-center justify-between rounded-md border border-violet-700/50 bg-violet-900/30 px-3 py-2 text-xs text-violet-200 hover:bg-violet-900/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Code className="h-3.5 w-3.5" />
+                      <span>Developer Templates</span>
+                    </div>
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+
+                  {/* Create Project */}
+                  <a
+                    href="/developers/projects"
+                    className="flex items-center justify-between rounded-md border border-violet-600 bg-violet-600/30 px-3 py-2 text-xs font-medium text-violet-100 hover:bg-violet-600/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Plus className="h-3.5 w-3.5" />
+                      <span>Create New Project</span>
+                    </div>
+                    <ArrowLeft className="h-3 w-3 rotate-180" />
+                  </a>
+
+                  {/* RPC Endpoint Info */}
+                  <div className="rounded-md border border-violet-700/50 bg-violet-900/30 p-2">
+                    <div className="text-xs font-medium text-violet-300 mb-1.5">RPC Endpoint</div>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 text-[10px] text-violet-200/80 font-mono break-all">
+                        http://localhost:8545
+                      </code>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText("http://localhost:8545");
+                        }}
+                        className="rounded border border-violet-700/50 bg-violet-900/40 px-2 py-1 text-[10px] text-violet-200 hover:bg-violet-900/60"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
           {/* Stats Grid */}
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
             {/* CGT Balance */}
             <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
               <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-300">
@@ -1037,7 +1296,7 @@ export default function UrgeIDPage() {
                 <button
                   onClick={handleSendCgt}
                   disabled={sending || !sendTo.trim() || !sendAmount.trim() || !resolvedRecipient || resolvingRecipient}
-                  className="rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-sm text-slate-50 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="min-h-[44px] rounded-md border border-slate-600 bg-slate-800 px-6 py-2 text-sm font-medium text-slate-50 hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {sending ? "Sending..." : "Send"}
                 </button>

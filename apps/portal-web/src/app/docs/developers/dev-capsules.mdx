@@ -1,0 +1,138 @@
+# Dev Capsules
+
+Dev Capsules are project-bound mini execution environments tracked on-chain and surfaced through the Abyss Gateway, Portal, and CLI.
+
+## Overview
+
+Dev Capsules allow developers to:
+
+- **Track execution environments** for their projects
+- **Manage capsule lifecycles** (draft, live, paused, archived)
+- **Associate capsules with projects** from the Developer Registry
+- **Store notes and metadata** for each capsule
+
+## Creating a Capsule
+
+### Via Portal
+
+1. Navigate to your project page: `/developers/projects/[slug]`
+2. Click "Create Capsule" in the Capsules section
+3. Enter notes describing the capsule's purpose
+4. The capsule is created on-chain and associated with your project
+
+### Via CLI
+
+```bash
+demiurge dev capsule create \
+  --owner 0x... \
+  --project my-project \
+  --notes "Production deployment capsule"
+```
+
+### Via RPC
+
+```typescript
+import { devCapsuleCreate } from "@/lib/rpc";
+
+const capsule = await devCapsuleCreate(
+  ownerAddress,
+  "my-project",
+  "Production deployment capsule"
+);
+```
+
+## Capsule Statuses
+
+- **Draft**: Initial state, not yet active
+- **Live**: Active and running
+- **Paused**: Temporarily suspended
+- **Archived**: No longer in use
+
+## Managing Capsules
+
+### List Capsules
+
+**CLI:**
+```bash
+demiurge dev capsule list --owner 0x...
+```
+
+**RPC:**
+```typescript
+import { devCapsuleListByOwner } from "@/lib/rpc";
+
+const capsules = await devCapsuleListByOwner(ownerAddress);
+```
+
+**GraphQL:**
+```graphql
+query {
+  devCapsulesByProject(projectSlug: "my-project") {
+    id
+    status
+    notes
+    createdAt
+    updatedAt
+  }
+}
+```
+
+### Update Status
+
+**Via Portal:**
+- Use the status dropdown in the Capsules section of your project page
+
+**Via CLI:**
+```bash
+demiurge dev capsule status --id 1 --status live
+```
+
+**Via RPC:**
+```typescript
+import { devCapsuleUpdateStatus } from "@/lib/rpc";
+
+await devCapsuleUpdateStatus(capsuleId, "live");
+```
+
+## Integration with Projects
+
+Capsules are automatically associated with projects via the `project_slug` field. This allows:
+
+- Filtering capsules by project
+- Project-specific capsule management
+- Future integration with deployment pipelines
+
+## Future Enhancements
+
+Dev Capsules will evolve to support:
+
+- **Execution environment metadata** (runtime, resources, config)
+- **Deployment tracking** (versions, rollbacks)
+- **Resource monitoring** (CPU, memory, network)
+- **Integration with CI/CD** pipelines
+- **Automatic status updates** based on health checks
+
+## API Reference
+
+### RPC Methods
+
+- `devCapsule_create`: Create a new capsule
+- `devCapsule_get`: Get capsule by ID
+- `devCapsule_listByOwner`: List all capsules for an owner
+- `devCapsule_updateStatus`: Update capsule status
+
+### GraphQL Queries
+
+- `devCapsulesByOwner(owner: String!)`: List capsules by owner
+- `devCapsulesByProject(projectSlug: String!)`: List capsules by project
+- `devCapsule(id: ID!)`: Get capsule by ID
+
+### GraphQL Mutations
+
+- `createDevCapsule(owner: String!, projectSlug: String!, notes: String!)`: Create capsule
+- `updateDevCapsuleStatus(id: ID!, status: String!)`: Update status
+
+---
+
+*Dev Capsules provide a foundation for tracking and managing execution environments in the Demiurge ecosystem.*
+

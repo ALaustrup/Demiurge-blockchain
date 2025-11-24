@@ -116,6 +116,20 @@ const ProjectType = new GraphQLObjectType({
   }),
 });
 
+// DevCapsule type
+const DevCapsuleType = new GraphQLObjectType({
+  name: "DevCapsule",
+  fields: () => ({
+    id: { type: new GraphQLNonNull(GraphQLID) },
+    owner: { type: new GraphQLNonNull(GraphQLString) },
+    projectSlug: { type: new GraphQLNonNull(GraphQLString) },
+    status: { type: new GraphQLNonNull(GraphQLString) },
+    createdAt: { type: new GraphQLNonNull(GraphQLInt) },
+    updatedAt: { type: new GraphQLNonNull(GraphQLInt) },
+    notes: { type: new GraphQLNonNull(GraphQLString) },
+  }),
+});
+
 // MessageActivity type
 const MessageActivityType = new GraphQLObjectType({
   name: "MessageActivity",
@@ -246,6 +260,33 @@ const QueryType = new GraphQLObjectType({
       },
       resolve: async (parent, args, context) => {
         return context.resolvers.getProject(args, context);
+      },
+    },
+    devCapsulesByOwner: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(DevCapsuleType))),
+      args: {
+        owner: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getDevCapsulesByOwner(args, context);
+      },
+    },
+    devCapsulesByProject: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(DevCapsuleType))),
+      args: {
+        projectSlug: { type: new GraphQLNonNull(GraphQLString) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getDevCapsulesByProject(args, context);
+      },
+    },
+    devCapsule: {
+      type: DevCapsuleType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getDevCapsule(args, context);
       },
     },
   }),

@@ -276,7 +276,25 @@ export type NftMetadata = {
   royalty_bps?: number;
   name?: string;
   description?: string;
+  class?: "DGen" | "DevBadge" | null; // NFT class/type
 };
+
+// DEV Badge NFT fabric root hash constant (matches chain constant)
+export const FABRIC_ROOT_DEV_BADGE = "0xDE5BAD6E00000000000000000000000000000000000000000000000000000000";
+
+/**
+ * Check if an NFT is a DEV Badge NFT
+ */
+export function isDevBadgeNft(nft: NftMetadata): boolean {
+  // Check by class first (newer NFTs)
+  if (nft.class === "DevBadge") {
+    return true;
+  }
+  // Fallback: check fabric root hash (for backward compatibility)
+  const normalizedHash = nft.fabric_root_hash.toLowerCase();
+  const normalizedConstant = FABRIC_ROOT_DEV_BADGE.toLowerCase();
+  return normalizedHash === normalizedConstant;
+}
 
 /**
  * Get all active marketplace listings.
@@ -414,5 +432,111 @@ export async function getUrgeIdProgress(
   return callRpc<UrgeIDProgress>("urgeid_getProgress", {
     address,
   });
+}
+
+// Dev Capsules types and helpers
+
+export type CapsuleStatus = "draft" | "live" | "paused" | "archived";
+
+export type DevCapsule = {
+  id: number;
+  owner: string;
+  project_slug: string;
+  status: CapsuleStatus;
+  created_at: number;
+  updated_at: number;
+  notes: string;
+};
+
+/**
+ * Create a new Dev Capsule for a project.
+ */
+export async function devCapsuleCreate(
+  owner: string,
+  projectSlug: string,
+  notes: string
+): Promise<DevCapsule> {
+  return callRpc<DevCapsule>("devCapsule_create", {
+    owner,
+    project_slug: projectSlug,
+    notes,
+  });
+}
+
+/**
+ * Get a Dev Capsule by ID.
+ */
+export async function devCapsuleGet(id: number): Promise<DevCapsule | null> {
+  return callRpc<DevCapsule | null>("devCapsule_get", { id });
+}
+
+/**
+ * List all Dev Capsules owned by an address.
+ */
+export async function devCapsuleListByOwner(
+  owner: string
+): Promise<DevCapsule[]> {
+  return callRpc<DevCapsule[]>("devCapsule_listByOwner", { owner });
+}
+
+/**
+ * Update the status of a Dev Capsule.
+ */
+export async function devCapsuleUpdateStatus(
+  id: number,
+  status: CapsuleStatus
+): Promise<DevCapsule> {
+  return callRpc<DevCapsule>("devCapsule_updateStatus", { id, status });
+}
+
+/**
+ * Claim DEV Badge NFT for an existing developer
+ */
+export async function devClaimDevNft(address: string): Promise<{ ok: boolean; nft_id?: number }> {
+  return callRpc<{ ok: boolean; nft_id?: number }>("dev_claimDevNft", { address });
+}
+
+// Recursion Registry types and helpers
+
+export type RecursionWorld = {
+  world_id: string;
+  owner: string;
+  title: string;
+  description: string;
+  fabric_root_hash: string;
+  created_at: number;
+};
+
+/**
+ * Create a new Recursion World.
+ */
+export async function recursionCreateWorld(
+  owner: string,
+  worldId: string,
+  title: string,
+  description: string,
+  fabricRootHash: string
+): Promise<RecursionWorld> {
+  return callRpc<RecursionWorld>("recursion_createWorld", {
+    owner,
+    world_id: worldId,
+    title,
+    description,
+    fabric_root_hash: fabricRootHash,
+  });
+}
+
+/**
+ * Get a Recursion World by ID.
+ */
+export async function recursionGetWorld(worldId: string): Promise<RecursionWorld | null> {
+  return callRpc<RecursionWorld | null>("recursion_getWorld", { world_id: worldId });
+}
+
+/**
+ * List all Recursion Worlds owned by an address.
+ */
+export async function recursionListWorldsByOwner(owner: string): Promise<RecursionWorld[]> {
+  return callRpc<RecursionWorld[]>("recursion_listWorldsByOwner", { owner });
 }
 
