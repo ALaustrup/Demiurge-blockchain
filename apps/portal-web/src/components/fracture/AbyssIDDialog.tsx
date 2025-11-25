@@ -1,77 +1,127 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X, CheckCircle2, XCircle, Loader2, Fingerprint, AlertTriangle } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { X, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { AbyssStateMachine, type AbyssState } from "./AbyssStateMachine";
+import { ShaderPlane } from "./ShaderPlane";
+import { useAbyssReactive } from "@/lib/fracture/audio/AbyssReactive";
+import { generateAbyssKeys } from "@/lib/fracture/crypto/generateKeys";
+import { resolveUsername } from "@/lib/rpc";
 
 interface AbyssIDDialogProps {
   open: boolean;
   onClose: () => void;
 }
 
-type AvailabilityStatus = "checking" | "available" | "taken" | null;
-
 export function AbyssIDDialog({ open, onClose }: AbyssIDDialogProps) {
-  const [abyssId, setAbyssId] = useState("");
-  const [availability, setAvailability] = useState<AvailabilityStatus>(null);
-  const [isEngaging, setIsEngaging] = useState(false);
-  const [step, setStep] = useState<"input" | "generating" | "success" | "backup">("input");
-
-  // TODO: Milestone 4.1 – connect to AbyssID state
-  // This should integrate with actual AbyssID registration system
+  const router = useRouter();
+  const [stateMachine] = useState(() => new AbyssStateMachine());
+  const [state, setState] = useState<AbyssState>("idle");
+  const [username, setUsername] = useState("");
+  const [keys, setKeys] = useState<{ publicKey: string; privateKey: string; seedPhrase: string } | null>(null);
+  const [showKey, setShowKey] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const checkingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reactive = useAbyssReactive(state);
 
   useEffect(() => {
     if (!open) {
-      setAbyssId("");
-      setAvailability(null);
-      setStep("input");
-      setIsEngaging(false);
+      stateMachine.reset();
+      setState("idle");
+      setUsername("");
+      setKeys(null);
+      setShowKey(false);
+      setIsGenerating(false);
+      if (checkingTimeoutRef.current) {
+        clearTimeout(checkingTimeoutRef.current);
+      }
     }
-  }, [open]);
+  }, [open, stateMachine]);
 
-  // Stub availability check
   useEffect(() => {
-    if (!abyssId.trim()) {
-      setAvailability(null);
-      return;
+    const unsubscribe = stateMachine.subscribe((newState) => {
+      setState(newState);
+    });
+    return unsubscribe;
+  }, [stateMachine]);
+
+  const handleUsernameChange = (value: string) => {
+    setUsername(value);
+    if (value.trim()) {
+      // Start checking after a brief delay
+      if (checkingTimeoutRef.current) {
+        clearTimeout(checkingTimeoutRef.current);
+      }
+      checkingTimeoutRef.current = setTimeout(() => {
+        checkAvailability(value.trim());
+      }, 500);
+    } else {
+      stateMachine.reset();
     }
-
-    // Basic validation
-    const isValid = /^[a-z0-9_-]{3,20}$/i.test(abyssId);
-    if (!isValid) {
-      setAvailability("taken");
-      return;
-    }
-
-    setAvailability("checking");
-
-    // Simulate API call
-    const timer = setTimeout(() => {
-      // Stub: Randomly assign availability (replace with real check)
-      const isAvailable = Math.random() > 0.3;
-      setAvailability(isAvailable ? "available" : "taken");
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [abyssId]);
-
-  const handleEngage = async () => {
-    if (availability !== "available") return;
-
-    setIsEngaging(true);
-    setStep("generating");
-
-    // TODO: Integrate with actual keypair generation and wallet binding
-    // Simulate generation process
-    setTimeout(() => {
-      setStep("backup");
-      setIsEngaging(false);
-    }, 2000);
   };
 
-  const handleComplete = () => {
-    // TODO: Complete registration flow
-    onClose();
+  const checkAvailability = async (name: string) => {
+    stateMachine.checkUsername(name);
+
+    try {
+      // Check username availability via RPC
+      const result = await resolveUsername(name);
+      
+      // If username resolves, it's taken
+      if (result && result.address) {
+        // Simulate checking delay
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        stateMachine.rejectUsername();
+      } else {
+        // Username is available
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        stateMachine.acceptUsername();
+      }
+    } catch (error) {
+      // On error, assume available (or handle appropriately)
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      stateMachine.acceptUsername();
+    }
+  };
+
+  const handleRevealKey = async () => {
+    if (keys) {
+      setShowKey(true);
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const generated = await generateAbyssKeys();
+      const keyData = {
+        publicKey: generated.publicKey,
+        privateKey: generated.privateKey,
+        seedPhrase: generated.seedPhrase,
+      };
+      setKeys(keyData);
+      stateMachine.startBinding(
+        keyData.publicKey,
+        keyData.privateKey,
+        keyData.seedPhrase
+      );
+      setShowKey(true);
+    } catch (error) {
+      console.error("Failed to generate keys:", error);
+      // TODO: Show error state
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleConfirm = () => {
+    stateMachine.confirm();
+    // TODO: Store keys and username in localStorage/backend
+    setTimeout(() => {
+      router.push("/haven");
+      onClose();
+    }, 1000);
   };
 
   if (!open) return null;
@@ -85,160 +135,309 @@ export function AbyssIDDialog({ open, onClose }: AbyssIDDialogProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+          className="absolute inset-0 bg-black/90 backdrop-blur-sm"
         />
+
+        {/* Shader Plane */}
+        <ShaderPlane state={state} />
 
         {/* Dialog */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
+          animate={{
+            opacity: 1,
+            scale: reactive.modalScale,
+            y: 0,
+          }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-md bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-6 sm:p-8"
+          transition={{
+            duration: 0.3,
+            ease: [0.4, 0, 0.2, 1],
+          }}
+          className="relative w-full max-w-2xl bg-black/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
         >
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-white/5 transition-colors"
+            className="absolute top-4 right-4 z-10 p-2 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-white/5 transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
 
-          {/* Step 1: Input */}
-          {step === "input" && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-cyan-500/20 to-fuchsia-500/20 border border-cyan-500/30 mb-4">
-                  <Fingerprint className="h-8 w-8 text-cyan-400" />
-                </div>
-                <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 mb-2">
-                  Claim Your AbyssID
-                </h2>
-                <p className="text-zinc-400 text-sm">
-                  Your sovereign identity on the Demiurge chain
-                </p>
-              </div>
-
-              <div className="space-y-4">
+          <div className="p-8 sm:p-12">
+            {/* IDLE STATE */}
+            {state === "idle" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-8 text-center"
+              >
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">
-                    Desired AbyssID
+                  <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-500">
+                      THE ABYSS DOES NOT ASK.
+                    </span>
+                  </h2>
+                  <p className="text-lg sm:text-xl text-zinc-400 space-y-2">
+                    <span>It waits.</span>
+                    <br />
+                    <span>For you.</span>
+                  </p>
+                </div>
+
+                <div className="pt-4">
+                  <label className="block text-sm font-medium text-zinc-300 mb-3 text-left">
+                    Enter the name you wish to carry into the dark.
                   </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={abyssId}
-                      onChange={(e) => setAbyssId(e.target.value)}
-                      placeholder="your-abyss-id"
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all"
-                    />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      {availability === "checking" && (
-                        <Loader2 className="h-5 w-5 text-cyan-400 animate-spin" />
-                      )}
-                      {availability === "available" && (
-                        <CheckCircle2 className="h-5 w-5 text-green-400" />
-                      )}
-                      {availability === "taken" && (
-                        <XCircle className="h-5 w-5 text-red-400" />
-                      )}
-                    </div>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => handleUsernameChange(e.target.value)}
+                    placeholder="your chosen identity…"
+                    className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all text-lg"
+                    autoFocus
+                  />
+                </div>
+              </motion.div>
+            )}
+
+            {/* CHECKING STATE */}
+            {state === "checking" && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-8 text-center"
+              >
+                <motion.div
+                  animate={{
+                    scale: [1, 0.88, 1, 0.88, 1],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  <h3 className="text-2xl sm:text-3xl font-semibold text-zinc-300 mb-4">
+                    The Abyss considers your worth…
+                  </h3>
+                </motion.div>
+              </motion.div>
+            )}
+
+            {/* REJECT STATE */}
+            {state === "reject" && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                  scale: [1, 1.02, 1],
+                }}
+                transition={{
+                  duration: 0.4,
+                  ease: "easeOut",
+                }}
+                className="space-y-6 text-center"
+              >
+                <div className="text-red-400">
+                  <h3 className="text-2xl sm:text-3xl font-semibold mb-4">
+                    Another carried this name.
+                  </h3>
+                  <p className="text-lg text-zinc-400 mb-2">
+                    They were found unworthy.
+                  </p>
+                  <p className="text-lg text-zinc-400">
+                    You may choose again.
+                  </p>
+                </div>
+
+                <div className="pt-4">
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => handleUsernameChange(e.target.value)}
+                    placeholder="your chosen identity…"
+                    className="w-full px-6 py-4 bg-white/5 border border-red-500/30 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500/50 transition-all text-lg"
+                    autoFocus
+                  />
+                </div>
+              </motion.div>
+            )}
+
+            {/* ACCEPT STATE */}
+            {state === "accept" && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+                className="space-y-8 text-center"
+              >
+                <div>
+                  <h3 className="text-2xl sm:text-3xl font-semibold text-green-400 mb-4">
+                    The Abyss remembers you.
+                  </h3>
+                  <p className="text-lg text-zinc-300">
+                    You will not be forgotten again.
+                  </p>
+                </div>
+
+                <motion.button
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  onClick={handleRevealKey}
+                  className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white font-semibold rounded-lg hover:from-cyan-400 hover:to-fuchsia-400 transition-all duration-200 text-lg"
+                >
+                  Proceed to Binding
+                </motion.button>
+              </motion.div>
+            )}
+
+            {/* BINDING STATE */}
+            {state === "binding" && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-8"
+              >
+                <div className="text-center">
+                  <h2 className="text-3xl sm:text-4xl font-bold mb-6">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-500">
+                      THE BINDING
+                    </span>
+                  </h2>
+                  <div className="text-zinc-300 text-lg leading-relaxed space-y-2 max-w-xl mx-auto">
+                    <p>Your identity is forged below the threshold of light.</p>
+                    <p>
+                      Guard this key, or the Abyss will consume the memory of you
+                    </p>
+                    <p>like you never lived.</p>
                   </div>
                 </div>
 
-                {/* Availability Feedback */}
-                <AnimatePresence>
-                  {availability === "available" && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="p-3 rounded-lg bg-green-500/10 border border-green-500/30"
+                {isGenerating ? (
+                  <div className="text-center py-8">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-cyan-500 border-t-transparent"></div>
+                    <p className="mt-4 text-zinc-400">Forging your key...</p>
+                  </div>
+                ) : keys ? (
+                  <div className="space-y-4">
+                    <button
+                      onClick={() => setShowKey(!showKey)}
+                      className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-lg text-zinc-300 hover:bg-white/10 transition-all flex items-center justify-center gap-2"
                     >
-                      <p className="text-sm text-green-400 font-medium">
-                        ✓ Available
-                      </p>
-                    </motion.div>
-                  )}
-                  {availability === "taken" && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="p-3 rounded-lg bg-red-500/10 border border-red-500/30"
+                      {showKey ? (
+                        <>
+                          <EyeOff className="h-5 w-5" />
+                          Hide Key
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="h-5 w-5" />
+                          Reveal Key
+                        </>
+                      )}
+                    </button>
+
+                    {showKey && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="space-y-4 p-6 bg-black/50 border border-white/10 rounded-lg"
+                      >
+                        <div>
+                          <label className="block text-sm font-medium text-zinc-400 mb-2">
+                            Seed Phrase
+                          </label>
+                          <div className="p-4 bg-black/50 border border-white/5 rounded font-mono text-sm text-zinc-200 break-words">
+                            {keys.seedPhrase}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-zinc-400 mb-2">
+                            Private Key
+                          </label>
+                          <div className="p-4 bg-black/50 border border-white/5 rounded font-mono text-xs text-zinc-300 break-all">
+                            {keys.privateKey}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-zinc-400 mb-2">
+                            Public Key
+                          </label>
+                          <div className="p-4 bg-black/50 border border-white/5 rounded font-mono text-xs text-zinc-300 break-all">
+                            {keys.publicKey}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    <motion.button
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                      onClick={handleConfirm}
+                      className="w-full px-8 py-4 bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white font-semibold rounded-lg hover:from-cyan-400 hover:to-fuchsia-400 transition-all duration-200 text-lg flex items-center justify-center gap-2"
                     >
-                      <p className="text-sm text-red-400 font-medium">
-                        ✗ Already claimed or invalid
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      Continue
+                      <ArrowRight className="h-5 w-5" />
+                    </motion.button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleRevealKey}
+                    className="w-full px-8 py-4 bg-gradient-to-r from-cyan-500/20 to-fuchsia-500/20 border border-cyan-500/30 text-cyan-300 font-semibold rounded-lg hover:from-cyan-500/30 hover:to-fuchsia-500/30 transition-all duration-200 text-lg"
+                  >
+                    Reveal Key
+                  </button>
+                )}
+              </motion.div>
+            )}
 
-                <button
-                  onClick={handleEngage}
-                  disabled={availability !== "available" || isEngaging}
-                  className="w-full px-6 py-3 bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white font-semibold rounded-lg hover:from-cyan-400 hover:to-fuchsia-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                >
-                  {isEngaging ? "Engaging..." : "Engage"}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Generating */}
-          {step === "generating" && (
-            <div className="text-center space-y-6 py-8">
-              <Loader2 className="h-16 w-16 text-cyan-400 animate-spin mx-auto" />
-              <div>
-                <h3 className="text-xl font-bold text-zinc-100 mb-2">
-                  Generating Keypair
-                </h3>
-                <p className="text-zinc-400 text-sm">
-                  Creating your sovereign identity...
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Backup Warning */}
-          {step === "backup" && (
-            <div className="space-y-6">
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-500/20 border border-yellow-500/30 mb-4">
-                  <AlertTriangle className="h-8 w-8 text-yellow-400" />
+            {/* CONFIRM STATE */}
+            {state === "confirm" && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="space-y-8 text-center"
+              >
+                <div>
+                  <h2 className="text-3xl sm:text-4xl font-bold mb-6">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-purple-500">
+                      THE VOID OPENS.
+                    </span>
+                  </h2>
+                  <p className="text-lg text-zinc-300 mb-8">
+                    You belong to the dark now.
+                  </p>
+                  <p className="text-lg text-zinc-400 mb-8">
+                    Proceed.
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold text-zinc-100 mb-2">
-                  Backup Your Keys
-                </h3>
-                <p className="text-zinc-400 text-sm">
-                  TODO: Milestone 4.1 – integrate keypair backup flow
-                </p>
-              </div>
 
-              <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                <p className="text-sm text-yellow-400">
-                  ⚠️ Store your private key securely. If lost, your AbyssID cannot be recovered.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                <button
-                  onClick={handleComplete}
-                  className="w-full px-6 py-3 bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white font-semibold rounded-lg hover:from-cyan-400 hover:to-fuchsia-400 transition-all duration-200"
+                <motion.button
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  onClick={handleConfirm}
+                  className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white font-semibold rounded-lg hover:from-cyan-400 hover:to-fuchsia-400 transition-all duration-200 text-lg flex items-center justify-center gap-2 mx-auto"
                 >
-                  I've Backed Up My Keys
-                </button>
-                <button
-                  onClick={onClose}
-                  className="w-full px-6 py-3 bg-white/5 border border-white/10 text-zinc-300 font-semibold rounded-lg hover:bg-white/10 transition-all duration-200"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
+                  Enter Haven
+                  <ArrowRight className="h-5 w-5" />
+                </motion.button>
+              </motion.div>
+            )}
+          </div>
         </motion.div>
       </div>
     </AnimatePresence>
   );
 }
-
