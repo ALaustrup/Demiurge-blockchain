@@ -113,25 +113,40 @@ sudo ufw status
 
 ### **Phase 2: Clone Repository**
 
-#### 2.1 Create Project Directory
+#### 2.1 Clone Repository (Simple Method - Recommended)
+
+```bash
+# Navigate to /opt
+cd /opt
+
+# Clone repository (SSH)
+git clone git@github.com:ALaustrup/DEMIURGE.git
+
+# Or using HTTPS (if SSH key not set up)
+# git clone https://github.com/ALaustrup/DEMIURGE.git
+
+# Navigate into repo
+cd DEMIURGE
+
+# Checkout the feature branch
+git checkout feature/fracture-v1-portal
+```
+
+#### 2.2 Alternative: Nested Directory Structure
+
+If you prefer the nested structure (`/opt/demiurge/repo`):
 
 ```bash
 sudo mkdir -p /opt/demiurge
 sudo chown $USER:$USER /opt/demiurge
 cd /opt/demiurge
-```
 
-#### 2.2 Clone Repository
-
-```bash
-# If using SSH key
+# Clone to 'repo' subdirectory
 git clone git@github.com:ALaustrup/DEMIURGE.git repo
-
-# Or if using HTTPS
-git clone https://github.com/ALaustrup/DEMIURGE.git repo
+# Or: git clone https://github.com/ALaustrup/DEMIURGE.git repo
 
 cd repo
-git checkout feature/fracture-v1-portal  # or your target branch
+git checkout feature/fracture-v1-portal
 ```
 
 #### 2.3 Verify Structure

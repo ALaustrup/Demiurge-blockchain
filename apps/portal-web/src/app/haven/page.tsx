@@ -23,6 +23,7 @@ import {
   getUrgeIdProgress,
   getNftsByOwner,
   isDevBadgeNft,
+  normalizeAddressForChain,
   type UrgeIDProfile,
   type UrgeIDProgress,
   type NftMetadata,
@@ -36,6 +37,7 @@ import {
   generateTxId,
   type TransactionRecord,
 } from "@/lib/transactions";
+import { graphqlRequest, getChatHeaders } from "@/lib/graphql";
 
 
 type Nft = {
@@ -71,18 +73,20 @@ export default function HavenPage() {
   const [resolvedRecipient, setResolvedRecipient] = useState<{
     address: string;
     username?: string;
+    isDeveloper?: boolean;
   } | null>(null);
   const [resolvingRecipient, setResolvingRecipient] = useState(false);
   const [recipientError, setRecipientError] = useState<string | null>(null);
   const [txHistory, setTxHistory] = useState<TransactionRecord[]>([]);
+  const [isDeveloper, setIsDeveloper] = useState(false);
+  const [checkingDeveloper, setCheckingDeveloper] = useState(false);
 
-  // Normalize address for chain RPC (remove 0x prefix)
-  const normalizeAddressForRpc = (address: string): string => {
-    let normalized = address.trim().toLowerCase();
-    if (normalized.startsWith("0x")) {
-      normalized = normalized.slice(2);
-    }
-    return normalized;
+  // Use shared address normalization utility
+  const normalizeAddressForRpc = normalizeAddressForChain;
+  
+  // Normalize address for GraphQL (database stores addresses as-is from headers, typically lowercase with 0x)
+  const normalizeAddressForGraphQL = (address: string): string => {
+    return address.trim().toLowerCase();
   };
 
   // Helper to shorten address for display
@@ -94,8 +98,63 @@ export default function HavenPage() {
   useEffect(() => {
     if (identity?.address) {
       loadChainData();
+      checkDeveloperStatus();
     }
   }, [identity]);
+  
+  // Check developer status from GraphQL
+  const checkDeveloperStatus = async () => {
+    if (!identity?.address) {
+      setIsDeveloper(false);
+      return;
+    }
+
+    try {
+      setCheckingDeveloper(true);
+      
+      // Normalize address for GraphQL query
+      const normalizedAddress = normalizeAddressForGraphQL(identity.address);
+      
+      // Query developer status
+      const query = `
+        query {
+          developer(address: "${normalizedAddress}") {
+            address
+            username
+            reputation
+            createdAt
+          }
+        }
+      `;
+      
+      const data = await graphqlRequest<{ developer: { address: string; username: string; reputation: number; createdAt: string } | null }>(
+        query,
+        {},
+        getChatHeaders(identity.address, identity.username || "")
+      );
+      
+      const isDev = !!data.developer;
+      setIsDeveloper(isDev);
+      
+      // Update identity if developer status changed
+      if (isDev && !identity.isDeveloper) {
+        setIdentity({ ...identity, isDeveloper: true });
+      } else if (!isDev && identity.isDeveloper) {
+        setIdentity({ ...identity, isDeveloper: false });
+      }
+    } catch (err: any) {
+      // Silently handle gateway connection errors
+      if (err.message?.includes("Connection failed") || err.message?.includes("Unable to reach")) {
+        console.warn("Abyss Gateway not available - developer status check failed");
+        setIsDeveloper(false);
+      } else {
+        console.error("Failed to check developer status:", err);
+        setIsDeveloper(false);
+      }
+    } finally {
+      setCheckingDeveloper(false);
+    }
+  };
 
   const loadChainData = async () => {
     if (!identity?.address) return;
@@ -196,8 +255,28 @@ export default function HavenPage() {
     }
     
     if (normalizedAddr.length === 64 && /^[0-9a-fA-F]{64}$/.test(normalizedAddr)) {
-      // It's an address
-      setResolvedRecipient({ address: normalizedAddr });
+      // It's an address - check if they're a developer
+      let isDev = false;
+      try {
+        const normalizedForGraphQL = normalizeAddressForGraphQL(trimmed);
+        const query = `
+          query {
+            developer(address: "${normalizedForGraphQL}") {
+              address
+              username
+            }
+          }
+        `;
+        const data = await graphqlRequest<{ developer: { address: string; username: string } | null }>(
+          query,
+          {},
+          getChatHeaders(identity?.address || "", identity?.username || "")
+        );
+        isDev = !!data.developer;
+      } catch (err) {
+        // Silently fail - not a developer
+      }
+      setResolvedRecipient({ address: normalizedAddr, isDeveloper: isDev });
       setRecipientError(null);
       return;
     }
@@ -211,7 +290,28 @@ export default function HavenPage() {
       try {
         const resolved = await resolveUsername(username);
         if (resolved && resolved.address) {
-          setResolvedRecipient({ address: resolved.address, username });
+          // Check if this user is a developer
+          let isDev = false;
+          try {
+            const normalizedForGraphQL = normalizeAddressForGraphQL(resolved.address);
+            const query = `
+              query {
+                developer(address: "${normalizedForGraphQL}") {
+                  address
+                  username
+                }
+              }
+            `;
+            const data = await graphqlRequest<{ developer: { address: string; username: string } | null }>(
+              query,
+              {},
+              getChatHeaders(identity?.address || "", identity?.username || "")
+            );
+            isDev = !!data.developer;
+          } catch (err) {
+            // Silently fail - not a developer
+          }
+          setResolvedRecipient({ address: resolved.address, username, isDeveloper: isDev });
         } else {
           setRecipientError("Username not found");
           setResolvedRecipient(null);
@@ -402,10 +502,10 @@ export default function HavenPage() {
                 <div>
                   <h3 className="text-lg font-semibold text-zinc-100 mb-1 flex items-center gap-2">
                     AbyssID: @{identity.username}
-                    {identity.isDeveloper && (
+                    {(isDeveloper || identity.isDeveloper) && (
                       <span className="px-2 py-1 text-xs font-semibold bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white rounded-full flex items-center gap-1">
-                        <Sparkles className="h-3 w-3" />
-                        Dev
+                        <Code className="h-3 w-3" />
+                        DEV
                       </span>
                     )}
                   </h3>
@@ -659,9 +759,15 @@ export default function HavenPage() {
                 {resolvedRecipient && !recipientError && (
                   <div className="mt-2 rounded-lg border border-white/10 bg-black/20 p-2">
                     {resolvedRecipient.username ? (
-                      <div className="text-xs text-zinc-300">
+                      <div className="text-xs text-zinc-300 flex items-center gap-2">
                         <span className="font-semibold text-cyan-400">@{resolvedRecipient.username}</span>
-                        <span className="ml-2 text-zinc-500 font-mono">
+                        {resolvedRecipient.isDeveloper && (
+                          <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white rounded-full flex items-center gap-0.5">
+                            <Code className="h-2.5 w-2.5" />
+                            DEV
+                          </span>
+                        )}
+                        <span className="ml-auto text-zinc-500 font-mono">
                           ({shortenAddress(resolvedRecipient.address)})
                         </span>
                       </div>

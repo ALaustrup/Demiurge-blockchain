@@ -4,19 +4,26 @@ import { NavbarWrapper } from "@/components/layout/NavbarWrapper";
 import { ServiceWorkerRegistration } from "@/components/pwa/ServiceWorkerRegistration";
 import { AudioContextProvider } from "@/lib/fracture/audio/AudioContextProvider";
 import { AbyssIDProvider } from "@/lib/fracture/identity/AbyssIDContext";
-import { UnifrakturMaguntia, Creepster } from "next/font/google";
+import { Bebas_Neue, Oswald, Rajdhani } from "next/font/google";
 
-const unifraktur = UnifrakturMaguntia({
+const bebasNeue = Bebas_Neue({
   weight: "400",
   subsets: ["latin"],
-  variable: "--font-unifraktur",
+  variable: "--font-bebas",
   display: "swap",
 });
 
-const creepster = Creepster({
-  weight: "400",
+const oswald = Oswald({
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
-  variable: "--font-creepster",
+  variable: "--font-oswald",
+  display: "swap",
+});
+
+const rajdhani = Rajdhani({
+  weight: ["400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-rajdhani",
   display: "swap",
 });
 
@@ -53,7 +60,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${unifraktur.variable} ${creepster.variable}`}>
+    <html lang="en" className={`${bebasNeue.variable} ${oswald.variable} ${rajdhani.variable}`}>
       <head>
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />

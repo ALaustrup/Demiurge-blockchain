@@ -8,7 +8,7 @@ import { useAbyssID } from "@/lib/fracture/identity/AbyssIDContext";
 import { useState, useEffect } from "react";
 import { graphqlRequest, getChatHeaders, MUTATIONS } from "@/lib/graphql";
 import { motion } from "framer-motion";
-import { devClaimDevNft, getNftsByOwner, isDevBadgeNft, callRpc, type NftMetadata } from "@/lib/rpc";
+import { devClaimDevNft, getNftsByOwner, isDevBadgeNft, callRpc, normalizeAddressForChain, type NftMetadata } from "@/lib/rpc";
 
 export default function VoidPage() {
   const { identity, setIdentity } = useAbyssID();
@@ -146,14 +146,8 @@ export default function VoidPage() {
     }
   };
 
-  // Normalize address (remove 0x prefix for chain RPC)
-  const normalizeAddress = (address: string): string => {
-    let normalized = address.trim().toLowerCase();
-    if (normalized.startsWith("0x")) {
-      normalized = normalized.slice(2);
-    }
-    return normalized;
-  };
+  // Import shared address normalization utility
+  const normalizeAddress = normalizeAddressForChain;
   
   // Normalize address for GraphQL (database stores addresses as-is from headers, typically lowercase with 0x)
   const normalizeAddressForGraphQL = (address: string): string => {
