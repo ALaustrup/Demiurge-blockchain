@@ -3,7 +3,7 @@
 import { FractureShell } from "@/components/fracture/FractureShell";
 import { HeroPanel } from "@/components/fracture/HeroPanel";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { MessageSquare, Send, Sparkles, MoreVertical, MessageCircle, VolumeX, Flag, Image as ImageIcon, X, EyeOff, Plus, Settings, Users, Music, Shield } from "lucide-react";
+import { MessageSquare, Send, Sparkles, MoreVertical, MessageCircle, VolumeX, Flag, Image as ImageIcon, X, EyeOff, Plus, Settings, Users, Music, Shield, Network, Activity, Upload, Download, Server } from "lucide-react";
 import {
   graphqlRequest,
   getChatHeaders,
@@ -30,11 +30,25 @@ interface ContextMenu {
   message: ChatMessage;
 }
 
+type NexusTab = "chat" | "analytics";
+
 export default function NexusPage() {
   const { identity } = useAbyssID();
+  const [activeTab, setActiveTab] = useState<NexusTab>("chat");
   const [currentAddress, setCurrentAddress] = useState<string>("");
   const [currentUsername, setCurrentUsername] = useState<string>("");
   const [activeView, setActiveView] = useState<ChatView>(null);
+  
+  // P2P Analytics state
+  const [p2pStats, setP2pStats] = useState({
+    connectedPeers: 0,
+    totalBandwidth: { up: 0, down: 0 },
+    seededContent: 0,
+    downloadedContent: 0,
+    networkHealth: "unknown" as "healthy" | "degraded" | "offline" | "unknown",
+  });
+  const [seedingEnabled, setSeedingEnabled] = useState(false);
+  const [loadingP2P, setLoadingP2P] = useState(false);
   const [activeRoom, setActiveRoom] = useState<ActiveRoom | null>(null);
   const [worldMessages, setWorldMessages] = useState<ChatMessage[]>([]);
   const [dmRooms, setDmRooms] = useState<ChatRoom[]>([]);
@@ -797,9 +811,234 @@ export default function NexusPage() {
   const activeCustomRoom = activeRoom?.type === "custom" ? activeRoom.room : null;
   const isMod = activeCustomRoom ? isRoomModerator(activeCustomRoom) : false;
 
+  // Load P2P stats (placeholder - replace with actual API)
+  useEffect(() => {
+    if (activeTab === "analytics" && identity?.address) {
+      setLoadingP2P(true);
+      // TODO: Replace with actual P2P network API calls
+      setTimeout(() => {
+        setP2pStats({
+          connectedPeers: 12,
+          totalBandwidth: { up: 2.5, down: 1.8 },
+          seededContent: 8,
+          downloadedContent: 15,
+          networkHealth: "healthy",
+        });
+        setLoadingP2P(false);
+      }, 500);
+    }
+  }, [activeTab, identity]);
+
   return (
     <FractureShell showNav={true}>
-      <div className="flex h-[calc(100vh-8rem)] bg-zinc-950/50 text-zinc-100 rounded-xl border border-white/10 overflow-hidden">
+      {/* Tab Navigation */}
+      <div className="mb-6 flex gap-2 border-b border-white/10">
+        <button
+          onClick={() => setActiveTab("chat")}
+          className={`px-6 py-3 font-semibold transition-all ${
+            activeTab === "chat"
+              ? "border-b-2 border-cyan-500 text-cyan-300"
+              : "text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4" />
+            Chat
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveTab("analytics")}
+          className={`px-6 py-3 font-semibold transition-all ${
+            activeTab === "analytics"
+              ? "border-b-2 border-cyan-500 text-cyan-300"
+              : "text-zinc-400 hover:text-zinc-200"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <Network className="h-4 w-4" />
+            P2P Analytics
+          </div>
+        </button>
+      </div>
+
+      {/* P2P Analytics View */}
+      {activeTab === "analytics" && (
+        <div className="space-y-6">
+          <HeroPanel
+            title="Nexus"
+            subtitle="P2P analytics & seeding controls"
+          />
+
+          {!identity ? (
+            <div className="text-center space-y-4 p-8 bg-white/5 border border-white/10 rounded-xl">
+              <p className="text-zinc-400">Please create an AbyssID to view P2P analytics.</p>
+              <p className="text-sm text-zinc-500">
+                P2P features require an identity. Create one from Haven.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Network Status Cards */}
+              <div className="grid md:grid-cols-4 gap-4">
+                <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Users className="h-4 w-4 text-cyan-400" />
+                    <p className="text-xs text-zinc-400">Connected Peers</p>
+                  </div>
+                  {loadingP2P ? (
+                    <p className="text-xl font-mono font-semibold text-zinc-500">...</p>
+                  ) : (
+                    <p className="text-xl font-mono font-semibold text-cyan-400">
+                      {p2pStats.connectedPeers}
+                    </p>
+                  )}
+                </div>
+
+                <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Upload className="h-4 w-4 text-fuchsia-400" />
+                    <p className="text-xs text-zinc-400">Upload Speed</p>
+                  </div>
+                  {loadingP2P ? (
+                    <p className="text-xl font-mono font-semibold text-zinc-500">...</p>
+                  ) : (
+                    <p className="text-xl font-mono font-semibold text-fuchsia-400">
+                      {p2pStats.totalBandwidth.up.toFixed(1)} MB/s
+                    </p>
+                  )}
+                </div>
+
+                <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Download className="h-4 w-4 text-purple-400" />
+                    <p className="text-xs text-zinc-400">Download Speed</p>
+                  </div>
+                  {loadingP2P ? (
+                    <p className="text-xl font-mono font-semibold text-zinc-500">...</p>
+                  ) : (
+                    <p className="text-xl font-mono font-semibold text-purple-400">
+                      {p2pStats.totalBandwidth.down.toFixed(1)} MB/s
+                    </p>
+                  )}
+                </div>
+
+                <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Activity className="h-4 w-4 text-emerald-400" />
+                    <p className="text-xs text-zinc-400">Network Health</p>
+                  </div>
+                  {loadingP2P ? (
+                    <p className="text-xl font-mono font-semibold text-zinc-500">...</p>
+                  ) : (
+                    <p className={`text-sm font-semibold ${
+                      p2pStats.networkHealth === "healthy" ? "text-emerald-400" :
+                      p2pStats.networkHealth === "degraded" ? "text-yellow-400" :
+                      "text-red-400"
+                    }`}>
+                      {p2pStats.networkHealth.toUpperCase()}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Seeding Controls */}
+              <div className="p-6 bg-white/5 border border-white/10 rounded-xl">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-cyan-500/20 border border-cyan-500/30">
+                      <Server className="h-5 w-5 text-cyan-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-zinc-100">Content Seeding</h3>
+                      <p className="text-xs text-zinc-400">Share content and earn Syzygy rewards</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setSeedingEnabled(!seedingEnabled)}
+                    className={`px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
+                      seedingEnabled
+                        ? "bg-emerald-500/20 border border-emerald-500/30 text-emerald-400"
+                        : "bg-zinc-800/50 border border-white/10 text-zinc-400"
+                    }`}
+                  >
+                    {seedingEnabled ? "Seeding Active" : "Start Seeding"}
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4 mt-4">
+                  <div className="p-4 bg-black/20 rounded-lg border border-white/10">
+                    <p className="text-xs text-zinc-400 mb-1">Content Seeded</p>
+                    {loadingP2P ? (
+                      <p className="text-2xl font-mono font-semibold text-zinc-500">...</p>
+                    ) : (
+                      <p className="text-2xl font-mono font-semibold text-cyan-400">
+                        {p2pStats.seededContent}
+                      </p>
+                    )}
+                    <p className="text-xs text-zinc-500 mt-1">Active seeders</p>
+                  </div>
+
+                  <div className="p-4 bg-black/20 rounded-lg border border-white/10">
+                    <p className="text-xs text-zinc-400 mb-1">Content Downloaded</p>
+                    {loadingP2P ? (
+                      <p className="text-2xl font-mono font-semibold text-zinc-500">...</p>
+                    ) : (
+                      <p className="text-2xl font-mono font-semibold text-fuchsia-400">
+                        {p2pStats.downloadedContent}
+                      </p>
+                    )}
+                    <p className="text-xs text-zinc-500 mt-1">Total downloads</p>
+                  </div>
+                </div>
+
+                {seedingEnabled && (
+                  <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg">
+                    <p className="text-sm text-emerald-300">
+                      ✓ Seeding is active. You're contributing to the Fabric network and earning Syzygy rewards.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Network Topology Placeholder */}
+              <div className="p-6 bg-white/5 border border-white/10 rounded-xl">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 rounded-lg bg-purple-500/20 border border-purple-500/30">
+                    <Network className="h-5 w-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-zinc-100">Fabric Network Topology</h3>
+                    <p className="text-xs text-zinc-400">Visual representation of P2P connections</p>
+                  </div>
+                </div>
+                <div className="p-8 bg-black/20 rounded-lg border border-white/10 text-center">
+                  <Network className="h-12 w-12 text-zinc-600 mx-auto mb-3" />
+                  <p className="text-sm text-zinc-400 mb-2">Network Topology Visualization</p>
+                  <p className="text-xs text-zinc-500">
+                    TODO: Milestone 4.1 – integrate Fabric network topology visualization
+                  </p>
+                </div>
+              </div>
+
+              {/* Info Section */}
+              <div className="p-6 bg-gradient-to-r from-cyan-500/10 to-fuchsia-500/10 border border-cyan-500/20 rounded-xl">
+                <h3 className="text-lg font-semibold text-zinc-100 mb-2">
+                  About P2P Analytics
+                </h3>
+                <p className="text-sm text-zinc-400 leading-relaxed">
+                  Nexus provides real-time insights into the Fabric P2P network. Monitor your connection status,
+                  bandwidth usage, and content seeding activity. By seeding content, you contribute to the network
+                  and earn Syzygy rewards. The network topology view shows how nodes are connected across the Fabric.
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Chat View */}
+      {activeTab === "chat" && (
+        <div className="flex h-[calc(100vh-8rem)] bg-zinc-950/50 text-zinc-100 rounded-xl border border-white/10 overflow-hidden">
         {/* Sidebar */}
         <div className="hidden md:block w-80 border-r border-white/10 bg-zinc-950/50">
           <div className="border-b border-white/10 p-4">
@@ -1192,7 +1431,8 @@ export default function NexusPage() {
             </div>
           )}
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Context Menu */}
       {contextMenu && (

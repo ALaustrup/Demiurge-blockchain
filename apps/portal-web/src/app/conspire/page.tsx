@@ -2,9 +2,102 @@
 
 import { FractureShell } from "@/components/fracture/FractureShell";
 import { HeroPanel } from "@/components/fracture/HeroPanel";
-import { Sparkles, MessageSquare, Zap, BookOpen } from "lucide-react";
+import { Sparkles, MessageSquare, Zap, BookOpen, Send, Loader2, X } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAbyssID } from "@/lib/fracture/identity/AbyssIDContext";
+
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+}
 
 export default function ConspirePage() {
+  const { identity } = useAbyssID();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Initialize with welcome message
+  useEffect(() => {
+    if (messages.length === 0) {
+      setMessages([
+        {
+          id: "welcome",
+          role: "assistant",
+          content: "Greetings, seeker. I am ArchonAI, your guide through the Demiurge. How may I assist you today? I can help with development tasks, documentation queries, creation workflows, and understanding the ecosystem.",
+          timestamp: new Date(),
+        },
+      ]);
+    }
+  }, []);
+
+  const handleSend = async () => {
+    if (!input.trim() || sending || !identity?.address) return;
+
+    const userMessage: Message = {
+      id: `user-${Date.now()}`,
+      role: "user",
+      content: input.trim(),
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setSending(true);
+    setError(null);
+
+    try {
+      // TODO: Replace with actual ArchonAI backend endpoint
+      // For now, simulate a response
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Simulated response - replace with actual API call
+      const response: Message = {
+        id: `assistant-${Date.now()}`,
+        role: "assistant",
+        content: `I understand you're asking about "${userMessage.content}". This is a placeholder response. The ArchonAI backend integration is pending. In production, this will connect to an LLM service that can assist with:\n\n- SDK integration and API usage\n- Documentation queries and code examples\n- Creation workflows for NFTs and worlds\n- Understanding Demiurge architecture\n\nWould you like to know more about any specific aspect of the Demiurge ecosystem?`,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, response]);
+    } catch (err: any) {
+      setError(err.message || "Failed to get response from ArchonAI");
+      const errorMessage: Message = {
+        id: `error-${Date.now()}`,
+        role: "assistant",
+        content: "I apologize, but I'm experiencing technical difficulties. Please try again later.",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleClear = () => {
+    setMessages([
+      {
+        id: "welcome",
+        role: "assistant",
+        content: "Greetings, seeker. I am ArchonAI, your guide through the Demiurge. How may I assist you today?",
+        timestamp: new Date(),
+      },
+    ]);
+    setConversationId(null);
+    setError(null);
+  };
+
   return (
     <FractureShell>
       <HeroPanel
@@ -13,39 +106,133 @@ export default function ConspirePage() {
       />
 
       <div className="space-y-6">
-        {/* Main Chat Interface Placeholder */}
-        <div className="p-8 bg-white/5 border border-white/10 rounded-xl min-h-[400px] flex flex-col">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="p-3 rounded-lg bg-gradient-to-r from-cyan-500/20 to-fuchsia-500/20 border border-cyan-500/30">
-              <Sparkles className="h-6 w-6 text-cyan-400" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-xl font-semibold text-zinc-100 mb-1">
-                ArchonAI Assistant
-              </h3>
-              <p className="text-sm text-zinc-400">
-                TODO: Milestone 4.1 – integrate ArchonAI chat interface
-              </p>
-            </div>
-          </div>
-
-          {/* Chat Placeholder */}
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center space-y-4 max-w-md">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-cyan-500/20 to-fuchsia-500/20 border border-cyan-500/30">
-                <MessageSquare className="h-8 w-8 text-cyan-400" />
+        {/* Main Chat Interface */}
+        <div className="p-6 bg-white/5 border border-white/10 rounded-xl min-h-[500px] flex flex-col">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-gradient-to-r from-cyan-500/20 to-fuchsia-500/20 border border-cyan-500/30">
+                <Sparkles className="h-6 w-6 text-cyan-400" />
               </div>
               <div>
-                <p className="text-zinc-300 font-medium mb-2">
-                  ArchonAI Chat Interface
-                </p>
-                <p className="text-sm text-zinc-400 leading-relaxed">
-                  This will integrate an LLM assistant for dev tasks, documentation queries,
-                  creation workflows, and general assistance with the Demiurge ecosystem.
+                <h3 className="text-xl font-semibold text-zinc-100 mb-1">
+                  ArchonAI Assistant
+                </h3>
+                <p className="text-sm text-zinc-400">
+                  {identity ? "Ready to assist" : "Please create an AbyssID to use ArchonAI"}
                 </p>
               </div>
             </div>
+            {messages.length > 1 && (
+              <button
+                onClick={handleClear}
+                className="px-3 py-1.5 text-xs text-zinc-400 hover:text-zinc-200 border border-white/10 rounded-lg hover:bg-white/5 transition-colors"
+              >
+                Clear Chat
+              </button>
+            )}
           </div>
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto space-y-4 mb-4 min-h-[300px] max-h-[400px]">
+            {messages.map((msg) => (
+              <motion.div
+                key={msg.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                {msg.role === "assistant" && (
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500/20 to-fuchsia-500/20 border border-cyan-500/30 flex items-center justify-center">
+                    <Sparkles className="h-4 w-4 text-cyan-400" />
+                  </div>
+                )}
+                <div
+                  className={`max-w-[80%] rounded-lg p-4 ${
+                    msg.role === "user"
+                      ? "bg-gradient-to-r from-cyan-500/20 to-fuchsia-500/20 border border-cyan-500/30 text-zinc-100"
+                      : "bg-white/5 border border-white/10 text-zinc-300"
+                  }`}
+                >
+                  <div className="text-sm whitespace-pre-wrap leading-relaxed">{msg.content}</div>
+                  <div className="text-xs text-zinc-500 mt-2">
+                    {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </div>
+                </div>
+                {msg.role === "user" && (
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                    <span className="text-xs font-semibold text-zinc-300">
+                      {identity?.username?.slice(0, 2).toUpperCase() || "U"}
+                    </span>
+                  </div>
+                )}
+              </motion.div>
+            ))}
+            {sending && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex gap-3 justify-start"
+              >
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500/20 to-fuchsia-500/20 border border-cyan-500/30 flex items-center justify-center">
+                  <Sparkles className="h-4 w-4 text-cyan-400" />
+                </div>
+                <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+                  <Loader2 className="h-4 w-4 text-cyan-400 animate-spin" />
+                </div>
+              </motion.div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+              <p className="text-xs text-red-400">{error}</p>
+            </div>
+          )}
+
+          {/* Input */}
+          {identity ? (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+                placeholder="Ask ArchonAI anything about Demiurge..."
+                className="flex-1 rounded-lg border border-white/10 bg-black/20 px-4 py-3 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+                disabled={sending}
+              />
+              <button
+                onClick={handleSend}
+                disabled={sending || !input.trim()}
+                className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white font-semibold rounded-lg hover:from-cyan-400 hover:to-fuchsia-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+              >
+                {sending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    Send
+                  </>
+                )}
+              </button>
+            </div>
+          ) : (
+            <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-center">
+              <p className="text-sm text-yellow-300">
+                Please create an AbyssID to use ArchonAI. Visit Haven to get started.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Features Grid */}
@@ -98,9 +285,11 @@ export default function ConspirePage() {
             and receive guidance on building within the Demiurge ecosystem. This is where human creativity
             meets artificial intelligence in service of sovereign creation.
           </p>
+          <p className="text-xs text-zinc-500 mt-3">
+            Note: ArchonAI backend integration is pending. Currently showing placeholder responses.
+          </p>
         </div>
       </div>
     </FractureShell>
   );
 }
-
