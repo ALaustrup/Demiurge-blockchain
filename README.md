@@ -84,12 +84,13 @@ DEMIURGE/
 
 ## Documentation
 
-All project documentation has been moved to the `/docs` directory for clarity and maintenance.
+All project documentation has been organized in the `/docs` directory. Start with the [Documentation Index](docs/index.md) for a complete overview.
 
-- [Architecture Overview](docs/ARCHITECTURE_DEMIURGE_CURRENT.md)
-- [Runtime Modules](docs/RUNTIME.md)
-- [RPC API](docs/RPC.md)
-- [Devnet Setup](docs/DEVNET.md)
+Quick links:
+- [Architecture Overview](docs/overview/ARCHITECTURE_DEMIURGE_CURRENT.md)
+- [Runtime Modules](docs/overview/RUNTIME.md)
+- [RPC API](docs/api/RPC.md)
+- [Devnet Setup](docs/network/DEVNET.md)
 - [Deployment Guide](docs/deployment/README_NODE0.md)
 
 ## Getting Started
