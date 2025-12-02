@@ -82,6 +82,16 @@ DEMIURGE/
 └── infra/                   # Docker, k8s, devcontainer configs
 ```
 
+## Documentation
+
+All project documentation has been moved to the `/docs` directory for clarity and maintenance.
+
+- [Architecture Overview](docs/ARCHITECTURE_DEMIURGE_CURRENT.md)
+- [Runtime Modules](docs/RUNTIME.md)
+- [RPC API](docs/RPC.md)
+- [Devnet Setup](docs/DEVNET.md)
+- [Deployment Guide](docs/deployment/README_NODE0.md)
+
 ## Getting Started
 
 ### Prerequisites
