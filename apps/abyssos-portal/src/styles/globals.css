@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-abyss-dark text-white overflow-hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  }
+  #root {
+    @apply w-screen h-screen;
+  }
+}
+
+@layer utilities {
+  .glitch-text {
+    position: relative;
+    color: #00ffff;
+    text-shadow: 
+      2px 0 #ff00ff,
+      -2px 0 #00ffff,
+      0 2px #9d00ff,
+      0 -2px #00ffff;
+    animation: glitch 0.3s infinite;
+  }
+
+  .glitch-text::before,
+  .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .glitch-text::before {
+    left: 2px;
+    text-shadow: -2px 0 #ff00ff;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-1 0.5s infinite linear alternate-reverse;
+  }
+
+  .glitch-text::after {
+    left: -2px;
+    text-shadow: -2px 0 #00ffff;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-2 0.5s infinite linear alternate-reverse;
+  }
+
+  @keyframes glitch-anim-1 {
+    0% { clip: rect(31px, 9999px, 94px, 0); }
+    20% { clip: rect(54px, 9999px, 66px, 0); }
+    40% { clip: rect(28px, 9999px, 99px, 0); }
+    60% { clip: rect(78px, 9999px, 102px, 0); }
+    80% { clip: rect(23px, 9999px, 85px, 0); }
+    100% { clip: rect(39px, 9999px, 53px, 0); }
+  }
+
+  @keyframes glitch-anim-2 {
+    0% { clip: rect(65px, 9999px, 100px, 0); }
+    20% { clip: rect(41px, 9999px, 74px, 0); }
+    40% { clip: rect(87px, 9999px, 61px, 0); }
+    60% { clip: rect(12px, 9999px, 79px, 0); }
+    80% { clip: rect(52px, 9999px, 97px, 0); }
+    100% { clip: rect(18px, 9999px, 83px, 0); }
+  }
+}
+

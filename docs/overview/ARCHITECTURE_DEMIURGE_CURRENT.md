@@ -2,6 +2,12 @@
 
 This document summarizes the existing Demiurge L1 blockchain implementation as of the current state. It describes only what already exists, without proposing changes.
 
+**Last Updated**: December 2024  
+**Production Status**: 
+- Node0: Live at 51.210.209.112
+- RPC: https://rpc.demiurge.cloud/rpc (HTTPS)
+- AbyssOS: https://demiurge.cloud (HTTPS)
+
 ## Directory Layout
 
 ```

@@ -2,6 +2,12 @@
 
 This guide explains how to deploy a single Demiurge devnet node (Node0) on Ubuntu 24.04.
 
+**Current Production Status:**
+- **Node**: Node0 at 51.210.209.112
+- **RPC**: https://rpc.demiurge.cloud/rpc (HTTPS enabled)
+- **AbyssOS**: https://demiurge.cloud (HTTPS enabled)
+- **Status**: ✅ Live and operational
+
 ## Prerequisites
 
 - Ubuntu 24.04 server

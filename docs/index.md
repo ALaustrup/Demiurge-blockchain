@@ -1,9 +1,22 @@
 # Demiurge Blockchain Documentation
 
-Welcome to the Demiurge L1 documentation. This repo contains the core chain, runtime modules, CGT token logic, work-claim mining, and infrastructure for node operators.
+Welcome to the Demiurge L1 documentation. This repo contains the core chain, runtime modules, CGT token logic, work-claim mining, infrastructure for node operators, and the AbyssOS desktop environment.
+
+**Live Services:**
+- **AbyssOS Portal**: https://demiurge.cloud (Full-screen desktop environment)
+- **RPC Endpoint**: https://rpc.demiurge.cloud/rpc (JSON-RPC API)
+
+**Current State**: See [Current State Overview](CURRENT_STATE.md) for production deployment status and recent milestones.
+
+## Applications
+
+- [AbyssOS Portal](apps/ABYSSOS_PORTAL.md) - Full-screen desktop environment for Demiurge Blockchain
+  - Live at: https://demiurge.cloud
+  - Features: Boot screen, AbyssID auth, desktop UI, Chain Ops, window management
 
 ## Overview
 
+- [Current State](CURRENT_STATE.md) - Production status and recent milestones
 - [Architecture Overview](overview/ARCHITECTURE_DEMIURGE_CURRENT.md)
 - [Runtime Modules](overview/RUNTIME.md)
 - [Consensus](overview/CONSENSUS.md) *(future)*
@@ -27,8 +40,9 @@ Welcome to the Demiurge L1 documentation. This repo contains the core chain, run
 
 ## Deployment
 
-- [Node0 / RC0 Deployment Guide](deployment/README_NODE0.md)
+- [Node0 / RC0 Deployment Guide](deployment/README_NODE0.md) - **Current production deployment**
 - [RC0 Deployment](deployment/DEPLOYMENT_RC0.md)
+- [AbyssOS Deployment](apps/ABYSSOS_PORTAL.md#deployment) - HTTPS deployment at demiurge.cloud
 - [Complete Deployment Instructions](deployment/COMPLETE_DEPLOYMENT_INSTRUCTIONS.md)
 - [Deployment Guide](deployment/DEPLOYMENT_GUIDE.md)
 - [OVHCloud Deployment Guide](deployment/OVHCLOUD_DEPLOYMENT_GUIDE.md)
@@ -72,6 +86,11 @@ Welcome to the Demiurge L1 documentation. This repo contains the core chain, run
 - [Development Status](development/DEVELOPMENT_STATUS.md)
 - [Current Status & Action Plan](development/CURRENT_STATUS_AND_ACTION_PLAN.md)
 - [Project Utility Overview](development/PROJECT_UTILITY_OVERVIEW.md)
+
+**Current Production Status:**
+- Node0: Live at 51.210.209.112
+- AbyssOS: https://demiurge.cloud (HTTPS enabled)
+- RPC: https://rpc.demiurge.cloud/rpc (HTTPS enabled)
 
 ### Milestones
 
