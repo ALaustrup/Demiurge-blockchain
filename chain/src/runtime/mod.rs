@@ -4,6 +4,8 @@
 //! runtime modules. In Phase 3, concrete modules (bank_cgt, nft_dgen, etc.)
 //! are registered here and handle transaction execution.
 
+use std::collections::HashMap;
+
 use crate::core::state::State;
 use crate::core::transaction::Transaction;
 
@@ -68,22 +70,26 @@ pub trait RuntimeModule: Send + Sync {
 ///
 /// The Runtime is created fresh for each block execution in Phase 3.
 /// In later phases, this may be stored in Node for reuse.
+///
+/// Uses a HashMap for O(1) module lookup by module_id, improving dispatch
+/// performance compared to linear search through a Vec.
 pub struct Runtime {
-    /// List of registered runtime modules.
-    modules: Vec<Box<dyn RuntimeModule>>,
+    /// Map of module_id -> module for O(1) lookup.
+    modules: HashMap<&'static str, Box<dyn RuntimeModule>>,
 }
 
 impl Runtime {
     /// Create a new empty runtime registry.
     pub fn new() -> Self {
         Self {
-            modules: Vec::new(),
+            modules: HashMap::new(),
         }
     }
 
     /// Add a module to the runtime registry.
     pub fn with_module(mut self, module: Box<dyn RuntimeModule>) -> Self {
-        self.modules.push(module);
+        let module_id = module.module_id();
+        self.modules.insert(module_id, module);
         self
     }
 
@@ -100,10 +106,15 @@ impl Runtime {
             .with_module(Box::new(RecursionRegistryModule::new()))
     }
 
+    /// Returns the number of registered modules.
+    pub fn module_count(&self) -> usize {
+        self.modules.len()
+    }
+
     /// Dispatch a transaction to the appropriate runtime module.
     ///
-    /// Looks up the module by `module_id` and calls its `dispatch` method
-    /// with the transaction's `call_id` and the full transaction.
+    /// Looks up the module by `module_id` using O(1) HashMap lookup and calls
+    /// its `dispatch` method with the transaction's `call_id` and the full transaction.
     ///
     /// # Returns
     /// - `Ok(())` if the transaction was successfully dispatched and executed
@@ -111,8 +122,7 @@ impl Runtime {
     pub fn dispatch_tx(&mut self, tx: &Transaction, state: &mut State) -> Result<(), String> {
         let module = self
             .modules
-            .iter()
-            .find(|m| m.module_id() == tx.module_id)
+            .get(tx.module_id.as_str())
             .ok_or_else(|| format!("Unknown module: {}", tx.module_id))?;
 
         module.dispatch(&tx.call_id, tx, state)
@@ -134,7 +144,7 @@ mod tests {
     #[test]
     fn test_runtime_with_default_modules() {
         let runtime = Runtime::with_default_modules();
-        assert_eq!(runtime.modules.len(), 8);
+        assert_eq!(runtime.module_count(), 8);
     }
 
     #[test]
