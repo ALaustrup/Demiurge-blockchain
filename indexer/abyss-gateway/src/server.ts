@@ -6,13 +6,9 @@ import { createYoga } from "@graphql-yoga/node";
 import { schema } from "./schema";
 import { resolvers, pubsub, resolveCurrentUser, ChatContext } from "./resolvers";
 import { initChatDb } from "./chatDb";
-import { registerArchons } from "./archons";
 
 // Initialize database
 initChatDb();
-
-// Register Archon NPCs
-registerArchons();
 
 // Create Yoga server
 const yoga = createYoga({

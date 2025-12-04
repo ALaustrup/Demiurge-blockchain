@@ -2,7 +2,9 @@
  * GraphQL resolvers for chat system.
  */
 
-import { chatDb, ChatUser, ChatMessage, ChatRoom, getDb, upsertDeveloper, getDeveloperByAddress, getDeveloperByUsername, listDevelopers, createProject, getProjectBySlug, addMaintainer, getMaintainers, listProjects, upsertDevCapsule, getDevCapsuleById, getDevCapsulesByOwner, getDevCapsulesByProject } from "./chatDb";
+import { chatDb, ChatUser, ChatMessage, ChatRoom, getDb, upsertDeveloper, getDeveloperByAddress, getDeveloperByUsername, listDevelopers, createProject, getProjectBySlug, addMaintainer, getMaintainers, listProjects, upsertDevCapsule, getDevCapsuleById, getDevCapsulesByOwner, getDevCapsulesByProject, createRitual, getRitualById, getRituals, updateRitualPhase, createRitualEvent, getRitualEvents, createArchonProposal, getArchonProposalById, getArchonProposals, reviewArchonProposal, applyArchonProposal, createSystemEvent, getSystemEvents, createSystemSnapshot, getSystemSnapshotById, getSystemSnapshots, createOperator, getOperatorById, updateOperatorRole, listOperators } from "./chatDb";
+import { executeAction, Action } from "./actionBridge";
+import { createSnapshotOnRitualPhaseChange, createSnapshotOnProposalApplication } from "./snapshotService";
 import { createPubSub, PubSub } from "@graphql-yoga/node";
 
 const DEMIURGE_RPC_URL = process.env.DEMIURGE_RPC_URL || "http://127.0.0.1:8545/rpc";
@@ -1362,6 +1364,279 @@ export const resolvers = {
       throw new Error(`Failed to update capsule status: ${e.message}`);
     }
     throw new Error("Failed to update capsule status: no result from RPC");
+  },
+  // Milestone 5: Ritual Engine resolvers
+  async getRituals(args: { phase?: string }, context: ChatContext): Promise<any[]> {
+    return getRituals(args.phase);
+  },
+  async getRitual(args: { id: string }, context: ChatContext): Promise<any | null> {
+    return getRitualById(args.id);
+  },
+  async getRitualEvents(args: { ritualId: string; limit?: number }, context: ChatContext): Promise<any[]> {
+    return getRitualEvents(args.ritualId, args.limit || 50);
+  },
+  async createRitual(args: { id: string; name: string; description?: string; parameters: string; effects?: string }, context: ChatContext): Promise<any> {
+    const createdBy = context.currentUser?.address || null;
+    return createRitual(args.id, args.name, args.description || null, args.parameters, args.effects || null, createdBy);
+  },
+  async updateRitualPhase(args: { id: string; phase: string; parameters?: string; effects?: string }, context: ChatContext): Promise<any> {
+    const ritual = updateRitualPhase(args.id, args.phase, args.parameters, args.effects);
+    // Emit ritual event
+    const eventId = `ritual_event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    createRitualEvent(eventId, args.id, "RitualPhaseChanged", args.phase, args.parameters, args.effects);
+    // Also create system event
+    const systemEventId = `sys_event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    createSystemEvent(systemEventId, "ritual", "ritual_engine", `Ritual ${args.id} phase changed`, `Ritual ${args.id} transitioned to phase ${args.phase}`, JSON.stringify({ ritualId: args.id, phase: args.phase }));
+    // Create snapshot on significant phase changes
+    if (args.phase === "active" || args.phase === "peaking" || args.phase === "completed") {
+      createSnapshotOnRitualPhaseChange(args.id, args.phase);
+    }
+    return ritual;
+  },
+  // Milestone 5: ArchonAI resolvers
+  async getArchonProposals(args: { status?: string; limit?: number }, context: ChatContext): Promise<any[]> {
+    return getArchonProposals(args.status, args.limit || 50);
+  },
+  async getArchonProposal(args: { id: string }, context: ChatContext): Promise<any | null> {
+    return getArchonProposalById(args.id);
+  },
+  async getArchonContext(context: ChatContext): Promise<string> {
+    // Aggregate context from multiple sources
+    // 1. Fabric state (mock for now - in production, fetch from Fabric P2P service)
+    // TODO: Connect to real Fabric P2P service to get actual node/edge data
+    const fabric = { 
+      nodeCount: 0, // Will be populated from Fabric service
+      edgeCount: 0,
+      activeNodes: 0,
+      averageLatency: 0,
+      unstableNodes: [] as string[],
+    };
+
+    // 2. Ritual state
+    const rituals = getRituals();
+    const activeRituals = rituals.filter((r: any) => r.phase === "active" || r.phase === "peaking" || r.phase === "initiating");
+    const recentRituals = rituals
+      .sort((a: any, b: any) => (b.created_at || 0) - (a.created_at || 0))
+      .slice(0, 5)
+      .map((r: any) => ({ id: r.id, name: r.name, phase: r.phase }));
+
+    // 3. Dev Capsules (aggregate across all owners or use current user's)
+    // For now, use current user's capsules if available
+    const userCapsules = context.currentUser?.address 
+      ? getDevCapsulesByOwner(context.currentUser.address)
+      : [];
+    
+    // TODO: If we have a way to list all capsules, aggregate here
+    const capsules = {
+      total: userCapsules.length,
+      active: userCapsules.filter((c: any) => c.status === "live" || c.status === "active").length,
+      byStatus: userCapsules.reduce((acc: any, c: any) => {
+        acc[c.status] = (acc[c.status] || 0) + 1;
+        return acc;
+      }, {}),
+    };
+
+    // 4. Recent events and anomalies
+    const recentEvents = getSystemEvents(undefined, undefined, Date.now() - 3600000, undefined, 10, 0);
+    const anomalies = recentEvents.filter((e: any) => {
+      const meta = e.metadata ? JSON.parse(e.metadata) : {};
+      return e.type === "anomaly" || meta.severity === "critical" || meta.severity === "high";
+    });
+    
+    const archonContext = {
+      fabric,
+      rituals: {
+        active: activeRituals.length,
+        recent: recentRituals,
+      },
+      capsules,
+      events: {
+        recent: recentEvents.length,
+        anomalies: anomalies.length,
+      },
+      timestamp: Date.now(),
+    };
+    return JSON.stringify(archonContext);
+  },
+  async createArchonProposal(args: { title: string; rationale: string; predictedImpact: string; actions: string }, context: ChatContext): Promise<any> {
+    const id = `archon_proposal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const proposal = createArchonProposal(id, args.title, args.rationale, args.predictedImpact, args.actions);
+    // Create system event
+    const eventId = `sys_event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    createSystemEvent(eventId, "archon_proposal", "archon_ai", `ArchonAI Proposal: ${args.title}`, args.rationale, JSON.stringify({ proposalId: id }));
+    return proposal;
+  },
+  async reviewArchonProposal(args: { id: string; status: string }, context: ChatContext): Promise<any> {
+    const reviewedBy = context.currentUser?.address || "system";
+    return reviewArchonProposal(args.id, args.status, reviewedBy);
+  },
+  async applyArchonProposal(args: { id: string }, context: ChatContext): Promise<any> {
+    const proposal = getArchonProposalById(args.id);
+    if (!proposal) {
+      throw new Error("Proposal not found");
+    }
+    if (proposal.status !== "approved") {
+      throw new Error("Proposal must be approved before applying");
+    }
+    
+    // Execute actions from proposal
+    const actions: Action[] = proposal.actions ? JSON.parse(proposal.actions) : [];
+    const operatorId = context.currentUser?.address || "system";
+    const results: any[] = [];
+    
+    for (const action of actions) {
+      try {
+        const result = executeAction(action, operatorId);
+        results.push(result);
+      } catch (error: any) {
+        results.push({
+          success: false,
+          actionId: action.type,
+          message: `Failed to execute action: ${error.message}`,
+        });
+      }
+    }
+    
+    const applied = applyArchonProposal(args.id);
+    
+    // Create system event with action results
+    const eventId = `sys_event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    createSystemEvent(
+      eventId,
+      "ARCHON_ACTION_APPLIED",
+      operatorId,
+      `ArchonAI Proposal Applied: ${proposal.title}`,
+      `Proposal ${args.id} was applied by ${operatorId}. ${results.length} action(s) executed.`,
+      JSON.stringify({ proposalId: args.id, actionResults: results })
+    );
+    
+    // Create snapshot on proposal application
+    createSnapshotOnProposalApplication(args.id);
+    return applied;
+  },
+  // Milestone 5: Timeline resolvers
+  async getSystemEvents(args: { type?: string; source?: string; startTime?: number; endTime?: number; limit?: number; offset?: number }, context: ChatContext): Promise<any[]> {
+    return getSystemEvents(args.type, args.source, args.startTime, args.endTime, args.limit || 50, args.offset || 0);
+  },
+  async getSystemSnapshots(args: { startTime?: number; endTime?: number; limit?: number; offset?: number }, context: ChatContext): Promise<any[]> {
+    return getSystemSnapshots(args.startTime, args.endTime, args.limit || 50, args.offset || 0);
+  },
+  async getSystemSnapshot(args: { id: string }, context: ChatContext): Promise<any | null> {
+    return getSystemSnapshotById(args.id);
+  },
+  async createSystemEvent(args: { type: string; source: string; title: string; description: string; metadata?: string; relatedSnapshotId?: string }, context: ChatContext): Promise<any> {
+    const id = `sys_event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return createSystemEvent(id, args.type, args.source, args.title, args.description, args.metadata, args.relatedSnapshotId);
+  },
+  async createSystemSnapshot(args: { label?: string; fabricState: string; ritualsState: string; capsulesState: string; shaderState?: string; metadata?: string }, context: ChatContext): Promise<any> {
+    const id = `snapshot_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return createSystemSnapshot(id, args.label || null, args.fabricState, args.ritualsState, args.capsulesState, args.shaderState, args.metadata);
+  },
+  // Milestone 6: Genesis Session Export
+  async exportGenesisSession(args: { sessionId?: string }, context: ChatContext): Promise<string> {
+    // Get all Genesis-related events and snapshots
+    const startTime = args.sessionId 
+      ? undefined // If sessionId provided, would filter by it (for now, get latest)
+      : Date.now() - 24 * 60 * 60 * 1000; // Last 24 hours
+    
+    const events = getSystemEvents(undefined, undefined, startTime, undefined, 100, 0);
+    const snapshots = getSystemSnapshots(startTime, undefined, 50, 0);
+    
+    // Get all ritual events and filter for Genesis
+    const allRitualEvents: any[] = [];
+    const rituals = getRituals();
+    for (const ritual of rituals) {
+      if (ritual.id?.startsWith("genesis_")) {
+        const ritualEvents = getRitualEvents(ritual.id, 100);
+        allRitualEvents.push(...ritualEvents);
+      }
+    }
+    
+    // Filter to Genesis-related items
+    const genesisEvents = events.filter((e: any) => 
+      e.source === "genesis_fabric_service" || 
+      e.type === "genesis_phase_change" ||
+      (e.metadata && JSON.parse(e.metadata || "{}").genesis === true)
+    );
+    
+    const genesisSnapshots = snapshots.filter((s: any) => 
+      s.label?.toLowerCase().includes("genesis") ||
+      (s.metadata && JSON.parse(s.metadata || "{}").genesis === true)
+    );
+    
+    const genesisRitualEvents = ritualEvents.filter((e: any) => 
+      e.ritual_id?.startsWith("genesis_")
+    );
+    
+    // Build session export
+    const session = {
+      version: "1.0",
+      type: "genesis",
+      sessionId: args.sessionId || `genesis_${Date.now()}`,
+      exportedAt: Date.now(),
+      metadata: {
+        exportedBy: context.currentUser?.address || "system",
+        eventCount: genesisEvents.length,
+        snapshotCount: genesisSnapshots.length,
+        ritualEventCount: genesisRitualEvents.length,
+      },
+      events: genesisEvents.map((e: any) => ({
+        id: e.id,
+        type: e.type,
+        source: e.source,
+        title: e.title,
+        description: e.description,
+        timestamp: e.timestamp,
+        metadata: e.metadata ? JSON.parse(e.metadata) : undefined,
+      })),
+      snapshots: genesisSnapshots.slice(0, 10).map((s: any) => ({
+        id: s.id,
+        timestamp: s.timestamp,
+        label: s.label,
+        // Include minimal snapshot data
+        fabricState: s.fabricState ? JSON.parse(s.fabricState) : undefined,
+        ritualsState: s.ritualsState ? JSON.parse(s.ritualsState) : undefined,
+        shaderState: s.shaderState ? JSON.parse(s.shaderState) : undefined,
+      })),
+      ritualEvents: genesisRitualEvents.map((e: any) => ({
+        id: e.id,
+        ritualId: e.ritual_id,
+        type: e.type,
+        phase: e.phase,
+        timestamp: e.timestamp,
+        parameters: e.parameters ? JSON.parse(e.parameters) : undefined,
+      })),
+    };
+    
+    return JSON.stringify(session, null, 2);
+  },
+  // Milestone 7: Operator resolvers
+  async getOperator(args: { id: string }, context: ChatContext): Promise<any> {
+    return getOperatorById(args.id);
+  },
+  async listOperators(args: {}, context: ChatContext): Promise<any[]> {
+    return listOperators();
+  },
+  async createOperator(args: { id: string; displayName: string; role: string }, context: ChatContext): Promise<any> {
+    if (args.role !== "OBSERVER" && args.role !== "OPERATOR" && args.role !== "ARCHITECT") {
+      throw new Error("Invalid role. Must be OBSERVER, OPERATOR, or ARCHITECT");
+    }
+    return createOperator(args.id, args.displayName, args.role as "OBSERVER" | "OPERATOR" | "ARCHITECT");
+  },
+  async updateOperatorRole(args: { id: string; role: string }, context: ChatContext): Promise<any> {
+    if (args.role !== "OBSERVER" && args.role !== "OPERATOR" && args.role !== "ARCHITECT") {
+      throw new Error("Invalid role. Must be OBSERVER, OPERATOR, or ARCHITECT");
+    }
+    return updateOperatorRole(args.id, args.role as "OBSERVER" | "OPERATOR" | "ARCHITECT");
+  },
+  // Milestone 7: Action Bridge resolver
+  async executeAction(args: { type: string; parameters: string }, context: ChatContext): Promise<any> {
+    const action: Action = {
+      type: args.type as any,
+      parameters: JSON.parse(args.parameters),
+    };
+    const operatorId = context.currentUser?.address || "system";
+    return executeAction(action, operatorId);
   },
 };
 

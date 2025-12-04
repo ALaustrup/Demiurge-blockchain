@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-abyss-dark text-white overflow-hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    /* Prevent mobile address bar collapse issues */
+    height: 100dvh;
+    min-height: 100vh;
+    position: fixed;
+    width: 100%;
+    overscroll-behavior: none;
+  }
+  #root {
+    @apply w-screen;
+    height: 100dvh;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  
+  /* Mobile optimizations */
+  @media (max-width: 768px) {
+    body {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      user-select: none;
+    }
+    
+    /* Ensure smooth scrolling on mobile */
+    * {
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+}
+
+@layer utilities {
+  .glitch-text {
+    position: relative;
+    color: #00ffff;
+    text-shadow: 
+      2px 0 #ff00ff,
+      -2px 0 #00ffff,
+      0 2px #9d00ff,
+      0 -2px #00ffff;
+    animation: glitch 0.3s infinite;
+  }
+
+  .glitch-text::before,
+  .glitch-text::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .glitch-text::before {
+    left: 2px;
+    text-shadow: -2px 0 #ff00ff;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-1 0.5s infinite linear alternate-reverse;
+  }
+
+  .glitch-text::after {
+    left: -2px;
+    text-shadow: -2px 0 #00ffff;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim-2 0.5s infinite linear alternate-reverse;
+  }
+
+  @keyframes glitch-anim-1 {
+    0% { clip: rect(31px, 9999px, 94px, 0); }
+    20% { clip: rect(54px, 9999px, 66px, 0); }
+    40% { clip: rect(28px, 9999px, 99px, 0); }
+    60% { clip: rect(78px, 9999px, 102px, 0); }
+    80% { clip: rect(23px, 9999px, 85px, 0); }
+    100% { clip: rect(39px, 9999px, 53px, 0); }
+  }
+
+  @keyframes glitch-anim-2 {
+    0% { clip: rect(65px, 9999px, 100px, 0); }
+    20% { clip: rect(41px, 9999px, 74px, 0); }
+    40% { clip: rect(87px, 9999px, 61px, 0); }
+    60% { clip: rect(12px, 9999px, 79px, 0); }
+    80% { clip: rect(52px, 9999px, 97px, 0); }
+    100% { clip: rect(18px, 9999px, 83px, 0); }
+  }
+
+  .abyss-pill {
+    @apply flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm border;
+  }
+
+  .abyss-pill--connecting {
+    @apply bg-abyss-navy/40 border-abyss-cyan/30 text-gray-300;
+  }
+
+  .abyss-pill--online {
+    @apply bg-green-500/20 border-green-400/50 text-green-300;
+  }
+
+  .abyss-pill--offline {
+    @apply bg-red-500/20 border-red-400/50 text-red-300;
+  }
+
+  .abyss-pill-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+
+  .abyss-pill--connecting .abyss-pill-dot {
+    @apply bg-abyss-cyan animate-pulse;
+  }
+
+  .abyss-pill--online .abyss-pill-dot {
+    @apply bg-green-400;
+  }
+
+  .abyss-pill--offline .abyss-pill-dot {
+    @apply bg-red-400;
+  }
+
+  .abyss-pill-text {
+    @apply text-xs;
+  }
+}
+

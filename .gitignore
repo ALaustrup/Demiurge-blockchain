@@ -138,6 +138,18 @@ temp/
 *.iso
 *.img
 
+# Media files (should be uploaded to server, not committed to git)
+*.wav
+*.mp3
+*.mp4
+*.webm
+*.ogg
+*.m4a
+*.aac
+*.flac
+apps/portal-web/public/media/*
+!apps/portal-web/public/media/.gitkeep
+
 # IDE and editor files
 *.suo
 *.user

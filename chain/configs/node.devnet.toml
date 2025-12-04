@@ -1,0 +1,23 @@
+# Demiurge Devnet Node Configuration
+# This file configures a single-node devnet instance
+
+[chain]
+chain_id = 77701
+name = "Demiurge Devnet"
+
+[node]
+# P2P listen address (for future P2P networking)
+# For now, single-node operation
+p2p_listen = "127.0.0.1:30333"
+
+# RPC server address
+rpc_host = "0.0.0.0"
+rpc_port = 8545
+
+# Database path (relative to node working directory)
+db_path = ".demiurge/data"
+
+[genesis]
+# Path to genesis config file (relative to this config file)
+genesis_config = "genesis.devnet.toml"
+

@@ -132,7 +132,7 @@ pub fn cgt_mint_to(
     caller_module: &str,
 ) -> Result<(), String> {
     // Enforce allowed minting modules
-    let allowed_modules = ["forge", "fabric_manager", "system", "urgeid_registry", "urgeid_level_rewards"];
+    let allowed_modules = ["forge", "fabric_manager", "system", "urgeid_registry", "urgeid_level_rewards", "work_claim"];
     if !allowed_modules.contains(&caller_module) {
         return Err(format!(
             "module '{}' is not authorized to mint CGT",

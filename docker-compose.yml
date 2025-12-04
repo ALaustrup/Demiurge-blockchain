@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  portal-web:
+    build:
+      context: ./apps/portal-web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_GENESIS_MODE=${GENESIS_MODE:-false}
+      - NEXT_PUBLIC_FABRIC_MODE=${FABRIC_MODE:-genesis}
+      - NEXT_PUBLIC_FABRIC_DEVNET_ENDPOINT=${FABRIC_DEVNET_ENDPOINT:-http://localhost:8080/api/fabric}
+      - NEXT_PUBLIC_FABRIC_PROD_ENDPOINT=${FABRIC_PROD_ENDPOINT:-https://fabric.demiurge.xyz/api/fabric}
+      - NEXT_PUBLIC_CURRENT_USER_ID=${CURRENT_USER_ID:-default}
+      - NEXT_PUBLIC_CURRENT_USER_ROLE=${CURRENT_USER_ROLE:-OBSERVER}
+      - NEXT_PUBLIC_CURRENT_USER_NAME=${CURRENT_USER_NAME:-Observer}
+      - NEXT_PUBLIC_GRAPHQL_ENDPOINT=http://abyss-gateway:4000/graphql
+    depends_on:
+      - abyss-gateway
+    volumes:
+      - ./apps/portal-web:/app
+      - /app/node_modules
+      - /app/.next
+
+  abyss-gateway:
+    build:
+      context: ./indexer/abyss-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - DISABLE_SNAPSHOT_SERVICE=${DISABLE_SNAPSHOT_SERVICE:-false}
+      - SNAPSHOT_INTERVAL_MS=${SNAPSHOT_INTERVAL_MS:-300000}
+      - DEMIURGE_RPC_URL=${DEMIURGE_RPC_URL:-http://127.0.0.1:8545/rpc}
+    volumes:
+      - ./indexer/abyss-gateway/data:/app/data
+      - ./indexer/abyss-gateway:/app
+      - /app/node_modules
+
+volumes:
+  sqlite_data:
+

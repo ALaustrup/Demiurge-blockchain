@@ -158,6 +158,85 @@ const ChatRoomType = new GraphQLObjectType({
   }),
 });
 
+// Milestone 5: Ritual Engine types
+const RitualType = new GraphQLObjectType({
+  name: "Ritual",
+  fields: () => ({
+    id: { type: new GraphQLNonNull(GraphQLID) },
+    name: { type: new GraphQLNonNull(GraphQLString) },
+    description: { type: GraphQLString },
+    parameters: { type: GraphQLString }, // JSON string
+    phase: { type: new GraphQLNonNull(GraphQLString) },
+    effects: { type: GraphQLString }, // JSON string
+    startedAt: { type: GraphQLInt },
+    completedAt: { type: GraphQLInt },
+    abortedAt: { type: GraphQLInt },
+    createdBy: { type: GraphQLString },
+    createdAt: { type: new GraphQLNonNull(GraphQLInt) },
+  }),
+});
+
+const RitualEventType = new GraphQLObjectType({
+  name: "RitualEvent",
+  fields: () => ({
+    id: { type: new GraphQLNonNull(GraphQLID) },
+    ritualId: { type: new GraphQLNonNull(GraphQLString) },
+    type: { type: new GraphQLNonNull(GraphQLString) },
+    phase: { type: new GraphQLNonNull(GraphQLString) },
+    timestamp: { type: new GraphQLNonNull(GraphQLInt) },
+    parameters: { type: GraphQLString }, // JSON string
+    effects: { type: GraphQLString }, // JSON string
+    metadata: { type: GraphQLString }, // JSON string
+  }),
+});
+
+// Milestone 5: ArchonAI types
+const ArchonProposalType = new GraphQLObjectType({
+  name: "ArchonProposal",
+  fields: () => ({
+    id: { type: new GraphQLNonNull(GraphQLID) },
+    title: { type: new GraphQLNonNull(GraphQLString) },
+    rationale: { type: new GraphQLNonNull(GraphQLString) },
+    predictedImpact: { type: GraphQLString }, // JSON string
+    actions: { type: GraphQLString }, // JSON string
+    status: { type: new GraphQLNonNull(GraphQLString) },
+    createdAt: { type: new GraphQLNonNull(GraphQLInt) },
+    reviewedAt: { type: GraphQLInt },
+    reviewedBy: { type: GraphQLString },
+    appliedAt: { type: GraphQLInt },
+    failureReason: { type: GraphQLString },
+  }),
+});
+
+// Milestone 5: Timeline types
+const SystemEventType = new GraphQLObjectType({
+  name: "SystemEvent",
+  fields: () => ({
+    id: { type: new GraphQLNonNull(GraphQLID) },
+    type: { type: new GraphQLNonNull(GraphQLString) },
+    source: { type: new GraphQLNonNull(GraphQLString) },
+    title: { type: new GraphQLNonNull(GraphQLString) },
+    description: { type: new GraphQLNonNull(GraphQLString) },
+    timestamp: { type: new GraphQLNonNull(GraphQLInt) },
+    metadata: { type: GraphQLString }, // JSON string
+    relatedSnapshotId: { type: GraphQLString },
+  }),
+});
+
+const SystemSnapshotType = new GraphQLObjectType({
+  name: "SystemSnapshot",
+  fields: () => ({
+    id: { type: new GraphQLNonNull(GraphQLID) },
+    timestamp: { type: new GraphQLNonNull(GraphQLInt) },
+    label: { type: GraphQLString },
+    fabricState: { type: GraphQLString }, // JSON string
+    ritualsState: { type: GraphQLString }, // JSON string
+    capsulesState: { type: GraphQLString }, // JSON string
+    shaderState: { type: GraphQLString }, // JSON string
+    metadata: { type: GraphQLString }, // JSON string
+  }),
+});
+
 // Query type
 const QueryType = new GraphQLObjectType({
   name: "Query",
@@ -287,6 +366,123 @@ const QueryType = new GraphQLObjectType({
       },
       resolve: async (parent, args, context) => {
         return context.resolvers.getDevCapsule(args, context);
+      },
+    },
+    // Milestone 5: Ritual Engine queries
+    rituals: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(RitualType))),
+      args: {
+        phase: { type: GraphQLString },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getRituals(args, context);
+      },
+    },
+    ritual: {
+      type: RitualType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getRitual(args, context);
+      },
+    },
+    ritualEvents: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(RitualEventType))),
+      args: {
+        ritualId: { type: new GraphQLNonNull(GraphQLID) },
+        limit: { type: GraphQLInt, defaultValue: 50 },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getRitualEvents(args, context);
+      },
+    },
+    // Milestone 5: ArchonAI queries
+    archonProposals: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(ArchonProposalType))),
+      args: {
+        status: { type: GraphQLString },
+        limit: { type: GraphQLInt, defaultValue: 50 },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getArchonProposals(args, context);
+      },
+    },
+    archonProposal: {
+      type: ArchonProposalType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getArchonProposal(args, context);
+      },
+    },
+    archonContext: {
+      type: GraphQLString, // JSON string
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getArchonContext(context);
+      },
+    },
+    // Milestone 5: Timeline queries
+    systemEvents: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(SystemEventType))),
+      args: {
+        type: { type: GraphQLString },
+        source: { type: GraphQLString },
+        startTime: { type: GraphQLInt },
+        endTime: { type: GraphQLInt },
+        limit: { type: GraphQLInt, defaultValue: 50 },
+        offset: { type: GraphQLInt, defaultValue: 0 },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getSystemEvents(args, context);
+      },
+    },
+    systemSnapshots: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(SystemSnapshotType))),
+      args: {
+        startTime: { type: GraphQLInt },
+        endTime: { type: GraphQLInt },
+        limit: { type: GraphQLInt, defaultValue: 50 },
+        offset: { type: GraphQLInt, defaultValue: 0 },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getSystemSnapshots(args, context);
+      },
+    },
+    systemSnapshot: {
+      type: SystemSnapshotType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getSystemSnapshot(args, context);
+      },
+    },
+    // Milestone 6: Genesis Session Export
+    exportGenesisSession: {
+      type: GraphQLString, // JSON string
+      args: {
+        sessionId: { type: GraphQLString },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.exportGenesisSession(args, context);
+      },
+    },
+    // Milestone 7: Operator queries
+    operator: {
+      type: OperatorType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.getOperator(args, context);
+      },
+    },
+    operators: {
+      type: new GraphQLNonNull(new GraphQLList(OperatorType)),
+      resolve: async (parent, args, context) => {
+        return context.resolvers.listOperators(args, context);
       },
     },
   }),
@@ -475,6 +671,93 @@ const MutationType = new GraphQLObjectType({
       },
       resolve: async (parent, args, context) => {
         return context.resolvers.addProjectMaintainer(args, context);
+      },
+    },
+    // Milestone 5: Ritual Engine mutations
+    createRitual: {
+      type: new GraphQLNonNull(RitualType),
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        name: { type: new GraphQLNonNull(GraphQLString) },
+        description: { type: GraphQLString },
+        parameters: { type: new GraphQLNonNull(GraphQLString) }, // JSON string
+        effects: { type: GraphQLString }, // JSON string
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.createRitual(args, context);
+      },
+    },
+    updateRitualPhase: {
+      type: new GraphQLNonNull(RitualType),
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        phase: { type: new GraphQLNonNull(GraphQLString) },
+        parameters: { type: GraphQLString }, // JSON string
+        effects: { type: GraphQLString }, // JSON string
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.updateRitualPhase(args, context);
+      },
+    },
+    // Milestone 5: ArchonAI mutations
+    createArchonProposal: {
+      type: new GraphQLNonNull(ArchonProposalType),
+      args: {
+        title: { type: new GraphQLNonNull(GraphQLString) },
+        rationale: { type: new GraphQLNonNull(GraphQLString) },
+        predictedImpact: { type: new GraphQLNonNull(GraphQLString) }, // JSON string
+        actions: { type: new GraphQLNonNull(GraphQLString) }, // JSON string
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.createArchonProposal(args, context);
+      },
+    },
+    reviewArchonProposal: {
+      type: new GraphQLNonNull(ArchonProposalType),
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+        status: { type: new GraphQLNonNull(GraphQLString) }, // "approved" | "rejected"
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.reviewArchonProposal(args, context);
+      },
+    },
+    applyArchonProposal: {
+      type: new GraphQLNonNull(ArchonProposalType),
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLID) },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.applyArchonProposal(args, context);
+      },
+    },
+    // Milestone 5: Timeline mutations
+    createSystemEvent: {
+      type: new GraphQLNonNull(SystemEventType),
+      args: {
+        type: { type: new GraphQLNonNull(GraphQLString) },
+        source: { type: new GraphQLNonNull(GraphQLString) },
+        title: { type: new GraphQLNonNull(GraphQLString) },
+        description: { type: new GraphQLNonNull(GraphQLString) },
+        metadata: { type: GraphQLString }, // JSON string
+        relatedSnapshotId: { type: GraphQLString },
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.createSystemEvent(args, context);
+      },
+    },
+    createSystemSnapshot: {
+      type: new GraphQLNonNull(SystemSnapshotType),
+      args: {
+        label: { type: GraphQLString },
+        fabricState: { type: new GraphQLNonNull(GraphQLString) }, // JSON string
+        ritualsState: { type: new GraphQLNonNull(GraphQLString) }, // JSON string
+        capsulesState: { type: new GraphQLNonNull(GraphQLString) }, // JSON string
+        shaderState: { type: GraphQLString }, // JSON string
+        metadata: { type: GraphQLString }, // JSON string
+      },
+      resolve: async (parent, args, context) => {
+        return context.resolvers.createSystemSnapshot(args, context);
       },
     },
   }),

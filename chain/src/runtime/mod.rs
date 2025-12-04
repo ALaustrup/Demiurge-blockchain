@@ -15,6 +15,7 @@ pub mod nft_dgen;
 pub mod developer_registry;
 pub mod dev_capsules;
 pub mod recursion_registry;
+pub mod work_claim;
 
 pub use abyss_registry::{get_all_active_listings, get_listing, AbyssRegistryModule, ListingId};
 pub use urgeid_registry::{
@@ -40,6 +41,7 @@ pub use dev_capsules::{
 pub use recursion_registry::{
     create_world, get_world, list_worlds_by_owner, RecursionWorldMeta, RecursionRegistryModule,
 };
+pub use work_claim::{calculate_reward, WorkClaimModule, WorkClaimParams};
 
 /// Trait that all runtime modules must implement.
 ///
@@ -98,6 +100,7 @@ impl Runtime {
             .with_module(Box::new(DeveloperRegistryModule::new()))
             .with_module(Box::new(DevCapsulesModule::new()))
             .with_module(Box::new(RecursionRegistryModule::new()))
+            .with_module(Box::new(WorkClaimModule::new()))
     }
 
     /// Dispatch a transaction to the appropriate runtime module.
@@ -134,7 +137,7 @@ mod tests {
     #[test]
     fn test_runtime_with_default_modules() {
         let runtime = Runtime::with_default_modules();
-        assert_eq!(runtime.modules.len(), 8);
+        assert_eq!(runtime.modules.len(), 9);
     }
 
     #[test]

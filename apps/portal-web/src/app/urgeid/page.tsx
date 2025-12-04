@@ -181,6 +181,9 @@ export default function UrgeIDPage() {
       });
       const loadedNfts = nftsRes.nfts || [];
       setNfts(loadedNfts);
+      
+      // Clear any previous chain connection errors
+      setError(null);
 
       // Check for DEV Badge NFT
       const devBadge = loadedNfts.find((nft: any) => isDevBadgeNft(nft as NftMetadata));
@@ -263,7 +266,14 @@ export default function UrgeIDPage() {
       }
     } catch (err: any) {
       console.error("Failed to load dashboard:", err);
-      setError(err.message || "Failed to load dashboard");
+      const errorMsg = err.message || "Failed to load dashboard";
+      
+      // Check if it's a chain connection error
+      if (errorMsg.includes("Unable to reach Demiurge node") || errorMsg.includes("Connection failed")) {
+        setError("Chain node not available. This page requires the Demiurge chain node to be running. Use the Fracture Portal (/haven) for identity management without the chain node.");
+      } else {
+        setError(errorMsg);
+      }
     }
   };
 
@@ -654,7 +664,32 @@ export default function UrgeIDPage() {
           </div>
 
           {error && (
-            <p className="text-xs text-rose-400">{error}</p>
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4"
+            >
+              <p className="text-sm text-rose-400 mb-2">{error}</p>
+              {error.includes("Chain node not available") && (
+                <div className="mt-3 flex items-center gap-3">
+                  <button
+                    onClick={() => router.push("/haven")}
+                    className="px-4 py-2 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-colors text-sm"
+                  >
+                    Use Fracture Portal (Haven) Instead
+                  </button>
+                  <span className="text-xs text-slate-400">or</span>
+                  <a
+                    href="https://github.com/ALaustrup/DEMIURGE/blob/main/CHAIN_NODE_INFO.md"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-slate-400 hover:text-slate-300 underline"
+                  >
+                    Learn how to start the chain node
+                  </a>
+                </div>
+              )}
+            </motion.div>
           )}
         </motion.div>
       </main>
@@ -706,7 +741,21 @@ export default function UrgeIDPage() {
             </button>
 
             {error && (
-              <p className="text-xs text-rose-400">{error}</p>
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4"
+              >
+                <p className="text-sm text-rose-400 mb-2">{error}</p>
+                {error.includes("Chain node not available") && (
+                  <button
+                    onClick={() => router.push("/haven")}
+                    className="mt-2 px-4 py-2 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-colors text-sm"
+                  >
+                    Use Fracture Portal (Haven) Instead
+                  </button>
+                )}
+              </motion.div>
             )}
           </div>
         </motion.div>
@@ -717,6 +766,28 @@ export default function UrgeIDPage() {
   // Dashboard view
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-4 sm:gap-8 px-4 sm:px-6 py-6 sm:py-12">
+      {/* Chain Node Error Banner */}
+      {error && error.includes("Chain node not available") && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 flex items-center justify-between gap-4"
+        >
+          <div className="flex-1">
+            <p className="text-sm text-rose-400 font-medium mb-1">Chain Node Not Available</p>
+            <p className="text-xs text-slate-400">
+              This page requires the Demiurge chain node. Use the Fracture Portal for identity management without the chain node.
+            </p>
+          </div>
+          <button
+            onClick={() => router.push("/haven")}
+            className="px-4 py-2 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-colors text-sm whitespace-nowrap"
+          >
+            Go to Haven
+          </button>
+        </motion.div>
+      )}
+      
       {/* Security Modal */}
       <AnimatePresence>
         {showSecurityModal && (

@@ -10,14 +10,54 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-bebas: var(--font-bebas);
+  --font-oswald: var(--font-oswald);
+  --font-rajdhani: var(--font-rajdhani);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+  font-family: var(--font-rajdhani), "Inter", system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Segoe UI", sans-serif;
+  font-weight: 500;
   overflow-x: hidden;
+}
+
+/* Bold, powerful heading styles */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-oswald), var(--font-bebas), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Ultra-bold display text (Bebas Neue - condensed, powerful) */
+.font-display {
+  font-family: var(--font-bebas), sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Strong, bold text (Oswald - strong, readable) */
+.font-bold-display {
+  font-family: var(--font-oswald), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+/* Make all semibold text use bold weight with Oswald */
+.font-semibold {
+  font-family: var(--font-oswald), var(--font-rajdhani), sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Make medium text bolder */
+.font-medium {
+  font-family: var(--font-rajdhani), var(--font-oswald), sans-serif;
+  font-weight: 600;
 }
 
 * {

@@ -562,6 +562,16 @@ export const MUTATIONS = {
       }
     }
   `,
+  REGISTER_DEVELOPER: `
+    mutation RegisterDeveloper($username: String!) {
+      registerDeveloper(username: $username) {
+        address
+        username
+        reputation
+        createdAt
+      }
+    }
+  `,
 };
 
 // Type definitions

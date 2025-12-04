@@ -1,5 +1,22 @@
 import { DEMIURGE_RPC_URL } from "@/config/demiurge";
 
+/**
+ * Normalize address for chain RPC calls.
+ * AbyssID addresses are 20 bytes (40 hex chars), but chain expects 32 bytes (64 hex chars).
+ * Pads with zeros on the left to make it 32 bytes.
+ */
+export function normalizeAddressForChain(address: string): string {
+  let normalized = address.trim().toLowerCase();
+  if (normalized.startsWith("0x")) {
+    normalized = normalized.slice(2);
+  }
+  // Pad 20-byte addresses (40 hex chars) to 32 bytes (64 hex chars)
+  if (normalized.length === 40) {
+    normalized = "0".repeat(24) + normalized; // 24 zeros (48 hex chars) + 40 hex chars = 64 hex chars (32 bytes)
+  }
+  return normalized;
+}
+
 export async function callRpc<T>(
   method: string,
   params: any | null = null
@@ -420,6 +437,17 @@ export async function getProfileByUsername(
 ): Promise<UrgeIDProfile | null> {
   return callRpc<UrgeIDProfile | null>("urgeid_getProfileByUsername", {
     username,
+  });
+}
+
+/**
+ * Get UrgeID profile by address.
+ */
+export async function getUrgeIdProfile(
+  address: string
+): Promise<UrgeIDProfile | null> {
+  return callRpc<UrgeIDProfile | null>("urgeid_get", {
+    address,
   });
 }
 

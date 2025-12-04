@@ -10,7 +10,7 @@
  * - Consistent with existing SDK patterns
  */
 
-import { callRpc, getCgtBalance, formatCgt, getUrgeIdProfile, getNftsByOwner, buildTransferTx, sendRawTransaction, signTransactionRpc } from "./rpc";
+import { callRpc, getCgtBalance, formatCgt, getUrgeIdProfile, getNftsByOwner, buildTransferTx, sendRawTransaction, signTransactionRpc, getNonce } from "./rpc";
 import { graphqlQuery, graphqlRequest } from "./graphql";
 import { signTransaction } from "./signing";
 
@@ -55,9 +55,9 @@ export function saveLocalWallet(wallet: LocalWallet): void {
  * Create a new UrgeID (offline keygen)
  */
 export async function createUrgeId(): Promise<LocalWallet> {
-  const { privateKey, publicKey } = await import("@noble/ed25519");
-  const privateKeyBytes = privateKey.randomPrivateKey();
-  const publicKeyBytes = publicKey.getPublicKey(privateKeyBytes);
+  const ed25519 = await import("@noble/ed25519");
+  const privateKeyBytes = ed25519.utils.randomSecretKey();
+  const publicKeyBytes = await ed25519.getPublicKeyAsync(privateKeyBytes);
   
   // Derive address (simplified - use actual SDK method)
   const address = "0x" + Array.from(publicKeyBytes.slice(0, 32))
@@ -114,6 +114,9 @@ export interface MyProgress {
 export async function getMyProfile(address: string): Promise<MyProfile | null> {
   try {
     const profile = await getUrgeIdProfile(address);
+    if (!profile) {
+      return null;
+    }
     return {
       address: profile.address,
       username: profile.username || undefined,
@@ -179,7 +182,7 @@ export async function getMyDeveloperProfile(address: string): Promise<any | null
 export async function getMyBalance(address: string): Promise<string> {
   try {
     const balance = await getCgtBalance(address);
-    return formatCgt(balance);
+    return formatCgt(balance.balance);
   } catch (error) {
     console.error("Failed to get balance:", error);
     return "0.00000000";
@@ -207,13 +210,20 @@ export async function sendCgt(params: {
       toAddress = resolved;
     }
     
-    // Build and sign transaction
-    const { unsignedTxHex, nonce } = await buildTransferTx(params.from, toAddress, params.amount);
-    const signedTxHex = await signTransactionRpc(unsignedTxHex, params.privateKey);
+    // Get nonce and build transaction
+    const { nonce } = await getNonce(params.from);
+    // Convert amount to smallest unit (assuming 8 decimals)
+    const amountSmallest = Math.floor(params.amount * 100000000).toString();
+    const { tx_hex } = await buildTransferTx(params.from, toAddress, amountSmallest, nonce);
+    
+    // Sign transaction
+    const txBytes = new Uint8Array(tx_hex.match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)));
+    const signatureHex = await signTransaction(txBytes, params.privateKey);
+    const { tx_hex: signedTxHex } = await signTransactionRpc(tx_hex, signatureHex);
     
     // Send transaction
-    const txHash = await sendRawTransaction(signedTxHex);
-    return txHash;
+    const result = await sendRawTransaction(signedTxHex);
+    return result.tx_hash;
   } catch (error: any) {
     throw new Error(`Failed to send CGT: ${error.message}`);
   }
@@ -224,7 +234,8 @@ export async function sendCgt(params: {
  */
 export async function getMyNfts(address: string): Promise<any[]> {
   try {
-    return await getNftsByOwner(address);
+    const result = await getNftsByOwner(address);
+    return result.nfts || [];
   } catch (error) {
     console.error("Failed to get NFTs:", error);
     return [];

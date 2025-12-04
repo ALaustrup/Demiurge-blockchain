@@ -31,8 +31,9 @@ use crate::runtime::{
     update_capsule_status, CapsuleStatus,
 };
 use crate::runtime::{
-    create_world, get_world, list_worlds_by_owner, RecursionWorldMeta,
+    create_world, get_world, list_worlds_by_owner,
 };
+use crate::runtime::work_claim::{calculate_reward, WorkClaimParams};
 
 /// JSON-RPC request envelope.
 #[derive(Debug, Deserialize)]
@@ -247,6 +248,16 @@ pub struct RecursionGetWorldParams {
 #[derive(Debug, Deserialize)]
 pub struct RecursionListWorldsByOwnerParams {
     pub owner: String, // hex address
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SubmitWorkClaimParams {
+    pub address: String, // hex string
+    pub game_id: String,
+    pub session_id: String,
+    pub depth_metric: f64,
+    pub active_ms: u64,
+    pub extra: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -2972,6 +2983,127 @@ async fn handle_rpc(
                     "fabric_root_hash": world.fabric_root_hash,
                     "created_at": world.created_at,
                 })).collect::<Vec<_>>())),
+                error: None,
+                id,
+            })
+        }
+        "submitWorkClaim" => {
+            let params: SubmitWorkClaimParams = match req.params.as_ref() {
+                Some(raw) => serde_json::from_value(raw.clone())
+                    .map_err(|e| e.to_string())
+                    .unwrap_or(SubmitWorkClaimParams {
+                        address: String::new(),
+                        game_id: String::new(),
+                        session_id: String::new(),
+                        depth_metric: 0.0,
+                        active_ms: 0,
+                        extra: None,
+                    }),
+                None => SubmitWorkClaimParams {
+                    address: String::new(),
+                    game_id: String::new(),
+                    session_id: String::new(),
+                    depth_metric: 0.0,
+                    active_ms: 0,
+                    extra: None,
+                },
+            };
+
+            let address = match parse_address_hex(&params.address) {
+                Ok(addr) => addr,
+                Err(msg) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: format!("invalid address: {}", msg),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            // Calculate reward estimate
+            let reward_estimate = calculate_reward(params.depth_metric, params.active_ms);
+
+            // Build work claim params
+            let work_claim_params = WorkClaimParams {
+                game_id: params.game_id,
+                session_id: params.session_id,
+                depth_metric: params.depth_metric,
+                active_ms: params.active_ms,
+                extra: params.extra,
+            };
+
+            // Get nonce
+            let nonce = node.get_nonce(&address);
+
+            // Serialize payload
+            let payload = match bincode::serialize(&work_claim_params) {
+                Ok(p) => p,
+                Err(e) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32603,
+                            message: format!("failed to serialize payload: {}", e),
+                        }),
+                        id,
+                    });
+                }
+            };
+
+            // Build transaction
+            let tx = Transaction {
+                from: address,
+                nonce,
+                module_id: "work_claim".to_string(),
+                call_id: "submit".to_string(),
+                payload,
+                fee: 0, // Work claims typically have no fee
+                signature: vec![],
+            };
+
+            // Submit transaction
+            match node.submit_transaction(tx) {
+                Ok(tx_hash) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: Some(json!({
+                        "tx_hash": tx_hash,
+                        "reward_estimate": reward_estimate.to_string(),
+                    })),
+                    error: None,
+                    id,
+                }),
+                Err(msg) => Json(JsonRpcResponse {
+                    jsonrpc: "2.0".to_string(),
+                    result: None,
+                    error: Some(JsonRpcError {
+                        code: -32603,
+                        message: msg,
+                    }),
+                    id,
+                }),
+            }
+        }
+        "getNetworkInfo" => {
+            // Get chain info for chain_id and name
+            let info = node.chain_info();
+            
+            // For devnet, use a fixed chain_id (77701)
+            // In production, this would come from config
+            let chain_id = 77701u64;
+            let chain_name = "Demiurge Devnet".to_string();
+
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "chain_id": chain_id,
+                    "name": chain_name,
+                    "height": info.height,
+                })),
                 error: None,
                 id,
             })

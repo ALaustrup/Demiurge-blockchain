@@ -218,6 +218,92 @@ function createSchema(db: Database.Database) {
     )
   `);
 
+  // Milestone 7: Operators table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS operators (
+      id TEXT PRIMARY KEY,
+      display_name TEXT NOT NULL,
+      role TEXT NOT NULL CHECK(role IN ('OBSERVER', 'OPERATOR', 'ARCHITECT')),
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    )
+  `);
+
+  // Milestone 5: Ritual Engine tables
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS rituals (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT,
+      parameters TEXT NOT NULL, -- JSON
+      phase TEXT NOT NULL DEFAULT 'idle',
+      effects TEXT, -- JSON
+      started_at INTEGER,
+      completed_at INTEGER,
+      aborted_at INTEGER,
+      created_by TEXT,
+      created_at INTEGER NOT NULL
+    )
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS ritual_events (
+      id TEXT PRIMARY KEY,
+      ritual_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      phase TEXT NOT NULL,
+      timestamp INTEGER NOT NULL,
+      parameters TEXT, -- JSON
+      effects TEXT, -- JSON
+      metadata TEXT, -- JSON
+      FOREIGN KEY (ritual_id) REFERENCES rituals(id) ON DELETE CASCADE
+    )
+  `);
+
+  // Milestone 5: ArchonAI Autonomy tables
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS archon_proposals (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      rationale TEXT NOT NULL,
+      predicted_impact TEXT NOT NULL, -- JSON
+      actions TEXT NOT NULL, -- JSON array
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at INTEGER NOT NULL,
+      reviewed_at INTEGER,
+      reviewed_by TEXT,
+      applied_at INTEGER,
+      failure_reason TEXT
+    )
+  `);
+
+  // Milestone 5: Timeline & Time Travel tables
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS system_events (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL,
+      source TEXT NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL,
+      timestamp INTEGER NOT NULL,
+      metadata TEXT, -- JSON
+      related_snapshot_id TEXT
+    )
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS system_snapshots (
+      id TEXT PRIMARY KEY,
+      timestamp INTEGER NOT NULL,
+      label TEXT,
+      fabric_state TEXT NOT NULL, -- JSON
+      rituals_state TEXT NOT NULL, -- JSON
+      capsules_state TEXT NOT NULL, -- JSON
+      shader_state TEXT, -- JSON
+      metadata TEXT -- JSON
+    )
+  `);
+
   // Create indexes for performance
   db.exec(`
     CREATE INDEX IF NOT EXISTS idx_chat_messages_room_id ON chat_messages(room_id);
@@ -227,6 +313,16 @@ function createSchema(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_chat_room_moderators_room_id ON chat_room_moderators(room_id);
     CREATE INDEX IF NOT EXISTS idx_system_messages_room_id ON system_messages(room_id);
     CREATE INDEX IF NOT EXISTS idx_room_music_queue_room_id ON room_music_queue(room_id);
+    -- Milestone 5 indexes
+    CREATE INDEX IF NOT EXISTS idx_rituals_phase ON rituals(phase);
+    CREATE INDEX IF NOT EXISTS idx_rituals_created_at ON rituals(created_at);
+    CREATE INDEX IF NOT EXISTS idx_ritual_events_ritual_id ON ritual_events(ritual_id);
+    CREATE INDEX IF NOT EXISTS idx_ritual_events_timestamp ON ritual_events(timestamp);
+    CREATE INDEX IF NOT EXISTS idx_archon_proposals_status ON archon_proposals(status);
+    CREATE INDEX IF NOT EXISTS idx_archon_proposals_created_at ON archon_proposals(created_at);
+    CREATE INDEX IF NOT EXISTS idx_system_events_type ON system_events(type);
+    CREATE INDEX IF NOT EXISTS idx_system_events_timestamp ON system_events(timestamp);
+    CREATE INDEX IF NOT EXISTS idx_system_snapshots_timestamp ON system_snapshots(timestamp);
   `);
 
   // Migrations for existing databases
@@ -1305,4 +1401,269 @@ export const chatDb = {
     db.prepare("DELETE FROM room_music_queue WHERE id = ?").run(musicId);
   },
 };
+
+// Milestone 5: Ritual Engine database functions
+export function createRitual(
+  id: string,
+  name: string,
+  description: string | null,
+  parameters: string, // JSON string
+  effects: string | null, // JSON string
+  createdBy: string | null
+): any {
+  const db = getDb();
+  const now = Date.now();
+  db.prepare(`
+    INSERT INTO rituals (id, name, description, parameters, phase, effects, created_by, created_at)
+    VALUES (?, ?, ?, ?, 'idle', ?, ?, ?)
+  `).run(id, name, description || null, parameters, effects || null, createdBy || null, now);
+  return getRitualById(id);
+}
+
+export function getRitualById(id: string): any | null {
+  const db = getDb();
+  return db.prepare("SELECT * FROM rituals WHERE id = ?").get(id) as any | null;
+}
+
+export function getRituals(phase?: string): any[] {
+  const db = getDb();
+  if (phase) {
+    return db.prepare("SELECT * FROM rituals WHERE phase = ? ORDER BY created_at DESC").all(phase) as any[];
+  }
+  return db.prepare("SELECT * FROM rituals ORDER BY created_at DESC").all() as any[];
+}
+
+export function updateRitualPhase(
+  id: string,
+  phase: string,
+  parameters?: string,
+  effects?: string
+): any {
+  const db = getDb();
+  const updates: string[] = [];
+  const values: any[] = [];
+  
+  updates.push("phase = ?");
+  values.push(phase);
+  
+  if (parameters !== undefined) {
+    updates.push("parameters = ?");
+    values.push(parameters);
+  }
+  
+  if (effects !== undefined) {
+    updates.push("effects = ?");
+    values.push(effects);
+  }
+  
+  if (phase === "active" || phase === "initiating") {
+    updates.push("started_at = COALESCE(started_at, ?)");
+    values.push(Date.now());
+  } else if (phase === "completed") {
+    updates.push("completed_at = ?");
+    values.push(Date.now());
+  } else if (phase === "aborted") {
+    updates.push("aborted_at = ?");
+    values.push(Date.now());
+  }
+  
+  values.push(id);
+  db.prepare(`UPDATE rituals SET ${updates.join(", ")} WHERE id = ?`).run(...values);
+  return getRitualById(id);
+}
+
+export function createRitualEvent(
+  id: string,
+  ritualId: string,
+  type: string,
+  phase: string,
+  parameters?: string,
+  effects?: string,
+  metadata?: string
+): any {
+  const db = getDb();
+  const timestamp = Date.now();
+  db.prepare(`
+    INSERT INTO ritual_events (id, ritual_id, type, phase, timestamp, parameters, effects, metadata)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, ritualId, type, phase, timestamp, parameters || null, effects || null, metadata || null);
+  return db.prepare("SELECT * FROM ritual_events WHERE id = ?").get(id) as any;
+}
+
+export function getRitualEvents(ritualId: string, limit: number = 50): any[] {
+  const db = getDb();
+  return db.prepare(`
+    SELECT * FROM ritual_events 
+    WHERE ritual_id = ? 
+    ORDER BY timestamp DESC 
+    LIMIT ?
+  `).all(ritualId, limit) as any[];
+}
+
+// Milestone 5: ArchonAI database functions
+export function createArchonProposal(
+  id: string,
+  title: string,
+  rationale: string,
+  predictedImpact: string, // JSON string
+  actions: string // JSON string
+): any {
+  const db = getDb();
+  const now = Date.now();
+  db.prepare(`
+    INSERT INTO archon_proposals (id, title, rationale, predicted_impact, actions, status, created_at)
+    VALUES (?, ?, ?, ?, ?, 'pending', ?)
+  `).run(id, title, rationale, predictedImpact, actions, now);
+  return getArchonProposalById(id);
+}
+
+export function getArchonProposalById(id: string): any | null {
+  const db = getDb();
+  return db.prepare("SELECT * FROM archon_proposals WHERE id = ?").get(id) as any | null;
+}
+
+export function getArchonProposals(status?: string, limit: number = 50): any[] {
+  const db = getDb();
+  if (status) {
+    return db.prepare(`
+      SELECT * FROM archon_proposals 
+      WHERE status = ? 
+      ORDER BY created_at DESC 
+      LIMIT ?
+    `).all(status, limit) as any[];
+  }
+  return db.prepare(`
+    SELECT * FROM archon_proposals 
+    ORDER BY created_at DESC 
+    LIMIT ?
+  `).all(limit) as any[];
+}
+
+export function reviewArchonProposal(
+  id: string,
+  status: string,
+  reviewedBy: string
+): any {
+  const db = getDb();
+  const now = Date.now();
+  db.prepare(`
+    UPDATE archon_proposals 
+    SET status = ?, reviewed_at = ?, reviewed_by = ?
+    WHERE id = ?
+  `).run(status, now, reviewedBy, id);
+  return getArchonProposalById(id);
+}
+
+export function applyArchonProposal(id: string): any {
+  const db = getDb();
+  const now = Date.now();
+  db.prepare(`
+    UPDATE archon_proposals 
+    SET status = 'applied', applied_at = ?
+    WHERE id = ?
+  `).run(now, id);
+  return getArchonProposalById(id);
+}
+
+// Milestone 5: Timeline database functions
+export function createSystemEvent(
+  id: string,
+  type: string,
+  source: string,
+  title: string,
+  description: string,
+  metadata?: string,
+  relatedSnapshotId?: string
+): any {
+  const db = getDb();
+  const timestamp = Date.now();
+  db.prepare(`
+    INSERT INTO system_events (id, type, source, title, description, timestamp, metadata, related_snapshot_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, type, source, title, description, timestamp, metadata || null, relatedSnapshotId || null);
+  return db.prepare("SELECT * FROM system_events WHERE id = ?").get(id) as any;
+}
+
+export function getSystemEvents(
+  type?: string,
+  source?: string,
+  startTime?: number,
+  endTime?: number,
+  limit: number = 50,
+  offset: number = 0
+): any[] {
+  const db = getDb();
+  let query = "SELECT * FROM system_events WHERE 1=1";
+  const params: any[] = [];
+  
+  if (type) {
+    query += " AND type = ?";
+    params.push(type);
+  }
+  if (source) {
+    query += " AND source = ?";
+    params.push(source);
+  }
+  if (startTime) {
+    query += " AND timestamp >= ?";
+    params.push(startTime);
+  }
+  if (endTime) {
+    query += " AND timestamp <= ?";
+    params.push(endTime);
+  }
+  
+  query += " ORDER BY timestamp DESC LIMIT ? OFFSET ?";
+  params.push(limit, offset);
+  
+  return db.prepare(query).all(...params) as any[];
+}
+
+export function createSystemSnapshot(
+  id: string,
+  label: string | null,
+  fabricState: string, // JSON string
+  ritualsState: string, // JSON string
+  capsulesState: string, // JSON string
+  shaderState?: string, // JSON string
+  metadata?: string // JSON string
+): any {
+  const db = getDb();
+  const timestamp = Date.now();
+  db.prepare(`
+    INSERT INTO system_snapshots (id, timestamp, label, fabric_state, rituals_state, capsules_state, shader_state, metadata)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(id, timestamp, label || null, fabricState, ritualsState, capsulesState, shaderState || null, metadata || null);
+  return getSystemSnapshotById(id);
+}
+
+export function getSystemSnapshotById(id: string): any | null {
+  const db = getDb();
+  return db.prepare("SELECT * FROM system_snapshots WHERE id = ?").get(id) as any | null;
+}
+
+export function getSystemSnapshots(
+  startTime?: number,
+  endTime?: number,
+  limit: number = 50,
+  offset: number = 0
+): any[] {
+  const db = getDb();
+  let query = "SELECT * FROM system_snapshots WHERE 1=1";
+  const params: any[] = [];
+  
+  if (startTime) {
+    query += " AND timestamp >= ?";
+    params.push(startTime);
+  }
+  if (endTime) {
+    query += " AND timestamp <= ?";
+    params.push(endTime);
+  }
+  
+  query += " ORDER BY timestamp DESC LIMIT ? OFFSET ?";
+  params.push(limit, offset);
+  
+  return db.prepare(query).all(...params) as any[];
+}
 

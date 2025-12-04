@@ -78,9 +78,28 @@ DEMIURGE/
 ├── sdk/                     # TypeScript & Rust SDKs
 ├── apps/
 │   ├── portal-web/          # Next.js website + creator dashboard
+│   ├── abyssos-portal/      # AbyssOS - Full-screen desktop environment
 │   └── desktop-qt/          # Qt 6.10 Pantheon Console
+├── deploy/                  # Deployment scripts and configs
 └── infra/                   # Docker, k8s, devcontainer configs
 ```
+
+## Documentation
+
+All project documentation has been organized in the `/docs` directory. Start with the [Documentation Index](docs/index.md) for a complete overview.
+
+**Quick links:**
+- [Current State](docs/CURRENT_STATE.md) - Production status and milestones
+- [Architecture Overview](docs/overview/ARCHITECTURE_DEMIURGE_CURRENT.md)
+- [Runtime Modules](docs/overview/RUNTIME.md)
+- [RPC API](docs/api/RPC.md)
+- [Devnet Setup](docs/network/DEVNET.md)
+- [Deployment Guide](docs/deployment/README_NODE0.md)
+- [AbyssOS Portal](docs/apps/ABYSSOS_PORTAL.md) - Desktop environment at `https://demiurge.cloud`
+
+**Live Services:**
+- **AbyssOS**: https://demiurge.cloud
+- **RPC**: https://rpc.demiurge.cloud/rpc
 
 ## Getting Started
 

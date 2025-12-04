@@ -12,7 +12,6 @@ import {
   type ChatUser,
   type RoomMusicItem,
 } from "@/lib/graphql";
-import { THE_SEVEN_ARCHONS } from "@/lib/archons";
 import { MusicPlayer } from "@/components/chat/MusicPlayer";
 import { DEMIURGE_RPC_URL } from "@/config/demiurge";
 
@@ -442,12 +441,6 @@ export default function ChatPage() {
   const handleSendMessage = async () => {
     if ((!messageInput.trim() && !selectedMedia) || !currentAddress || sending || !activeRoom) return;
     
-    // Check for @Summon command
-    if (messageInput.trim().toLowerCase() === "@summon") {
-      setMessageInput("");
-      await handleSummonArchon();
-      return;
-    }
     
     setSending(true);
     
@@ -609,32 +602,6 @@ export default function ChatPage() {
     }
   };
 
-  const handleSummonArchon = async () => {
-    if (!currentAddress || !activeRoom) return;
-
-    const randomArchon = THE_SEVEN_ARCHONS[Math.floor(Math.random() * THE_SEVEN_ARCHONS.length)];
-    const summonMessage = `✨ @${randomArchon.username} has been summoned! The ${randomArchon.displayName} manifests in the chat. Type "@${randomArchon.username}" to interact.`;
-
-    try {
-      if (activeRoom.type === "world") {
-        await graphqlRequest<{ sendWorldMessage: ChatMessage }>(
-          MUTATIONS.SEND_WORLD_MESSAGE,
-          { content: summonMessage },
-          getChatHeaders(currentAddress, currentUsername)
-        );
-        setTimeout(loadWorldMessages, 500);
-      } else if (activeRoom.type === "custom") {
-        await graphqlRequest<{ sendWorldMessage: ChatMessage }>(
-          MUTATIONS.SEND_WORLD_MESSAGE,
-          { content: summonMessage },
-          getChatHeaders(currentAddress, currentUsername)
-        );
-        setTimeout(() => loadRoomMessages(activeRoom.roomId), 500);
-      }
-    } catch (err: any) {
-      console.error("Failed to summon archon:", err);
-    }
-  };
 
   const handlePlayMusic = async (musicId: string | null) => {
     if (!activeRoom || activeRoom.type === "world" || !currentAddress) return;
@@ -666,54 +633,6 @@ export default function ChatPage() {
     }
   };
 
-  const handleOpenArchonDm = async (archonUsername: string) => {
-    if (!currentAddress) return;
-    
-    try {
-      // First, try to find existing DM room
-      await loadDmRooms();
-      const existingRoom = dmRooms.find(
-        (r) => r.members.some((m) => m.username.toLowerCase() === archonUsername.toLowerCase())
-      );
-      
-      if (existingRoom) {
-        const otherMember = existingRoom.members.find((m) => m.address !== currentAddress);
-        if (otherMember) {
-          setActiveView("dm");
-          setActiveRoom({ type: "dm", roomId: existingRoom.id, recipient: otherMember });
-          return;
-        }
-      }
-      
-      // If no existing room, send a greeting message to create it
-      await graphqlRequest<{ sendDirectMessage: ChatMessage }>(
-        MUTATIONS.SEND_DIRECT_MESSAGE,
-        { toUsername: archonUsername, content: "Hello!" },
-        getChatHeaders(currentAddress, currentUsername)
-      );
-      
-      // Reload and open the new room
-      await loadDmRooms();
-      const updatedRooms = await graphqlRequest<{ dmRooms: ChatRoom[] }>(
-        QUERIES.DM_ROOMS,
-        {},
-        getChatHeaders(currentAddress, currentUsername)
-      );
-      const room = updatedRooms.dmRooms.find(
-        (r) => r.members.some((m) => m.username.toLowerCase() === archonUsername.toLowerCase())
-      );
-      if (room) {
-        const otherMember = room.members.find((m) => m.address !== currentAddress);
-        if (otherMember) {
-          setActiveView("dm");
-          setActiveRoom({ type: "dm", roomId: room.id, recipient: otherMember });
-        }
-      }
-    } catch (err: any) {
-      console.error("Failed to open Archon DM:", err);
-      alert(err.message || "Failed to open DM with Archon");
-    }
-  };
 
   const handleContextMenu = (e: React.MouseEvent, message: ChatMessage) => {
     e.preventDefault();
