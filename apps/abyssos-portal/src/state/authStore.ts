@@ -16,6 +16,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: true,
 
   login: (account: AbyssAccount) => {
+    // Persist to localStorage
+    localStorage.setItem('abyssos_auth', JSON.stringify(account));
     set({ account, isAuthenticated: true });
   },
 

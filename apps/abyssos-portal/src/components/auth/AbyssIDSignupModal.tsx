@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../shared/Button';
 import { Card } from '../shared/Card';
-import { abyssIdClient } from '../../lib/abyssIdClient';
+import { abyssIdClient, type AbyssAccount } from '../../lib/abyssIdClient';
 import { useAuthStore } from '../../state/authStore';
 
 interface AbyssIDSignupModalProps {
@@ -17,7 +17,41 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
   const [secret, setSecret] = useState('');
   const [hasBackedUp, setHasBackedUp] = useState(false);
   const [step, setStep] = useState<'username' | 'backup'>('username');
+  const [createdAccount, setCreatedAccount] = useState<AbyssAccount | null>(null);
   const login = useAuthStore((state) => state.login);
+  const checkTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Debounced username checking on input change
+  useEffect(() => {
+    // Clear any pending check
+    if (checkTimeoutRef.current) {
+      clearTimeout(checkTimeoutRef.current);
+    }
+
+    if (!username.trim()) {
+      setUsernameStatus('idle');
+      return;
+    }
+
+    // Minimum length check
+    if (username.trim().length < 3) {
+      setUsernameStatus('idle');
+      return;
+    }
+
+    // Debounce the check
+    setUsernameStatus('checking');
+    checkTimeoutRef.current = setTimeout(() => {
+      const available = abyssIdClient.checkUsernameAvailability(username);
+      setUsernameStatus(available ? 'available' : 'taken');
+    }, 500);
+
+    return () => {
+      if (checkTimeoutRef.current) {
+        clearTimeout(checkTimeoutRef.current);
+      }
+    };
+  }, [username]);
 
   const checkUsername = () => {
     if (!username.trim()) {
@@ -42,21 +76,44 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
     try {
       const account = await abyssIdClient.signup(username);
       setSecret(account.abyssIdSecret || '');
+      // Store the full created account for later use
+      setCreatedAccount(account);
       setStep('backup');
     } catch (error) {
       console.error('Signup failed:', error);
+      setUsernameStatus('taken');
     }
   };
 
   const handleBackupConfirm = () => {
     if (!hasBackedUp) return;
     
-    // Account already created, just close and trigger success
-    const account = abyssIdClient.getAllAccounts()[username];
-    if (account) {
-      login(account);
-      onSuccess(account.username, account.publicKey);
+    // Use the stored account from signup
+    if (createdAccount) {
+      // Login with the full account object
+      login(createdAccount);
+      onSuccess(createdAccount.username, createdAccount.publicKey);
       handleClose();
+    } else {
+      // Fallback: look up account by normalized username
+      const normalizedUsername = username.toLowerCase();
+      const accounts = abyssIdClient.getAllAccounts();
+      const account = accounts[normalizedUsername];
+      if (account) {
+        login(account);
+        onSuccess(account.username, account.publicKey);
+        handleClose();
+      } else {
+        console.error('Account not found after signup');
+        // Try to get from current account as last resort
+        abyssIdClient.getCurrentAccount().then(account => {
+          if (account) {
+            login(account);
+            onSuccess(account.username, account.publicKey);
+            handleClose();
+          }
+        });
+      }
     }
   };
 
@@ -66,6 +123,11 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
     setHasBackedUp(false);
     setStep('username');
     setUsernameStatus('idle');
+    setCreatedAccount(null);
+    if (checkTimeoutRef.current) {
+      clearTimeout(checkTimeoutRef.current);
+      checkTimeoutRef.current = null;
+    }
     onClose();
   };
 
@@ -105,7 +167,7 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
                         value={username}
                         onChange={(e) => {
                           setUsername(e.target.value);
-                          setUsernameStatus('idle');
+                          // Status will be updated by useEffect debounce
                         }}
                         onBlur={checkUsername}
                         className="w-full px-4 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded-lg text-white focus:outline-none focus:border-abyss-cyan focus:ring-2 focus:ring-abyss-cyan/50"
@@ -138,7 +200,15 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
                     Save this code securely. You'll need it to access your AbyssID.
                   </p>
                   
+                  {createdAccount && (
+                    <div className="bg-abyss-dark border border-abyss-cyan/30 rounded-lg p-4 mb-4">
+                      <div className="text-xs text-gray-400 mb-2">Your AbyssID Public Key:</div>
+                      <div className="font-mono text-sm text-abyss-cyan break-all">{createdAccount.publicKey}</div>
+                    </div>
+                  )}
+                  
                   <div className="bg-abyss-dark border border-abyss-cyan/30 rounded-lg p-4 mb-4">
+                    <div className="text-xs text-gray-400 mb-2">Your Secret Code:</div>
                     <div className="font-mono text-sm text-abyss-cyan break-all">{secret}</div>
                   </div>
 
