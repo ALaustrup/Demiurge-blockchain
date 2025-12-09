@@ -4,6 +4,7 @@ import { Button } from '../shared/Button';
 import { Card } from '../shared/Card';
 import { abyssIdClient, type AbyssAccount } from '../../lib/abyssIdClient';
 import { useAbyssID } from '../../hooks/useAbyssID';
+import { backgroundMusicService } from '../../services/backgroundMusic';
 
 interface AbyssIDSignupModalProps {
   isOpen: boolean;
@@ -100,9 +101,7 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
         // Login with unified AbyssID system - this will automatically initialize identity service
         await abyssIDLogin(createdAccount.username);
         // Start background music after successful signup
-        import('../../services/backgroundMusic').then(({ backgroundMusicService }) => {
-          backgroundMusicService.play();
-        });
+        backgroundMusicService.play();
         onSuccess(createdAccount.username, createdAccount.publicKey);
         handleClose();
       } else {

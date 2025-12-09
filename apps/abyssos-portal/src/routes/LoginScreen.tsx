@@ -5,6 +5,7 @@ import { AbyssBackground } from '../components/layout/AbyssBackground';
 import { AbyssIDLoginForm } from '../components/auth/AbyssIDLoginForm';
 import { AbyssIDSignupModal } from '../components/auth/AbyssIDSignupModal';
 import { useAbyssID } from '../hooks/useAbyssID';
+import { backgroundMusicService } from '../services/backgroundMusic';
 
 interface LoginScreenProps {
   onLogin: () => void;
@@ -18,9 +19,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
   useEffect(() => {
     if (!isLoading && session) {
       // Start background music after successful login
-      import('../../services/backgroundMusic').then(({ backgroundMusicService }) => {
-        backgroundMusicService.play();
-      });
+      backgroundMusicService.play();
       onLogin();
     }
   }, [session, isLoading, onLogin]);
