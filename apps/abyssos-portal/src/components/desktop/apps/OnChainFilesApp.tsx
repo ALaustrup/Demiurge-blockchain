@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAbyssID } from '../../../hooks/useAbyssID';
+import { useAbyssIDIdentity } from '../../../hooks/useAbyssIDIdentity';
 import { Button } from '../../shared/Button';
 import { abyssIdSDK } from '../../../services/abyssid/sdk';
 import type { DRC369 } from '../../../services/drc369/schema';
@@ -16,8 +16,11 @@ type MintStatus = 'idle' | 'minting' | 'finalizing' | 'confirmed' | 'error';
 
 /**
  * My Assets View - Shows DRC-369 assets owned by current user
+ * Uses unified AbyssID identity system - automatically syncs with logged-in user
  */
-function MyAssetsView({ session }: { session: { username: string; publicKey: string } | null }) {
+function MyAssetsView() {
+  const { identity } = useAbyssIDIdentity();
+  const session = identity ? { username: identity.username, publicKey: identity.publicKey } : null;
   const [assets, setAssets] = useState<DRC369[]>([]);
   const [loading, setLoading] = useState(true);
   const [showMintForm, setShowMintForm] = useState(false);
@@ -632,7 +635,9 @@ function CustomWorkspaceOverlay({ onClose }: { onClose: () => void }) {
 }
 
 export function OnChainFilesApp() {
-  const { session, mode } = useAbyssID();
+  const { identity, isAuthenticated } = useAbyssIDIdentity();
+  const session = identity ? { username: identity.username, publicKey: identity.publicKey } : null;
+  const mode = 'local'; // Default to local mode
   const [activeTab, setActiveTab] = useState<TabId>('my-assets');
   const [showCustomOverlay, setShowCustomOverlay] = useState(false);
 
@@ -671,12 +676,12 @@ export function OnChainFilesApp() {
 
       {/* Main content */}
       <div className="abyss-files-content">
-        {!session && mode === 'remote' && (
+        {!isAuthenticated && (
           <div className="mb-4 p-3 bg-abyss-purple/10 border border-abyss-purple/30 rounded-lg text-sm text-gray-300">
             Sign in with AbyssID to mint DRC-369 assets
           </div>
         )}
-        {activeTab === 'my-assets' && <MyAssetsView session={session} />}
+        {activeTab === 'my-assets' && <MyAssetsView />}
         {activeTab === 'network' && <NetworkView />}
         {activeTab === 'explorer' && <ChainExplorerView />}
       </div>

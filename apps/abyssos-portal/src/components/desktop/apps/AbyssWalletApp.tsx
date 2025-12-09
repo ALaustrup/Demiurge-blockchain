@@ -5,24 +5,20 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useAbyssID } from '../../../hooks/useAbyssID';
+import { useAbyssIDIdentity, useAbyssIDUserData } from '../../../hooks/useAbyssIDIdentity';
 import { useWalletStore } from '../../../state/walletStore';
 import { useBlockListener } from '../../../context/BlockListenerContext';
-import { deriveDemiurgePublicKey, sendCgt } from '../../../services/wallet/demiurgeWallet';
+import { sendCgt } from '../../../services/wallet/demiurgeWallet';
 import { Button } from '../../shared/Button';
 import { NFTSwapPanel } from './NFTSwapPanel';
 
 export function AbyssWalletApp() {
-  const { session } = useAbyssID();
+  const { identity, isAuthenticated } = useAbyssIDIdentity();
+  const { balance: userBalance, sync: syncUserData, isSyncing } = useAbyssIDUserData();
   const { currentBlockHeight } = useBlockListener();
   const {
-    demiurgePublicKey,
-    balance,
     transactions,
-    isLoadingBalance,
     isLoadingTransactions,
-    setDemiurgePublicKey,
-    refreshBalance,
     refreshTransactions,
     addTransaction,
     updateTransaction,
@@ -35,22 +31,16 @@ export function AbyssWalletApp() {
   const [showSendForm, setShowSendForm] = useState(false);
   const [activeTab, setActiveTab] = useState<'cgt' | 'nft-swap'>('cgt');
   
-  // Derive Demiurge public key on mount
-  useEffect(() => {
-    if (session?.publicKey && !demiurgePublicKey) {
-      deriveDemiurgePublicKey(session.publicKey)
-        .then(derivedKey => setDemiurgePublicKey(derivedKey))
-        .catch(error => console.error('Failed to derive Demiurge key:', error));
-    }
-  }, [session, demiurgePublicKey, setDemiurgePublicKey]);
+  // Use identity from unified service - automatically synced
+  const demiurgePublicKey = identity?.demiurgePublicKey || null;
+  const balance = userBalance; // From unified identity service
   
-  // Refresh balance and transactions on mount and when block height changes
+  // Refresh transactions when block height changes (balance auto-syncs via identity service)
   useEffect(() => {
     if (demiurgePublicKey) {
-      refreshBalance();
       refreshTransactions();
     }
-  }, [demiurgePublicKey, currentBlockHeight, refreshBalance, refreshTransactions]);
+  }, [demiurgePublicKey, currentBlockHeight, refreshTransactions]);
   
   // Listen for transaction confirmations
   useEffect(() => {
@@ -72,7 +62,7 @@ export function AbyssWalletApp() {
   }, [demiurgePublicKey, transactions, updateTransaction, refreshBalance]);
   
   const handleSend = async () => {
-    if (!session?.publicKey || !demiurgePublicKey) {
+    if (!identity || !demiurgePublicKey) {
       setSendError('No wallet connected');
       return;
     }
@@ -111,7 +101,7 @@ export function AbyssWalletApp() {
       
       // Send transaction
       const result = await sendCgt({
-        from: session.publicKey,
+        from: identity.publicKey,
         to: sendTo.trim(),
         amount,
       });

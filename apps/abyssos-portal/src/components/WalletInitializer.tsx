@@ -1,31 +1,31 @@
 import { useEffect } from 'react';
-import { useAbyssID } from '../hooks/useAbyssID';
-import { useWalletStore } from '../state/walletStore';
-import { deriveDemiurgePublicKey } from '../services/wallet/demiurgeWallet';
+import { useAbyssIDIdentity } from '../hooks/useAbyssIDIdentity';
+import { useAbyssIDUserData } from '../hooks/useAbyssIDIdentity';
 
 /**
- * WalletInitializer - Ensures wallet is tied to AbyssID account
- * Derives Demiurge public key from AbyssID session when user logs in
+ * WalletInitializer - Ensures wallet is automatically synced with AbyssID
+ * 
+ * This component uses the unified AbyssID identity service which automatically:
+ * - Derives Demiurge public key from AbyssID
+ * - Syncs wallet balance
+ * - Syncs transactions
+ * - Syncs on-chain assets
+ * 
+ * All of this happens automatically when user logs in via AbyssID.
  */
 export function WalletInitializer() {
-  const { session } = useAbyssID();
-  const { demiurgePublicKey, setDemiurgePublicKey, clearWallet } = useWalletStore();
+  const { identity, isAuthenticated } = useAbyssIDIdentity();
+  const { balance, isSyncing } = useAbyssIDUserData();
 
+  // The identity service handles everything automatically
+  // This component just ensures the hooks are active
   useEffect(() => {
-    if (session?.publicKey) {
-      // Derive wallet key from AbyssID
-      deriveDemiurgePublicKey(session.publicKey)
-        .then(derivedKey => {
-          setDemiurgePublicKey(derivedKey);
-        })
-        .catch(error => {
-          console.error('Failed to derive Demiurge key from AbyssID:', error);
-        });
-    } else {
-      // Clear wallet when logged out
-      clearWallet();
+    if (isAuthenticated && identity) {
+      console.log('[WalletInitializer] AbyssID authenticated:', identity.username);
+      console.log('[WalletInitializer] Demiurge public key:', identity.demiurgePublicKey);
+      console.log('[WalletInitializer] Balance:', balance);
     }
-  }, [session?.publicKey, setDemiurgePublicKey, clearWallet]);
+  }, [identity, isAuthenticated, balance]);
 
   return null; // This component doesn't render anything
 }

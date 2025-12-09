@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../shared/Button';
 import { Card } from '../shared/Card';
 import { abyssIdClient, type AbyssAccount } from '../../lib/abyssIdClient';
-import { useAuthStore } from '../../state/authStore';
+import { useAbyssID } from '../../hooks/useAbyssID';
 
 interface AbyssIDSignupModalProps {
   isOpen: boolean;
@@ -18,7 +18,7 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
   const [hasBackedUp, setHasBackedUp] = useState(false);
   const [step, setStep] = useState<'username' | 'backup'>('username');
   const [createdAccount, setCreatedAccount] = useState<AbyssAccount | null>(null);
-  const login = useAuthStore((state) => state.login);
+  const { login: abyssIDLogin } = useAbyssID();
   const checkTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Debounced username checking on input change
@@ -85,13 +85,13 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
     }
   };
 
-  const handleBackupConfirm = () => {
+  const handleBackupConfirm = async () => {
     if (!hasBackedUp) return;
     
     // Use the stored account from signup
     if (createdAccount) {
-      // Login with the full account object
-      login(createdAccount);
+      // Login with unified AbyssID system - this will automatically initialize identity service
+      await abyssIDLogin(createdAccount.username);
       onSuccess(createdAccount.username, createdAccount.publicKey);
       handleClose();
     } else {
@@ -100,19 +100,18 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
       const accounts = abyssIdClient.getAllAccounts();
       const account = accounts[normalizedUsername];
       if (account) {
-        login(account);
+        await abyssIDLogin(account.username);
         onSuccess(account.username, account.publicKey);
         handleClose();
       } else {
         console.error('Account not found after signup');
         // Try to get from current account as last resort
-        abyssIdClient.getCurrentAccount().then(account => {
-          if (account) {
-            login(account);
-            onSuccess(account.username, account.publicKey);
-            handleClose();
-          }
-        });
+        const account = await abyssIdClient.getCurrentAccount();
+        if (account) {
+          await abyssIDLogin(account.username);
+          onSuccess(account.username, account.publicKey);
+          handleClose();
+        }
       }
     }
   };

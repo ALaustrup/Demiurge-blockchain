@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuthStore } from './state/authStore';
 import { AbyssIDProvider } from './context/AbyssIDContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -6,10 +6,8 @@ import { BlockListenerProvider } from './context/BlockListenerContext';
 import { BootScreen } from './routes/BootScreen';
 import { LoginScreen } from './routes/LoginScreen';
 import { Desktop } from './routes/Desktop';
+import { WalletInitializer } from './components/WalletInitializer';
 import { migrateOldDemiNFTData } from './services/abyssid/drc369';
-import { useWalletStore } from './state/walletStore';
-import { deriveDemiurgePublicKey } from './services/wallet/demiurgeWallet';
-import { useAbyssID } from './hooks/useAbyssID';
 import './styles/globals.css';
 
 type Screen = 'boot' | 'login' | 'desktop';
@@ -79,15 +77,16 @@ function App() {
     );
   }
 
-  return (
-    <ThemeProvider>
-      <AbyssIDProvider>
-        <BlockListenerProvider>
-          <Desktop />
-        </BlockListenerProvider>
-      </AbyssIDProvider>
-    </ThemeProvider>
-  );
+        return (
+          <ThemeProvider>
+            <AbyssIDProvider>
+              <BlockListenerProvider>
+                <WalletInitializer />
+                <Desktop />
+              </BlockListenerProvider>
+            </AbyssIDProvider>
+          </ThemeProvider>
+        );
 }
 
 export default App;

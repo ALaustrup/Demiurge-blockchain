@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../shared/Button';
 import { Card } from '../shared/Card';
-import { useAuthStore } from '../../state/authStore';
-import { abyssIdClient } from '../../lib/abyssIdClient';
+import { useAbyssID } from '../../hooks/useAbyssID';
 
 interface AbyssIDLoginFormProps {
   onSignupClick: () => void;
@@ -10,28 +9,24 @@ interface AbyssIDLoginFormProps {
 
 export function AbyssIDLoginForm({ onSignupClick }: AbyssIDLoginFormProps) {
   const [username, setUsername] = useState('');
-  const [publicKey, setPublicKey] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const login = useAuthStore((state) => state.login);
+  const { login } = useAbyssID();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
-    if (!username.trim() || !publicKey.trim()) {
-      setError('Please fill in all fields');
+    if (!username.trim()) {
+      setError('Please enter your username');
       return;
     }
 
     setIsLoading(true);
     try {
-      const account = await abyssIdClient.login(username, publicKey);
-      if (account) {
-        login(account);
-      } else {
-        setError('Invalid credentials');
-      }
+      // Use unified AbyssID login - this will automatically initialize identity service
+      await login(username);
+      // Login success - identity service will handle wallet sync, etc.
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {
@@ -58,19 +53,6 @@ export function AbyssIDLoginForm({ onSignupClick }: AbyssIDLoginFormProps) {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-2 text-gray-300">
-            Public Key / AbyssID Code
-          </label>
-          <input
-            type="text"
-            value={publicKey}
-            onChange={(e) => setPublicKey(e.target.value)}
-            className="w-full px-4 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded-lg text-white focus:outline-none focus:border-abyss-cyan focus:ring-2 focus:ring-abyss-cyan/50"
-            placeholder="Enter your public key or code"
-            disabled={isLoading}
-          />
-        </div>
 
         {error && (
           <div className="text-red-400 text-sm">{error}</div>
