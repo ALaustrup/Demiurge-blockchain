@@ -2,13 +2,13 @@
  * DNS Record Routes
  */
 
-import { Router } from 'express';
+import { Router, type Router as ExpressRouter } from 'express';
 import { z } from 'zod';
 import { cache } from '../db/client';
 import { resolveDNS } from '../dns/resolver';
 import type { DNSRecordType } from '../types';
 
-const router = Router();
+const router: ExpressRouter = Router();
 
 router.get('/record', async (req, res) => {
   try {

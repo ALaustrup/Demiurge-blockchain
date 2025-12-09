@@ -1,0 +1,17 @@
+[Unit]
+Description=Demiurge DNS Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/node /opt/demiurge/dns-service/dist/index.js
+WorkingDirectory=/opt/demiurge/dns-service/
+Restart=always
+RestartSec=5
+EnvironmentFile=/opt/demiurge/dns-service/.env
+User=root
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+

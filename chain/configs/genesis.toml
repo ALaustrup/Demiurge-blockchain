@@ -1,0 +1,30 @@
+# Demiurge Genesis Configuration Template
+# This file defines the initial state for the chain
+# The placeholder "validator_address_here" will be replaced during deployment
+
+[chain]
+chain_id = 77701
+name = "Demiurge Mainnet"
+
+[genesis]
+# Genesis Archon address (pre-funded and marked as Archon)
+genesis_archon_address = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+genesis_archon_balance = "100000000000000"  # 1M CGT in smallest units (1,000,000 * 10^8)
+
+[allocations]
+# Initial CGT allocations (address: balance in smallest units)
+# Faucet account for testing
+faucet_address = "1111111111111111111111111111111111111111111111111111111111111111"
+faucet_balance = "1000000000000000"  # 10M CGT
+
+# Test account 1
+test_account_1 = "2222222222222222222222222222222222222222222222222222222222222222"
+test_account_1_balance = "100000000000000"  # 1M CGT
+
+# Test account 2
+test_account_2 = "3333333333333333333333333333333333333333333333333333333333333333"
+test_account_2_balance = "100000000000000"  # 1M CGT
+
+[[validators]]
+address = "validator_address_here"
+stake = "1000000000000"

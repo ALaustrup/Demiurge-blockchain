@@ -1,0 +1,18 @@
+[Unit]
+Description=Abyss Radio Scheduler
+After=network.target abyssid.service
+
+[Service]
+ExecStart=/usr/bin/node /opt/demiurge/abyssid-service/dist/index.js
+WorkingDirectory=/opt/demiurge/abyssid-service
+Restart=always
+RestartSec=5
+User=root
+Environment=NODE_ENV=production
+EnvironmentFile=/opt/demiurge/abyssid-service/.env
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+

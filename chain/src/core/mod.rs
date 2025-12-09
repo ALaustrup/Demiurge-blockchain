@@ -1,10 +1,14 @@
-//! Core blockchain types and state management.
+//! Core blockchain components
 //!
-//! This module contains the fundamental building blocks of the Demiurge chain:
-//! - Blocks and block headers
-//! - Transactions
-//! - State management
+//! Block, Transaction, State management
 
 pub mod block;
 pub mod state;
 pub mod transaction;
+pub mod meta;
+pub mod intentions;
+pub mod evolution;
+
+pub use block::Block;
+pub use state::State;
+pub use transaction::Transaction;

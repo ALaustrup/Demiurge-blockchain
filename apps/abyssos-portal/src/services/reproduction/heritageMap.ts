@@ -5,6 +5,7 @@
  */
 
 import type { HeritageRecord } from './reproductionTypes';
+import { getLocalPeerId } from '../grid/peer';
 
 class HeritageMap {
   private records: Map<string, HeritageRecord> = new Map();
@@ -107,25 +108,32 @@ class HeritageMap {
 // Singleton instance
 export const heritageMap = new HeritageMap();
 
-// Initialize with root instance
+// Initialize with root instance (lazy initialization to avoid circular dependency)
 if (typeof window !== 'undefined') {
-  const rootId = getLocalPeerId();
-  heritageMap.recordInstance({
-    instanceId: rootId,
-    parentId: null,
-    generation: 0,
-    lineage: 'root',
-    divergence: 0,
-    traits: {
-      kernelHeuristics: [],
-      spiritBehaviors: [],
-      computeFocus: 'general',
-      mutationRate: 0.1,
-      stabilityThreshold: 0.7,
-      growthAggressiveness: 0.5,
-    },
-    createdAt: Date.now(),
-    status: 'active',
-  });
+  // Defer initialization to avoid module load order issues
+  setTimeout(() => {
+    try {
+      const rootId = getLocalPeerId();
+      heritageMap.recordInstance({
+        instanceId: rootId,
+        parentId: null,
+        generation: 0,
+        lineage: 'root',
+        divergence: 0,
+        traits: {
+          kernelHeuristics: [],
+          spiritBehaviors: [],
+          computeFocus: 'general',
+          mutationRate: 0.1,
+          stabilityThreshold: 0.7,
+          growthAggressiveness: 0.5,
+        },
+        createdAt: Date.now(),
+        status: 'active',
+      });
+    } catch (error) {
+      console.error('Failed to initialize heritage map:', error);
+    }
+  }, 0);
 }
 

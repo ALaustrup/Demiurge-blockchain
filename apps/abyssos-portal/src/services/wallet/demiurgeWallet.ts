@@ -78,9 +78,43 @@ function encodeCgtTransfer(params: SendCgtParams): Uint8Array {
 }
 
 /**
+ * Check if user can send CGT (must have minted/swapped an NFT)
+ */
+export async function canSendCgt(sessionToken: string | null): Promise<boolean> {
+  if (!sessionToken) return false;
+  
+  try {
+    const response = await fetch(`${import.meta.env.VITE_ABYSSID_API_URL || 'http://localhost:8082'}/api/wallet/can-send`, {
+      headers: {
+        'Authorization': `Bearer ${sessionToken}`,
+      },
+    });
+    
+    if (response.ok) {
+      const { canSend } = await response.json();
+      return canSend;
+    }
+  } catch (error) {
+    console.error('Failed to check send permission:', error);
+  }
+  
+  return false;
+}
+
+/**
  * Sign and send a CGT transfer transaction
  */
 export async function sendCgt(params: SendCgtParams): Promise<SignedTransaction> {
+  // Check if user can send (must have minted/swapped NFT)
+  const sessionToken = typeof window !== 'undefined' 
+    ? localStorage.getItem('abyssos.abyssid.sessionId')
+    : null;
+  
+  const canSend = await canSendCgt(sessionToken);
+  if (!canSend) {
+    throw new Error('You must mint or swap a DRC-369 NFT before sending CGT');
+  }
+  
   // Derive private key from identity key
   const { privateKey } = await deriveDemiurgeKeypair(params.from);
   

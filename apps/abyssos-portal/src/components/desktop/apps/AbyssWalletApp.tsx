@@ -10,6 +10,7 @@ import { useWalletStore } from '../../../state/walletStore';
 import { useBlockListener } from '../../../context/BlockListenerContext';
 import { deriveDemiurgePublicKey, sendCgt } from '../../../services/wallet/demiurgeWallet';
 import { Button } from '../../shared/Button';
+import { NFTSwapPanel } from './NFTSwapPanel';
 
 export function AbyssWalletApp() {
   const { session } = useAbyssID();
@@ -32,6 +33,7 @@ export function AbyssWalletApp() {
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [showSendForm, setShowSendForm] = useState(false);
+  const [activeTab, setActiveTab] = useState<'cgt' | 'nft-swap'>('cgt');
   
   // Derive Demiurge public key on mount
   useEffect(() => {
@@ -151,8 +153,44 @@ export function AbyssWalletApp() {
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-abyss-cyan mb-2">AbyssID Wallet</h2>
-        <p className="text-sm text-gray-400">Manage your CGT balance and transactions</p>
+        <p className="text-sm text-gray-400">Manage your CGT balance, transactions, and NFTs</p>
       </div>
+
+      {/* Tabs */}
+      <div className="flex space-x-2 border-b border-abyss-cyan/20">
+        <button
+          onClick={() => setActiveTab('cgt')}
+          className={`px-4 py-2 text-sm font-medium transition-colors ${
+            activeTab === 'cgt'
+              ? 'text-abyss-cyan border-b-2 border-abyss-cyan'
+              : 'text-gray-400 hover:text-gray-300'
+          }`}
+        >
+          CGT
+        </button>
+        <button
+          onClick={() => setActiveTab('nft-swap')}
+          className={`px-4 py-2 text-sm font-medium transition-colors ${
+            activeTab === 'nft-swap'
+              ? 'text-abyss-cyan border-b-2 border-abyss-cyan'
+              : 'text-gray-400 hover:text-gray-300'
+          }`}
+        >
+          NFT Swap
+        </button>
+      </div>
+
+      {activeTab === 'nft-swap' && (
+        <NFTSwapPanel
+          onSwapComplete={(assetId) => {
+            console.log('NFT swapped:', assetId);
+            // TODO: Refresh NFT list or show notification
+          }}
+        />
+      )}
+
+      {activeTab === 'cgt' && (
+        <>
       
       {/* Balance Card */}
       <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-6 backdrop-blur-sm">
@@ -279,6 +317,8 @@ export function AbyssWalletApp() {
           </div>
         )}
       </div>
+        </>
+      )}
     </div>
   );
 }

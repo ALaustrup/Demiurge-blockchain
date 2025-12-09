@@ -2569,16 +2569,39 @@ async fn handle_rpc(
             })
         }
         "archon_state" => {
-            let asv = node.archon_last_state.read().unwrap_or_else(|_| {
-                log::error!("archon_last_state rwlock poisoned");
-                panic!("archon_last_state rwlock poisoned - this should never happen");
-            }).clone();
+            let asv = match node.archon_last_state.read() {
+                Ok(guard) => guard.clone(),
+                Err(_) => {
+                    log::error!("archon_last_state rwlock poisoned");
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32603,
+                            message: "Internal error: archon state lock poisoned".to_string(),
+                        }),
+                        id,
+                    });
+                }
+            };
+            let result_value = match serde_json::to_value(asv) {
+                Ok(v) => v,
+                Err(e) => {
+                    log::error!("Failed to serialize ASV: {}", e);
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32603,
+                            message: format!("Failed to serialize Archon state: {}", e),
+                        }),
+                        id,
+                    });
+                }
+            };
             Json(JsonRpcResponse {
                 jsonrpc: "2.0".to_string(),
-                result: Some(serde_json::to_value(asv).unwrap_or_else(|e| {
-                    log::error!("Failed to serialize ASV: {}", e);
-                    json!({"error": "Failed to serialize Archon state"})
-                })),
+                result: Some(result_value),
                 error: None,
                 id,
             })

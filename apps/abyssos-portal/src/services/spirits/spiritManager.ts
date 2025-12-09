@@ -73,13 +73,6 @@ class SpiritManager {
   }
   
   /**
-   * Get spirit by ID
-   */
-  getSpirit(spiritId: string): AbyssSpirit | undefined {
-    return this.spirits.get(spiritId);
-  }
-  
-  /**
    * Update spirit
    */
   async updateSpirit(spirit: AbyssSpirit): Promise<void> {

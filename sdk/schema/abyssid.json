@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AbyssID Identity Schema",
+  "description": "AbyssOS identity layer schema",
+  "type": "object",
+  "required": ["username", "publicKey"],
+  "properties": {
+    "username": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$",
+      "minLength": 3,
+      "maxLength": 32,
+      "description": "Username (lowercase a-z0-9, _, -)"
+    },
+    "publicKey": {
+      "type": "string",
+      "minLength": 32,
+      "maxLength": 200,
+      "description": "Ed25519 public key (hex or base58)"
+    },
+    "displayName": {
+      "type": "string"
+    },
+    "avatarUrl": {
+      "type": "string",
+      "format": "uri"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "lastLoginAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "demiurgeAddress": {
+      "type": "string",
+      "description": "Derived Demiurge chain address"
+    }
+  }
+}

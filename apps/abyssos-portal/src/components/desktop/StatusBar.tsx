@@ -5,6 +5,8 @@ import { useTheme } from '../../context/ThemeContext';
 import { useMusicPlayerStore } from '../../state/musicPlayerStore';
 import { useDesktopStore } from '../../state/desktopStore';
 import { useWalletStore } from '../../state/walletStore';
+import { StartButton } from './StartButton';
+import { SystemMenu } from './SystemMenu';
 
 export function StatusBar() {
   const { session, logout } = useAbyssID();
@@ -13,6 +15,7 @@ export function StatusBar() {
   const { openApp } = useDesktopStore();
   const { refreshBalance } = useWalletStore();
   const [showMenu, setShowMenu] = useState(false);
+  const [showSystemMenu, setShowSystemMenu] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -61,55 +64,68 @@ export function StatusBar() {
   };
 
   return (
-    <div
-      className="fixed top-0 left-0 right-0 h-8 z-50 flex items-center justify-between px-4 text-xs"
-      style={{
-        background: themeConfig.toolbar.background,
-        borderBottom: `1px solid ${themeConfig.toolbar.border}`,
-        backdropFilter: themeConfig.toolbar.backdropBlur,
-        WebkitBackdropFilter: themeConfig.toolbar.backdropBlur,
-      }}
-    >
-      <div className="text-abyss-cyan">AbyssOS – Demiurge Devnet</div>
-      
-      <div className="flex items-center space-x-4">
-        {/* Date and Time */}
-        <div className="flex items-center gap-2 text-gray-300">
-          <span>{formatDate(currentTime)}</span>
-          <span className="text-abyss-cyan">{formatTime(currentTime)}</span>
+    <>
+      <div
+        className="fixed top-0 left-0 right-0 h-8 z-50 flex items-center justify-between px-4 text-xs"
+        style={{
+          background: themeConfig.toolbar.background,
+          borderBottom: `1px solid ${themeConfig.toolbar.border}`,
+          backdropFilter: themeConfig.toolbar.backdropBlur,
+          WebkitBackdropFilter: themeConfig.toolbar.backdropBlur,
+        }}
+      >
+        <div className="text-abyss-cyan">AbyssOS – Demiurge Devnet</div>
+        
+        {/* Start Button - Center */}
+        <div className="absolute left-1/2 transform -translate-x-1/2">
+          <StartButton
+            onClick={() => setShowSystemMenu(!showSystemMenu)}
+            isOpen={showSystemMenu}
+          />
+        </div>
+        
+        <div className="flex items-center space-x-3">
+          {/* Music Player Widget */}
+          {(currentTrack && isBackgroundMode) && (
+            <div className="flex items-center gap-2 px-2 py-1 rounded bg-abyss-navy/60 border border-abyss-cyan/20">
+              <span className="text-abyss-cyan text-[10px] truncate max-w-[120px]">
+                {currentTrack.music?.trackName || currentTrack.name || 'Unknown Track'}
+              </span>
+              <button
+                onClick={togglePlayPause}
+                className="w-5 h-5 rounded bg-abyss-cyan/20 hover:bg-abyss-cyan/40 text-abyss-cyan flex items-center justify-center text-[10px]"
+              >
+                {isPlaying ? '⏸' : '▶'}
+              </button>
+              <button
+                onClick={nextTrack}
+                className="w-5 h-5 rounded bg-abyss-cyan/20 hover:bg-abyss-cyan/40 text-abyss-cyan flex items-center justify-center text-[10px]"
+              >
+                ⏭
+              </button>
+              <button
+                onClick={() => openApp('neonPlayer')}
+                className="w-5 h-5 rounded bg-abyss-cyan/20 hover:bg-abyss-cyan/40 text-abyss-cyan flex items-center justify-center text-[10px]"
+                title="Open NEON Player"
+              >
+                🎵
+              </button>
+            </div>
+          )}
+          
+          {/* RPC Status - moved right */}
+          <div className="mr-2">
+            <ChainStatusPill />
+          </div>
+          
+          {/* Date and Time - moved closer to avatar */}
+          <div className="flex items-center gap-2 text-gray-300 mr-2">
+            <span className="text-xs">{formatDate(currentTime)}</span>
+            <span className="text-abyss-cyan text-xs font-mono">{formatTime(currentTime)}</span>
+          </div>
         </div>
 
-        {/* Music Player Widget */}
-        {(currentTrack && isBackgroundMode) && (
-          <div className="flex items-center gap-2 px-2 py-1 rounded bg-abyss-navy/60 border border-abyss-cyan/20">
-            <span className="text-abyss-cyan text-[10px] truncate max-w-[120px]">
-              {currentTrack.music?.trackName || currentTrack.name || 'Unknown Track'}
-            </span>
-            <button
-              onClick={togglePlayPause}
-              className="w-5 h-5 rounded bg-abyss-cyan/20 hover:bg-abyss-cyan/40 text-abyss-cyan flex items-center justify-center text-[10px]"
-            >
-              {isPlaying ? '⏸' : '▶'}
-            </button>
-            <button
-              onClick={nextTrack}
-              className="w-5 h-5 rounded bg-abyss-cyan/20 hover:bg-abyss-cyan/40 text-abyss-cyan flex items-center justify-center text-[10px]"
-            >
-              ⏭
-            </button>
-            <button
-              onClick={() => openApp('neonPlayer')}
-              className="w-5 h-5 rounded bg-abyss-cyan/20 hover:bg-abyss-cyan/40 text-abyss-cyan flex items-center justify-center text-[10px]"
-              title="Open NEON Player"
-            >
-              🎵
-            </button>
-          </div>
-        )}
-        <ChainStatusPill />
-      </div>
-
-      <div className="flex items-center space-x-2 relative">
+        <div className="flex items-center space-x-2 relative">
         {/* Avatar Button */}
         <button
           onClick={() => setShowMenu(!showMenu)}
@@ -186,6 +202,10 @@ export function StatusBar() {
           onClick={() => setShowMenu(false)}
         />
       )}
-    </div>
+      </div>
+
+      {/* System Menu */}
+      <SystemMenu isOpen={showSystemMenu} onClose={() => setShowSystemMenu(false)} />
+    </>
   );
 }

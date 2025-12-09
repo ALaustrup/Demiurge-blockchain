@@ -3,9 +3,14 @@
 //! This module provides the infrastructure for routing transactions to
 //! runtime modules. In Phase 3, concrete modules (bank_cgt, nft_dgen, etc.)
 //! are registered here and handle transaction execution.
+//!
+//! PHASE OMEGA: Runtime registration is now deterministic and versioned.
+//! Module order must remain consistent. See version.rs for integrity checks.
 
 use crate::core::state::State;
 use crate::core::transaction::Transaction;
+
+pub mod version;
 
 pub mod abyss_registry;
 pub mod urgeid_registry;
@@ -90,8 +95,11 @@ impl Runtime {
     }
 
     /// Create a runtime with all default modules registered.
+    ///
+    /// PHASE OMEGA: Module registration order is deterministic and must not change
+    /// without incrementing RUNTIME_VERSION. See version.rs for integrity checks.
     pub fn with_default_modules() -> Self {
-        Self::new()
+        let runtime = Self::new()
             .with_module(Box::new(BankCgtModule::new()))
             .with_module(Box::new(UrgeIDRegistryModule::new()))
             .with_module(Box::new(NftDgenModule::new()))
@@ -100,7 +108,26 @@ impl Runtime {
             .with_module(Box::new(DeveloperRegistryModule::new()))
             .with_module(Box::new(DevCapsulesModule::new()))
             .with_module(Box::new(RecursionRegistryModule::new()))
-            .with_module(Box::new(WorkClaimModule::new()))
+            .with_module(Box::new(WorkClaimModule::new()));
+        
+        // PHASE OMEGA: Verify integrity in debug builds
+        // In debug builds, fail fast if integrity check fails
+        // In release builds, log warning but continue
+        #[cfg(debug_assertions)]
+        {
+            if let Err(e) = version::verify_runtime_integrity(&runtime) {
+                log::error!("Runtime integrity check failed: {}", e);
+                panic!("Runtime integrity check failed: {}", e);
+            }
+        }
+        #[cfg(not(debug_assertions))]
+        {
+            if let Err(e) = version::verify_runtime_integrity(&runtime) {
+                log::warn!("Runtime integrity check failed in release build: {}", e);
+            }
+        }
+        
+        runtime
     }
 
     /// Dispatch a transaction to the appropriate runtime module.

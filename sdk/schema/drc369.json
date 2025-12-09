@@ -1,0 +1,154 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DRC-369 (Demiurge Resource Contract)",
+  "description": "Universal NFT schema supporting native Demiurge NFTs and multi-chain imports",
+  "type": "object",
+  "required": ["id", "chain", "standard", "owner", "uri", "contentType"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Internal UUID or deterministic hash"
+    },
+    "chain": {
+      "type": "string",
+      "enum": ["DEMIURGE", "ETH", "POLYGON", "BSC", "SOL", "BTC", "TON"],
+      "description": "Origin blockchain"
+    },
+    "standard": {
+      "type": "string",
+      "enum": ["DRC-369", "ERC-721", "ERC-1155", "SPL", "ORDINAL", "ARC-3"],
+      "description": "NFT standard"
+    },
+    "owner": {
+      "type": "string",
+      "description": "AbyssID or external wallet address"
+    },
+    "creator": {
+      "type": "string",
+      "description": "Creator address"
+    },
+    "supply": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Supply count (1 for NFT, >1 for semi-fungible)"
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri",
+      "description": "IPFS / Arweave / HTTP / Mycelia / Fabric URI"
+    },
+    "contentType": {
+      "type": "string",
+      "enum": ["image", "video", "audio", "model", "html-app", "binary", "dns-record", "awe-world", "other"],
+      "description": "Content type"
+    },
+    "bridgeWrapped": {
+      "type": "boolean",
+      "description": "True if imported from another chain"
+    },
+    "originalChain": {
+      "type": "string"
+    },
+    "originalContract": {
+      "type": "string"
+    },
+    "originalTokenId": {
+      "type": "string"
+    },
+    "attributes": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "string" },
+          { "type": "number" }
+        ]
+      }
+    },
+    "unlockables": {
+      "type": "object",
+      "properties": {
+        "encrypted": { "type": "boolean" },
+        "accessRequires": { "type": "number", "description": "CGT amount required" }
+      }
+    },
+    "onChain": {
+      "type": "boolean",
+      "description": "True if minted on-chain"
+    },
+    "txHash": {
+      "type": "string",
+      "description": "Transaction hash"
+    },
+    "blockHeight": {
+      "type": "integer",
+      "description": "Block height when minted"
+    },
+    "royalties": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 20,
+      "description": "Royalty percentage (0-20%)"
+    },
+    "provenance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "owner": { "type": "string" },
+          "txHash": { "type": "string" },
+          "timestamp": { "type": "integer" },
+          "blockHeight": { "type": "integer" }
+        },
+        "required": ["owner", "txHash", "timestamp"]
+      }
+    },
+    "transfers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "txHash": { "type": "string" },
+          "blockHeight": { "type": "integer" },
+          "timestamp": { "type": "integer" }
+        },
+        "required": ["from", "to", "txHash", "blockHeight", "timestamp"]
+      }
+    },
+    "burned": {
+      "type": "boolean"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "mime": { "type": "string" },
+        "dimensions": {
+          "type": "object",
+          "properties": {
+            "width": { "type": "integer" },
+            "height": { "type": "integer" }
+          }
+        },
+        "duration": { "type": "number" },
+        "extra": { "type": "object" }
+      }
+    },
+    "music": {
+      "type": "object",
+      "properties": {
+        "trackNumber": { "type": "integer" },
+        "trackName": { "type": "string" },
+        "albumName": { "type": "string" },
+        "artistName": { "type": "string" },
+        "genre": { "type": "string" },
+        "releaseDate": { "type": "string" },
+        "duration": { "type": "number" },
+        "fractal1Hash": { "type": "string" },
+        "beatmapHash": { "type": "string" },
+        "segmentRoot": { "type": "string" }
+      },
+      "required": ["trackName", "artistName", "duration"]
+    }
+  }
+}

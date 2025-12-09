@@ -93,6 +93,20 @@ export interface DRC369 {
     duration?: number;     // For video/audio
     extra?: Record<string, any>;
   };
+  
+  // Music-specific fields (for contentType === "audio")
+  music?: {
+    trackNumber?: number;
+    trackName: string;
+    albumName?: string;
+    artistName: string;
+    genre?: string;
+    releaseDate?: string;
+    duration: number;      // in seconds
+    fractal1Hash?: string; // SHA-256 hash of fractal-1 encoded audio
+    beatmapHash?: string;  // SHA-256 hash of beatmap data
+    segmentRoot?: string;  // Merkle root of segment table
+  };
 }
 
 export function isDRC369(obj: any): obj is DRC369 {

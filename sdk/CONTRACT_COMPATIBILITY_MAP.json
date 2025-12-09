@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Demiurge SDK Contract Compatibility Matrix",
+  "description": "PHASE OMEGA PART II: Defines runtime version to SDK version compatibility and upgrade paths",
+  "version": "1.0.0",
+  "compatibility": {
+    "runtime": {
+      "1.0.0": {
+        "ts-sdk": ["0.1.0", "0.2.0"],
+        "rust-sdk": ["0.1.0", "0.2.0"],
+        "chain": ["0.1.0"],
+        "description": "Initial runtime version with all core modules"
+      },
+      "1.1.0": {
+        "ts-sdk": ["0.2.0", "0.3.0"],
+        "rust-sdk": ["0.2.0", "0.3.0"],
+        "chain": ["0.1.0", "0.2.0"],
+        "description": "Runtime with enhanced features",
+        "upgrade_from": ["1.0.0"]
+      }
+    },
+    "sdk": {
+      "ts-sdk": {
+        "0.1.0": {
+          "runtime": ["1.0.0"],
+          "chain": ["0.1.0"],
+          "deprecated": false
+        },
+        "0.2.0": {
+          "runtime": ["1.0.0", "1.1.0"],
+          "chain": ["0.1.0", "0.2.0"],
+          "deprecated": false,
+          "upgrade_from": ["0.1.0"]
+        }
+      },
+      "rust-sdk": {
+        "0.1.0": {
+          "runtime": ["1.0.0"],
+          "chain": ["0.1.0"],
+          "deprecated": false
+        },
+        "0.2.0": {
+          "runtime": ["1.0.0", "1.1.0"],
+          "chain": ["0.1.0", "0.2.0"],
+          "deprecated": false,
+          "upgrade_from": ["0.1.0"]
+        }
+      }
+    },
+    "chain": {
+      "0.1.0": {
+        "runtime": ["1.0.0"],
+        "ts-sdk": ["0.1.0", "0.2.0"],
+        "rust-sdk": ["0.1.0", "0.2.0"],
+        "deprecated": false
+      },
+      "0.2.0": {
+        "runtime": ["1.0.0", "1.1.0"],
+        "ts-sdk": ["0.2.0"],
+        "rust-sdk": ["0.2.0"],
+        "deprecated": false,
+        "upgrade_from": ["0.1.0"]
+      }
+    }
+  },
+  "upgrade_paths": {
+    "allowed": [
+      {
+        "from": { "runtime": "1.0.0" },
+        "to": { "runtime": "1.1.0" },
+        "requires_sdk_upgrade": true,
+        "breaking": false
+      },
+      {
+        "from": { "chain": "0.1.0" },
+        "to": { "chain": "0.2.0" },
+        "requires_sdk_upgrade": true,
+        "breaking": false
+      }
+    ],
+    "forbidden": [
+      {
+        "from": { "runtime": "1.1.0" },
+        "to": { "runtime": "1.0.0" },
+        "reason": "Downgrades not allowed - state incompatibility"
+      }
+    ]
+  },
+  "validation_rules": {
+    "runtime_version_must_match_seal": true,
+    "sdk_must_be_compatible_with_runtime": true,
+    "chain_version_must_match_runtime": true,
+    "no_downgrades_allowed": true
+  }
+}

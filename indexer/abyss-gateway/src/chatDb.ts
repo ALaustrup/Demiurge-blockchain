@@ -1642,6 +1642,33 @@ export function getSystemSnapshotById(id: string): any | null {
   return db.prepare("SELECT * FROM system_snapshots WHERE id = ?").get(id) as any | null;
 }
 
+// Operator functions
+export function createOperator(id: string, displayName: string, role: string): any {
+  const db = getDb();
+  db.prepare(`
+    INSERT OR REPLACE INTO operators (id, display_name, role, created_at)
+    VALUES (?, ?, ?, datetime('now'))
+  `).run(id, displayName, role);
+  return getOperatorById(id);
+}
+
+export function getOperatorById(id: string): any | null {
+  const db = getDb();
+  const row = db.prepare('SELECT * FROM operators WHERE id = ?').get(id) as any;
+  return row || null;
+}
+
+export function updateOperatorRole(id: string, role: string): any {
+  const db = getDb();
+  db.prepare('UPDATE operators SET role = ? WHERE id = ?').run(role, id);
+  return getOperatorById(id);
+}
+
+export function listOperators(): any[] {
+  const db = getDb();
+  return db.prepare('SELECT * FROM operators ORDER BY created_at DESC').all() as any[];
+}
+
 export function getSystemSnapshots(
   startTime?: number,
   endTime?: number,

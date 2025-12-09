@@ -2,14 +2,14 @@
  * Express Server Setup
  */
 
-import express from 'express';
+import express, { type Express } from 'express';
 import cors from 'cors';
 import lookupRoutes from './routes/lookup';
 import recordRoutes from './routes/record';
 import chainRoutes from './routes/chain';
 import { initDb } from './db/client';
 
-export function createServer() {
+export function createServer(): Express {
   const app = express();
   
   // Initialize database

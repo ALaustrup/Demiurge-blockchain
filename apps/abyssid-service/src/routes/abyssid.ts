@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
 import { getDb } from '../db.js';
+import { deriveDemiurgeKey } from '../crypto/keyDerivation.js';
 import {
   RegisterRequestSchema,
   SessionInitRequestSchema,
@@ -11,6 +12,25 @@ import {
 
 const router: Router = Router();
 const challenges = new Map<string, { username: string; expiresAt: Date }>();
+
+// Helper functions for session management (exported for use in other routes)
+export function getSessionId(req: any): string | null {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+  return authHeader.substring(7);
+}
+
+export function getUserIdFromSession(sessionId: string): number | null {
+  const db = getDb();
+  const session = db.prepare(`
+    SELECT user_id FROM abyssid_sessions
+    WHERE id = ? AND expires_at > datetime('now')
+  `).get(sessionId) as { user_id: number } | undefined;
+  
+  return session?.user_id ?? null;
+}
 
 // Check username availability
 router.get('/username-available', (req, res) => {
@@ -53,17 +73,71 @@ router.post('/register', (req, res) => {
       VALUES (?, ?, datetime('now'))
     `).run(normalizedUsername, publicKey);
     
+    const userId = result.lastInsertRowid;
+    
     // Also insert into keys table
     db.prepare(`
       INSERT INTO abyssid_keys (user_id, public_key, label, created_at)
       VALUES (?, ?, ?, datetime('now'))
-    `).run(result.lastInsertRowid, publicKey, 'primary');
+    `).run(userId, publicKey, 'primary');
+    
+    // Initialize user storage (500GB quota)
+    db.prepare(`
+      INSERT INTO user_storage (user_id, total_quota_bytes, used_bytes)
+      VALUES (?, 536870912000, 0)
+    `).run(userId);
+    
+    // Initialize wallet (CGT will be minted on-chain)
+    db.prepare(`
+      INSERT INTO user_wallet_balances (user_id, cgt_balance, cgt_minted, has_minted_nft)
+      VALUES (?, 0.0, 0, 0)
+    `).run(userId);
+    
+    // Mint 5000 CGT on-chain for new user
+    try {
+      const demiurgePublicKey = deriveDemiurgeKey(publicKey);
+      const mintAmount = 5000 * 100000000; // 5000 CGT in smallest units (8 decimals)
+      const addressHex = Array.from(demiurgePublicKey).map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      // Call RPC to mint CGT (using dev faucet method if available, or direct mint)
+      const rpcUrl = process.env.DEMIURGE_RPC_URL || 'https://rpc.demiurge.cloud/rpc';
+      const mintResponse = await fetch(rpcUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'cgt_faucet', // Use faucet method for new users
+          params: {
+            address: addressHex,
+          },
+          id: Date.now(),
+        }),
+      });
+      
+      if (mintResponse.ok) {
+        const mintResult = await mintResponse.json();
+        if (mintResult.result !== undefined) {
+          // Update wallet record
+          const balance = Number(mintResult.result) / 100000000; // Convert from smallest units
+          db.prepare(`
+            UPDATE user_wallet_balances 
+            SET cgt_balance = ?, cgt_minted = 1
+            WHERE user_id = ?
+          `).run(balance, userId);
+        }
+      }
+    } catch (mintError) {
+      console.error('Failed to mint CGT on-chain for new user:', mintError);
+      // Continue registration even if minting fails (can be retried later)
+    }
     
     res.json({
-      userId: result.lastInsertRowid,
+      userId,
       username: normalizedUsername,
       publicKey,
       createdAt: new Date().toISOString(),
+      cgtGift: 5000.0,
+      storageQuota: '500GB',
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -221,6 +295,45 @@ router.get('/me', (req, res) => {
   } catch (error) {
     console.error('Get me error:', error);
     res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Failed to get user info' } });
+  }
+});
+
+// Get wallet balance
+router.get('/wallet/balance', (req, res) => {
+  try {
+    const sessionId = getSessionId(req);
+    if (!sessionId) {
+      return res.status(401).json({ error: { code: 'UNAUTHORIZED', message: 'Authentication required' } });
+    }
+    
+    const userId = getUserIdFromSession(sessionId);
+    if (!userId) {
+      return res.status(401).json({ error: { code: 'INVALID_SESSION', message: 'Invalid or expired session' } });
+    }
+    
+    const db = getDb();
+    
+    // Initialize wallet if it doesn't exist
+    const existing = db.prepare('SELECT user_id FROM user_wallet_balances WHERE user_id = ?').get(userId);
+    if (!existing) {
+      db.prepare(`
+        INSERT INTO user_wallet_balances (user_id, cgt_balance)
+        VALUES (?, 5000.0)
+      `).run(userId);
+    }
+    
+    const wallet = db.prepare('SELECT cgt_balance FROM user_wallet_balances WHERE user_id = ?').get(userId) as {
+      cgt_balance: number;
+    } | undefined;
+    
+    if (!wallet) {
+      return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Wallet not initialized' } });
+    }
+    
+    res.json({ balance: wallet.cgt_balance });
+  } catch (error) {
+    console.error('Get wallet balance error:', error);
+    res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Failed to get wallet balance' } });
   }
 });
 

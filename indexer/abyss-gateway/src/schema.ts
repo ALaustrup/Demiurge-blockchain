@@ -223,6 +223,17 @@ const SystemEventType = new GraphQLObjectType({
   }),
 });
 
+// OperatorType
+const OperatorType = new GraphQLObjectType({
+  name: "Operator",
+  fields: () => ({
+    id: { type: new GraphQLNonNull(GraphQLID) },
+    displayName: { type: GraphQLString },
+    role: { type: new GraphQLNonNull(GraphQLString) },
+    createdAt: { type: new GraphQLNonNull(GraphQLString) },
+  }),
+});
+
 const SystemSnapshotType = new GraphQLObjectType({
   name: "SystemSnapshot",
   fields: () => ({

@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # Demiurge Chain Node
+  demiurge-chain:
+    build:
+      context: .
+      dockerfile: docker/DemiurgeChain.Dockerfile
+    container_name: demiurge-chain
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./chain-data:/app/data
+      - ./chain/config:/app/config
+    environment:
+      - RUST_LOG=info
+      - DEMIURGE_RPC_PORT=8080
+    networks:
+      - demiurge-network
+    restart: unless-stopped
+
+  # AbyssID Service
+  abyssid-service:
+    build:
+      context: .
+      dockerfile: docker/AbyssIDService.Dockerfile
+    container_name: abyssid-service
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./apps/abyssid-service/data:/app/data
+      - ./apps/abyssid-service/data/user-storage:/app/data/user-storage
+    environment:
+      - PORT=8082
+      - DEMIURGE_RPC_URL=http://demiurge-chain:8080/rpc
+      - CORS_ORIGIN=http://localhost:5173
+      - STORAGE_PATH=/app/data/user-storage
+    depends_on:
+      - demiurge-chain
+    networks:
+      - demiurge-network
+    restart: unless-stopped
+
+  # AbyssOS Portal (Frontend)
+  abyssos-portal:
+    build:
+      context: .
+      dockerfile: docker/AbyssOSPortal.Dockerfile
+    container_name: abyssos-portal
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./apps/abyssos-portal:/app
+      - /app/node_modules
+    environment:
+      - VITE_DEMIURGE_RPC_URL=http://localhost:8080/rpc
+      - VITE_ABYSSID_API_URL=http://localhost:8082
+      - VITE_ABYSSID_MODE=remote
+    depends_on:
+      - abyssid-service
+    networks:
+      - demiurge-network
+    restart: unless-stopped
+    command: pnpm dev --host
+
+  # User Development Framework Container
+  user-dev-framework:
+    image: node:20-alpine
+    container_name: user-dev-framework
+    ports:
+      - "3000-3010:3000-3010"
+    volumes:
+      - ./user-workspaces:/workspace
+      - /workspace/node_modules
+    working_dir: /workspace
+    environment:
+      - NODE_ENV=development
+    networks:
+      - demiurge-network
+    command: tail -f /dev/null
+    profiles:
+      - dev
+
+networks:
+  demiurge-network:
+    driver: bridge
+
+volumes:
+  chain-data:
+  user-storage:
+  user-workspaces:
+

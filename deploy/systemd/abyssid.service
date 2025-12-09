@@ -1,0 +1,17 @@
+[Unit]
+Description=AbyssID Identity Backend
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/node /opt/demiurge/abyssid-service/dist/index.js
+WorkingDirectory=/opt/demiurge/abyssid-service/
+Restart=always
+RestartSec=5
+EnvironmentFile=/opt/demiurge/abyssid-service/.env
+User=root
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+

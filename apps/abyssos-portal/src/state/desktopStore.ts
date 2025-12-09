@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-export type AppId = 'chainOps' | 'miner' | 'wallet' | 'abyssBrowser' | 'abyssTorrent' | 'onChainFiles' | 'drc369Studio' | 'blockExplorer' | 'abyssShell' | 'abyssRuntime' | 'systemMonitor' | 'abyssGridMonitor' | 'abyssSpiritConsole' | 'cogFabricConsole' | 'cogSingularity' | 'genesisConsole' | 'temporalObservatory' | 'dnsConsole' | 'aweConsole' | 'aweAtlas' | 'neonPlayer' | 'neonRadio';
+export type AppId = 'chainOps' | 'miner' | 'wallet' | 'abyssBrowser' | 'abyssTorrent' | 'onChainFiles' | 'drc369Studio' | 'blockExplorer' | 'abyssShell' | 'abyssRuntime' | 'systemMonitor' | 'abyssGridMonitor' | 'abyssSpiritConsole' | 'cogFabricConsole' | 'cogSingularity' | 'genesisConsole' | 'temporalObservatory' | 'dnsConsole' | 'aweConsole' | 'aweAtlas' | 'neonPlayer' | 'neonRadio' | 'documentEditor';
 
 export interface Window {
   id: string;
@@ -45,6 +45,7 @@ export const APP_INFOS: AppInfo[] = [
   { id: 'aweAtlas', label: 'Atlas', icon: '🗺️' },
   { id: 'neonPlayer', label: 'NEON Player', icon: '🎵' },
   { id: 'neonRadio', label: 'Abyss Radio', icon: '📻' },
+  { id: 'documentEditor', label: 'Document Editor', icon: '📄' },
 ];
 
 interface DesktopState {

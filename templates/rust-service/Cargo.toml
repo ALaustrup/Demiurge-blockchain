@@ -7,11 +7,11 @@ description = "Rust server template for Demiurge Blockchain"
 
 [dependencies]
 demiurge-rust-sdk = { path = "../../sdk/rust-sdk" }
-axum = "0.7"
-tokio = { version = "1.0", features = ["full"] }
+axum = "0.8"
+tokio = { version = "1.38", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-tower = "0.4"
+tower = "0.5"
 tower-http = { version = "0.5", features = ["cors"] }
 anyhow = "1.0"
 

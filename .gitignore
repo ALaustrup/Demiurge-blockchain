@@ -192,3 +192,6 @@ coverage/
 .eslintcache
 .stylelintcache
 
+# Archived duplicate directories (quarantined)
+DEMIURGE__ARCHIVED__*
+

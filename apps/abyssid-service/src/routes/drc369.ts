@@ -239,6 +239,13 @@ router.post('/assets/native', async (req, res) => {
       chainResult ? JSON.stringify({ txHash: chainResult.txHash, blockHeight }) : null,
     );
     
+    // Mark user as having minted/swapped an NFT (allows CGT sending)
+    db.prepare(`
+      UPDATE user_wallet_balances 
+      SET has_minted_nft = 1 
+      WHERE user_id = ?
+    `).run(userId);
+    
     res.json({
       id: assetId,
       chain: data.originChain || 'DEMIURGE',

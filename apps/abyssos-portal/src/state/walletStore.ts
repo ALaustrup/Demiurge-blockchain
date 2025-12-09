@@ -87,6 +87,33 @@ export const useWalletStore = create<WalletState>()(
         
         set({ isLoadingBalance: true });
         try {
+          // First try to get from AbyssID service (includes 5000 CGT gift)
+          const sessionToken = typeof window !== 'undefined' 
+            ? localStorage.getItem('abyssos.abyssid.sessionId')
+            : null;
+          
+          if (sessionToken) {
+            try {
+              const balanceResponse = await fetch(
+                `${import.meta.env.VITE_ABYSSID_API_URL || 'http://localhost:8082'}/api/abyssid/wallet/balance`,
+                {
+                  headers: {
+                    'Authorization': `Bearer ${sessionToken}`,
+                  },
+                }
+              );
+              
+              if (balanceResponse.ok) {
+                const { balance } = await balanceResponse.json();
+                get().setBalance(Number(balance) || 0);
+                return;
+              }
+            } catch (apiError) {
+              console.warn('Failed to fetch balance from API, falling back to RPC:', apiError);
+            }
+          }
+          
+          // Fallback to RPC
           const rpcUrl = import.meta.env.VITE_DEMIURGE_RPC_URL || 'https://rpc.demiurge.cloud/rpc';
           const response = await fetch(rpcUrl, {
             method: 'POST',

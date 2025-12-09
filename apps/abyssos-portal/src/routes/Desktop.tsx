@@ -2,10 +2,10 @@ import React from 'react';
 import { FullscreenContainer } from '../components/layout/FullscreenContainer';
 import { AbyssBackground } from '../components/layout/AbyssBackground';
 import { StatusBar } from '../components/desktop/StatusBar';
-import { GlassDock } from '../components/desktop/GlassDock';
 import { WindowFrame } from '../components/desktop/WindowFrame';
 import { useDesktopStore } from '../state/desktopStore';
 import { WalletInitializer } from '../components/WalletInitializer';
+import { FileDropZone } from '../components/desktop/FileDropZone';
 import { ChainOpsApp } from '../components/desktop/apps/ChainOpsApp';
 import { MinerApp } from '../components/desktop/apps/MinerApp';
 import { AbyssWalletApp } from '../components/desktop/apps/AbyssWalletApp';
@@ -28,6 +28,7 @@ import { AWEConsoleApp } from '../components/desktop/apps/AWEConsoleApp';
 import { AWEAtlasApp } from '../components/desktop/apps/AWEAtlasApp';
 import { NeonPlayerApp } from '../components/desktop/apps/NeonPlayerApp';
 import { NeonRadioApp } from '../components/desktop/apps/NeonRadioApp';
+import { DocumentEditorApp } from '../components/desktop/apps/DocumentEditorApp';
 
 const appComponents: Record<string, React.ComponentType> = {
   chainOps: ChainOpsApp,
@@ -52,6 +53,7 @@ const appComponents: Record<string, React.ComponentType> = {
   aweAtlas: AWEAtlasApp,
   neonPlayer: NeonPlayerApp,
   neonRadio: NeonRadioApp,
+  documentEditor: DocumentEditorApp,
 };
 
 export function Desktop() {
@@ -60,6 +62,16 @@ export function Desktop() {
   return (
     <FullscreenContainer>
       <WalletInitializer />
+      <FileDropZone
+        onUploadComplete={(fileId, assetId) => {
+          console.log('File uploaded and minted:', { fileId, assetId });
+          // TODO: Refresh file explorer or show notification
+        }}
+        onUploadError={(error) => {
+          console.error('Upload error:', error);
+          // TODO: Show error notification
+        }}
+      />
       <AbyssBackground />
       <StatusBar />
 
@@ -83,7 +95,7 @@ export function Desktop() {
         );
       })}
 
-      <GlassDock />
+      {/* GlassDock removed - using System Menu instead */}
     </FullscreenContainer>
   );
 }

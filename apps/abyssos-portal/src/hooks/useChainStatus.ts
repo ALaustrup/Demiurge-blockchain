@@ -27,10 +27,10 @@ export function useChainStatus(pollIntervalMs = 5000) {
   const fetchStatus = useCallback(async () => {
     const rpcUrl = getRpcUrl();
     
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout for better reliability
+    
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-      
       const res = await fetch(rpcUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -42,18 +42,21 @@ export function useChainStatus(pollIntervalMs = 5000) {
         }),
         signal: controller.signal,
       });
-      
-      clearTimeout(timeoutId);
 
       if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       }
 
       const json = await res.json();
       
       // Check for JSON-RPC error
       if (json.error) {
-        throw new Error(json.error.message || 'RPC error');
+        throw new Error(json.error.message || `RPC error: ${json.error.code || 'unknown'}`);
+      }
+
+      // Validate response structure
+      if (!json.result) {
+        throw new Error('Invalid RPC response: missing result');
       }
 
       // Treat ANY successful response with numeric height (including 0) as connected
@@ -61,8 +64,20 @@ export function useChainStatus(pollIntervalMs = 5000) {
       
       setStatus({ state: 'connected', height });
     } catch (e: any) {
-      const message = e?.message ?? 'Unknown error';
+      let message = 'Unknown error';
+      if (e.name === 'AbortError') {
+        message = 'Connection timeout';
+      } else if (e.message) {
+        message = e.message;
+      } else if (typeof e === 'string') {
+        message = e;
+      }
+      
+      console.error('[ChainStatus] RPC error:', message, e);
       setStatus({ state: 'error', message });
+    } finally {
+      // Always clear timeout to prevent resource leaks
+      clearTimeout(timeoutId);
     }
   }, []);
 

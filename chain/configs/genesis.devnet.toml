@@ -24,8 +24,7 @@ test_account_1_balance = "100000000000000"  # 1M CGT
 test_account_2 = "3333333333333333333333333333333333333333333333333333333333333333"
 test_account_2_balance = "100000000000000"  # 1M CGT
 
-[validators]
-# For devnet, we can start with a single validator (Node0)
-# In production, this would be a list of validator addresses
-validator_0 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+[[validators]]
+address = "<YOUR_ADDRESS_FROM_KEYGEN>"
+stake = "1000000000000"
 

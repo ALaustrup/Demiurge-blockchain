@@ -1,0 +1,21 @@
+# Demiurge Node Configuration
+# This file configures the validator node
+
+[chain]
+chain_id = 77701
+name = "Demiurge Mainnet"
+
+[node]
+# RPC server address - bind to all interfaces for server deployment
+rpc_host = "0.0.0.0"
+rpc_port = 8545
+
+# Database path (absolute path for server deployment)
+db_path = "/opt/demiurge/.demiurge/data"
+
+# P2P listen address (for future P2P networking)
+p2p_listen = "0.0.0.0:30333"
+
+[genesis]
+# Path to genesis config file (relative to this config file)
+genesis_config = "genesis.toml"

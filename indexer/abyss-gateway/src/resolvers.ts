@@ -1564,7 +1564,7 @@ export const resolvers = {
       (s.metadata && JSON.parse(s.metadata || "{}").genesis === true)
     );
     
-    const genesisRitualEvents = ritualEvents.filter((e: any) => 
+    const genesisRitualEvents = allRitualEvents.filter((e: any) => 
       e.ritual_id?.startsWith("genesis_")
     );
     

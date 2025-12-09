@@ -2,12 +2,12 @@
  * DNS Lookup Routes
  */
 
-import { Router } from 'express';
+import { Router, type Router as ExpressRouter } from 'express';
 import { z } from 'zod';
 import { resolveDNS } from '../dns/resolver';
 import type { DNSRecordType } from '../types';
 
-const router = Router();
+const router: ExpressRouter = Router();
 
 const LookupSchema = z.object({
   domain: z.string().min(1),

@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Fractal-1 Audio Codec Schema",
+  "description": "Fractal-1 encoded audio metadata and structure",
+  "type": "object",
+  "required": ["metadata", "beatmap", "segments"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["trackName", "artistName", "duration", "sampleRate", "channels"],
+      "properties": {
+        "trackNumber": { "type": "integer" },
+        "trackName": { "type": "string" },
+        "albumName": { "type": "string" },
+        "artistName": { "type": "string" },
+        "genre": { "type": "string" },
+        "releaseDate": { "type": "string" },
+        "duration": { "type": "number", "description": "Duration in seconds" },
+        "sampleRate": { "type": "integer" },
+        "channels": { "type": "integer", "enum": [1, 2] },
+        "nftMetadata": {
+          "type": "object",
+          "properties": {
+            "owner": { "type": "string" },
+            "royalties": { "type": "number", "minimum": 0, "maximum": 100 },
+            "provenance": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "owner": { "type": "string" },
+                  "txHash": { "type": "string" },
+                  "timestamp": { "type": "integer" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "beatmap": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["timestamp", "bass", "mid", "high", "beat", "colorR", "colorG", "colorB"],
+        "properties": {
+          "timestamp": { "type": "number" },
+          "bass": { "type": "integer", "minimum": 0, "maximum": 255 },
+          "mid": { "type": "integer", "minimum": 0, "maximum": 255 },
+          "high": { "type": "integer", "minimum": 0, "maximum": 255 },
+          "beat": { "type": "integer", "minimum": 0, "maximum": 255 },
+          "colorR": { "type": "integer", "minimum": 0, "maximum": 255 },
+          "colorG": { "type": "integer", "minimum": 0, "maximum": 255 },
+          "colorB": { "type": "integer", "minimum": 0, "maximum": 255 }
+        }
+      }
+    },
+    "segments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["index", "offset", "size", "timestamp", "compressed"],
+        "properties": {
+          "index": { "type": "integer" },
+          "offset": { "type": "integer" },
+          "size": { "type": "integer" },
+          "timestamp": { "type": "number" },
+          "compressed": { "type": "boolean" }
+        }
+      }
+    },
+    "header": {
+      "type": "object",
+      "required": ["magic", "version", "metadata", "beatmapSize", "segmentCount", "segmentTableOffset", "audioDataOffset"],
+      "properties": {
+        "magic": { "type": "string", "const": "FRACT1" },
+        "version": { "type": "integer" },
+        "metadata": { "$ref": "#/properties/metadata" },
+        "beatmapSize": { "type": "integer" },
+        "segmentCount": { "type": "integer" },
+        "segmentTableOffset": { "type": "integer" },
+        "audioDataOffset": { "type": "integer" }
+      }
+    }
+  }
+}

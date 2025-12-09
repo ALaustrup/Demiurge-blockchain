@@ -8,6 +8,8 @@ use clap::{Parser, Subcommand};
 use demiurge_rust_sdk::DemiurgeSDK;
 use reqwest;
 
+mod keygen;
+
 #[derive(Parser)]
 #[command(name = "demiurge")]
 #[command(about = "Demiurge Blockchain CLI", long_about = None)]
@@ -46,6 +48,12 @@ enum Commands {
     Dev {
         #[command(subcommand)]
         command: DevCommands,
+    },
+    /// Validator key operations
+    Keygen {
+        /// Path to save the validator key
+        #[arg(long, default_value = "/opt/demiurge/keys/validator.key")]
+        output: String,
     },
 }
 
@@ -460,6 +468,19 @@ async fn main() -> anyhow::Result<()> {
                     }
                 }
             }
+        }
+        Commands::Keygen { output } => {
+            use std::path::PathBuf;
+            let key_path = PathBuf::from(&output);
+            let address = keygen::generate_validator_key(&key_path)?;
+            if key_path.exists() && std::fs::metadata(&key_path)?.len() == 32 {
+                println!("Validator key loaded:");
+            } else {
+                println!("Validator key generated successfully!");
+            }
+            println!("  Key path: {}", key_path.display());
+            println!("  Validator address: {}", address);
+            println!("\n⚠️  Keep your validator key secure! Never share it.");
         }
     }
 

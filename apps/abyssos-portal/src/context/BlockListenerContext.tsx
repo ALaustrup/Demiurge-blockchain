@@ -27,8 +27,13 @@ export function BlockListenerProvider({ children }: BlockListenerProviderProps) 
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'polling' | 'disconnected'>('disconnected');
   
   useEffect(() => {
-    // Start the block listener
-    blockListener.start();
+    // Start the block listener (non-blocking)
+    try {
+      blockListener.start();
+    } catch (error) {
+      console.error('Failed to start block listener:', error);
+      setConnectionStatus('disconnected');
+    }
     
     // Subscribe to block events
     const unsubscribe = blockListener.onBlock((event) => {
@@ -39,13 +44,22 @@ export function BlockListenerProvider({ children }: BlockListenerProviderProps) 
     
     // Update connection status periodically
     const statusInterval = setInterval(() => {
-      setConnectionStatus(blockListener.getStatus());
+      try {
+        setConnectionStatus(blockListener.getStatus());
+      } catch (error) {
+        console.error('Block listener status error:', error);
+        setConnectionStatus('disconnected');
+      }
     }, 2000);
     
     return () => {
       unsubscribe();
       clearInterval(statusInterval);
-      blockListener.stop();
+      try {
+        blockListener.stop();
+      } catch (error) {
+        console.error('Error stopping block listener:', error);
+      }
     };
   }, []);
   

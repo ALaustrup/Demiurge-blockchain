@@ -197,27 +197,105 @@ function initSchema(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_execution_receipts_user ON execution_receipts(user_id);
     CREATE INDEX IF NOT EXISTS idx_execution_receipts_job ON execution_receipts(job_id);
     CREATE INDEX IF NOT EXISTS idx_compute_providers_user ON compute_providers(user_id);
-    CREATE INDEX IF NOT EXISTS idx_compute_providers_trust ON compute_providers(trust_score);
-    
-    // mining_rewards table
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS mining_rewards (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,
-        cycle_id TEXT NOT NULL,
-        cycles INTEGER NOT NULL,
-        zk_proof_count INTEGER NOT NULL DEFAULT 0,
-        neural_contributions INTEGER NOT NULL DEFAULT 0,
-        reward_cgt REAL NOT NULL,
-        claimed INTEGER NOT NULL DEFAULT 0,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        claimed_at TEXT,
-        FOREIGN KEY (user_id) REFERENCES abyssid_users(id) ON DELETE CASCADE
-      )
-    `);
-    
-    CREATE INDEX IF NOT EXISTS idx_mining_rewards_user ON mining_rewards(user_id);
-    CREATE INDEX IF NOT EXISTS idx_mining_rewards_claimed ON mining_rewards(claimed);
+    CREATE INDEX IF NOT EXISTS idx_compute_providers_trust ON compute_providers(trust_score)
+  `);
+  
+  // mining_rewards table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS mining_rewards (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      cycle_id TEXT NOT NULL,
+      cycles INTEGER NOT NULL,
+      zk_proof_count INTEGER NOT NULL DEFAULT 0,
+      neural_contributions INTEGER NOT NULL DEFAULT 0,
+      reward_cgt REAL NOT NULL,
+      claimed INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      claimed_at TEXT,
+      FOREIGN KEY (user_id) REFERENCES abyssid_users(id) ON DELETE CASCADE
+    )
+  `);
+  
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_mining_rewards_user ON mining_rewards(user_id)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_mining_rewards_claimed ON mining_rewards(claimed)`);
+  
+  // radio_queue table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS radio_queue (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      track_id TEXT NOT NULL,
+      genre_id TEXT NOT NULL,
+      submitted_by TEXT NOT NULL,
+      submitted_at INTEGER NOT NULL,
+      priority INTEGER NOT NULL DEFAULT 0
+    )
+  `);
+  
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_radio_queue_genre ON radio_queue(genre_id)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_radio_queue_submitted_by ON radio_queue(submitted_by)`);
+  
+  // radio_segments table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS radio_segments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      track_id TEXT NOT NULL,
+      segment_index INTEGER NOT NULL,
+      data BLOB,
+      offset INTEGER NOT NULL DEFAULT 0,
+      size INTEGER NOT NULL,
+      timestamp INTEGER NOT NULL,
+      UNIQUE(track_id, segment_index)
+    )
+  `);
+  
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_radio_segments_track ON radio_segments(track_id)`);
+  
+  // user_storage table (500GB per user)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS user_storage (
+      user_id INTEGER PRIMARY KEY,
+      total_quota_bytes INTEGER NOT NULL DEFAULT 536870912000,
+      used_bytes INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES abyssid_users(id) ON DELETE CASCADE
+    )
+  `);
+  
+  // user_files table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS user_files (
+      id TEXT PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      filename TEXT NOT NULL,
+      original_filename TEXT NOT NULL,
+      file_path TEXT NOT NULL,
+      file_size INTEGER NOT NULL,
+      mime_type TEXT,
+      file_hash TEXT,
+      drc369_asset_id TEXT,
+      metadata TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES abyssid_users(id) ON DELETE CASCADE,
+      FOREIGN KEY (drc369_asset_id) REFERENCES drc369_assets(id) ON DELETE SET NULL
+    )
+  `);
+  
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_user_files_user ON user_files(user_id)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_user_files_drc369 ON user_files(drc369_asset_id)`);
+  
+  // user_wallet_balances table (for CGT tracking)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS user_wallet_balances (
+      user_id INTEGER PRIMARY KEY,
+      cgt_balance REAL NOT NULL DEFAULT 0.0,
+      cgt_minted INTEGER NOT NULL DEFAULT 0,
+      has_minted_nft INTEGER NOT NULL DEFAULT 0,
+      last_updated TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES abyssid_users(id) ON DELETE CASCADE
+    )
   `);
 }
 

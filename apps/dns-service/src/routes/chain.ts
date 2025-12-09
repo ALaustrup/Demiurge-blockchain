@@ -2,11 +2,11 @@
  * Chain DNS Routes
  */
 
-import { Router } from 'express';
+import { Router, type Router as ExpressRouter } from 'express';
 import { z } from 'zod';
 import { lookupChainRecord } from '../dns/chainLookup';
 
-const router = Router();
+const router: ExpressRouter = Router();
 
 router.get('/onchain/:domain', async (req, res) => {
   try {

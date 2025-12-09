@@ -5,7 +5,7 @@
 //! Arc<Mutex<...>> for thread-safe concurrent reads from JSON-RPC handlers.
 
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, RwLock};
 
 use anyhow::Result;
 use bincode;
@@ -20,6 +20,9 @@ use crate::runtime::{
     get_nfts_by_owner, is_archon,
     BankCgtModule, FabricRootHash, ListingId, NftId, Runtime, RuntimeModule, UrgeIDRegistryModule,
 };
+use crate::invariants::ChainInvariants;
+use crate::state_root_sentinel::StateRootSentinel;
+use crate::signature_guard::SignatureGuard;
 
 /// Chain information returned by JSON-RPC queries.
 #[derive(Clone)]
@@ -34,6 +37,7 @@ pub struct ChainInfo {
 /// - A thread-safe State (RocksDB-backed, wrapped in Arc<Mutex<...>>)
 /// - A mempool for pending transactions
 /// - Chain height tracking
+/// - Archon state vector (last ASV emitted)
 ///
 /// In Phase 5, State is wrapped for concurrent read access from JSON-RPC handlers.
 pub struct Node {
@@ -45,6 +49,8 @@ pub struct Node {
     pub mempool: Arc<Mutex<Vec<Transaction>>>,
     /// Current chain height.
     pub height: Arc<Mutex<u64>>,
+    /// Last Archon State Vector (for RPC exposure).
+    pub archon_last_state: Arc<RwLock<crate::archon::ArchonStateVector>>,
 }
 
 impl Node {
@@ -58,17 +64,47 @@ impl Node {
     ///
     /// # Note
     /// This function automatically initializes genesis state if not already done.
+    ///
+    /// PHASE OMEGA PART II: Rejects node startup if invariants fail
     pub fn new(db_path: PathBuf) -> Result<Self> {
         let mut state = State::open_rocksdb(&db_path)?;
         
         // Initialize genesis state if needed
         init_genesis_state(&mut state)?;
         
+        // PHASE OMEGA PART II: Verify invariants before startup
+        use crate::invariants::ChainInvariants;
+        ChainInvariants::verify_all(&state, 0, 0)
+            .map_err(|e| anyhow::anyhow!("Chain invariants failed at startup: {}", e))?;
+        
+        // PHASE OMEGA PART II: Verify no uninitialized storage
+        use crate::state_root_sentinel::StateRootSentinel;
+        StateRootSentinel::verify_no_uninitialized_storage(&state)
+            .map_err(|e| anyhow::anyhow!("Uninitialized storage detected: {}", e))?;
+        
+        // Initialize default Archon State Vector
+        use crate::archon::ArchonStateVector;
+        let default_asv = ArchonStateVector::new(
+            crate::runtime::version::RUNTIME_VERSION.to_string(),
+            "genesis".to_string(),
+            "node-0".to_string(),
+            true,
+            0,
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_secs(),
+            "genesis_registry".to_string(),
+            "genesis_sdk".to_string(),
+            "genesis_seal".to_string(),
+        );
+        
         Ok(Self {
             state: Arc::new(Mutex::new(state)),
             db_path,
             mempool: Arc::new(Mutex::new(Vec::new())),
             height: Arc::new(Mutex::new(0)),
+            archon_last_state: Arc::new(RwLock::new(default_asv)),
         })
     }
 
@@ -122,6 +158,11 @@ impl Node {
         })
         .map_err(|e| format!("failed to store transaction: {}", e))?;
 
+        // PHASE OMEGA PART II: Verify signature before execution
+        use crate::signature_guard::SignatureGuard;
+        SignatureGuard::verify_transaction_signature(&tx)
+            .map_err(|e| format!("Signature verification failed: {}", e))?;
+        
         // Execute transaction immediately (dev mode behavior)
         // In production, this would be done via block production/mining
         let exec_result = self.with_state_mut(|state| -> Result<(), String> {
@@ -252,6 +293,103 @@ impl Node {
     pub fn with_state_mut<R>(&self, f: impl FnOnce(&mut State) -> R) -> R {
         let mut state = self.state.lock().expect("state mutex poisoned");
         f(&mut state)
+    }
+    
+    /// Execute Archon governance cycle (called after block is built but before finalization)
+    ///
+    /// PHASE OMEGA PART VI: Every block triggers the Archon heartbeat
+    pub fn execute_archon_governance(&self) -> Result<()> {
+        use crate::archon::{
+            ArchonStateVector, ArchonDaemon, ArchonDirective,
+            emit_archon_event, emit_archon_heartbeat, emit_archon_directive,
+        };
+        use crate::runtime::version::RUNTIME_VERSION;
+        use crate::invariants::ChainInvariants;
+        use sha2::{Digest, Sha256};
+        
+        let height = *self.height.lock().expect("height mutex poisoned");
+        
+        // Compute state root hash (we can't serialize MutexGuard directly, use a hash of state keys)
+        let state_root = self.with_state(|state| {
+            // In production, this would iterate over all state keys and hash them
+            // For now, use a simplified hash based on height and total supply
+            use crate::runtime::get_cgt_total_supply;
+            use sha2::{Digest, Sha256};
+            let mut hasher = Sha256::new();
+            hasher.update(height.to_le_bytes());
+            let total_supply = get_cgt_total_supply(state).unwrap_or(0);
+            hasher.update(total_supply.to_le_bytes());
+            format!("{:x}", hasher.finalize())
+        });
+        
+        // Check invariants
+        let invariants_ok = self.with_state(|state| {
+            ChainInvariants::verify_all(state, height, 0).is_ok()
+        });
+        
+        // Get runtime registry hash (simplified - in production, hash actual registry)
+        let runtime_registry_hash = format!("{:x}", Sha256::digest(format!("{}", RUNTIME_VERSION).as_bytes()));
+        
+        // Get SDK compatibility hash (simplified)
+        let sdk_compatibility_hash = format!("{:x}", Sha256::digest("sdk_v1".as_bytes()));
+        
+        // Get sovereignty seal hash (simplified)
+        let sovereignty_seal_hash = format!("{:x}", Sha256::digest("seal_v1".as_bytes()));
+        
+        // Create local ASV
+        let local_asv = ArchonStateVector::new(
+            RUNTIME_VERSION.to_string(),
+            state_root,
+            "node-0".to_string(), // TODO: Get from config
+            invariants_ok,
+            height,
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_secs(),
+            runtime_registry_hash,
+            sdk_compatibility_hash,
+            sovereignty_seal_hash,
+        );
+        
+        // For now, use local ASV as remote (in production, fetch from network)
+        let remote_asv = local_asv.clone();
+        
+        // Initialize daemon and execute heartbeat
+        let mut daemon = ArchonDaemon::new("node-0".to_string());
+        let directive = daemon.heartbeat(local_asv.clone(), Some(remote_asv));
+        
+        // Emit events
+        emit_archon_event("Heartbeat evaluated");
+        emit_archon_heartbeat(height, &format!("{:?}", directive));
+        emit_archon_directive(&format!("Directive applied: {:?}", directive));
+        
+        // Handle directive
+        match directive {
+            ArchonDirective::A0_UnifyState => {
+                log::info!("[ARCHON] A0: State unified");
+            }
+            ArchonDirective::A1_RepairNode(reason) => {
+                log::warn!("[ARCHON] A1 repair triggered: {}", reason);
+                // TODO: auto_heal::attempt_repair();
+            }
+            ArchonDirective::A2_ForceSync(reason) => {
+                log::warn!("[ARCHON] A2 resync: {}", reason);
+                // TODO: sync::force_resync();
+            }
+            ArchonDirective::A3_RejectNode(reason) => {
+                log::error!("[ARCHON] A3 REJECT: {}", reason);
+                // TODO: network::quarantine_node(remote_asv.node_id.clone());
+            }
+            _ => {
+                log::info!("[ARCHON] Directive: {:?}", directive);
+            }
+        }
+        
+        // Update last ASV for RPC exposure
+        *self.archon_last_state.write().expect("archon_last_state rwlock poisoned") = local_asv;
+        
+        Ok(())
     }
 }
 

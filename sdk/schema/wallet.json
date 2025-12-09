@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AbyssID Wallet Schema",
+  "description": "Wallet state and transaction schema",
+  "type": "object",
+  "properties": {
+    "demiurgePublicKey": {
+      "type": ["string", "null"],
+      "description": "Derived Demiurge public key from AbyssID identity"
+    },
+    "balance": {
+      "type": "number",
+      "minimum": 0,
+      "description": "CGT balance in smallest units"
+    },
+    "balanceLastUpdated": {
+      "type": "integer",
+      "description": "Unix timestamp of last balance update"
+    },
+    "transactions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["hash", "from", "to", "amount", "type", "timestamp", "status"],
+        "properties": {
+          "hash": { "type": "string" },
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "amount": { "type": "number", "minimum": 0 },
+          "type": {
+            "type": "string",
+            "enum": ["send", "receive", "mint", "burn", "transfer"]
+          },
+          "blockHeight": { "type": "integer" },
+          "timestamp": { "type": "integer" },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "confirmed", "failed"]
+          }
+        }
+      }
+    }
+  }
+}

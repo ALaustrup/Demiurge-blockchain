@@ -6,31 +6,54 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { WindowFrame } from '../WindowFrame';
 import { NeonVisualizer, NFTMetadataPanel, NeonDesktopReactivity } from './neonPlayer';
 import type { DRC369 } from '../../../services/drc369/schema';
 import { Fractal1Codec } from '@abyssos/fractall/codec';
 import type { FractalBeatmap } from '@abyssos/fractall/types';
+import { useMusicPlayerStore } from '../../../state/musicPlayerStore';
+import { useDesktopStore } from '../../../state/desktopStore';
 
 interface NeonPlayerAppProps {
   assetId?: string;
 }
 
 export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
-  const [currentTrack, setCurrentTrack] = useState<DRC369 | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const {
+    currentTrack,
+    isPlaying,
+    currentTime,
+    duration,
+    beatmap,
+    setTrack,
+    setPlaying,
+    setCurrentTime,
+    setDuration,
+    setBeatmap,
+    setBackgroundMode,
+  } = useMusicPlayerStore();
+  const { closeWindow, openWindows } = useDesktopStore();
+  
   const [playlist, setPlaylist] = useState<DRC369[]>([]);
   const [shuffle, setShuffle] = useState(false);
   const [repeat, setRepeat] = useState<'off' | 'one' | 'all'>('off');
-  const [beatmap, setBeatmap] = useState<FractalBeatmap[]>([]);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [sourceNode, setSourceNode] = useState<AudioBufferSourceNode | null>(null);
   const [gainNode, setGainNode] = useState<GainNode | null>(null);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const animationFrameRef = useRef<number>();
+  const [isVideo, setIsVideo] = useState(false);
+  
+  // Enable background mode when window is closed
+  useEffect(() => {
+    const neonPlayerWindow = openWindows.find(w => w.appId === 'neonPlayer');
+    if (!neonPlayerWindow && currentTrack && isPlaying) {
+      setBackgroundMode(true);
+    } else if (neonPlayerWindow) {
+      setBackgroundMode(false);
+    }
+  }, [openWindows, currentTrack, isPlaying, setBackgroundMode]);
 
   // Initialize audio context
   useEffect(() => {
@@ -49,14 +72,33 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
     }
   }, [assetId]);
 
+  // Detect if track is video or audio
+  useEffect(() => {
+    if (currentTrack) {
+      const contentType = currentTrack.contentType || currentTrack.attributes?.mimeType || '';
+      const uri = currentTrack.uri || '';
+      const isVideoFile = contentType.startsWith('video/') || 
+                         /\.(mp4|webm|ogg|mov|avi|mkv|flv|wmv|m4v)$/i.test(uri);
+      setIsVideo(isVideoFile);
+    }
+  }, [currentTrack]);
+
   // Playback control
   useEffect(() => {
-    if (isPlaying && audioContext && currentTrack) {
-      playTrack();
-    } else if (!isPlaying && sourceNode) {
-      stopTrack();
+    if (isPlaying && currentTrack) {
+      if (isVideo && videoRef.current) {
+        videoRef.current.play().catch(console.error);
+      } else if (!isVideo && audioContext) {
+        playTrack();
+      }
+    } else if (!isPlaying) {
+      if (isVideo && videoRef.current) {
+        videoRef.current.pause();
+      } else if (sourceNode) {
+        stopTrack();
+      }
     }
-  }, [isPlaying, currentTrack]);
+  }, [isPlaying, currentTrack, isVideo]);
 
   // Update current time
   useEffect(() => {
@@ -75,7 +117,7 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isPlaying]);
+  }, [isPlaying, setCurrentTime]);
 
   const loadTrack = async (id: string) => {
     try {
@@ -85,7 +127,7 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
       const track = assets.find(a => a.id === id);
       
       if (track && track.music) {
-        setCurrentTrack(track);
+        setTrack(track);
         setDuration(track.music.duration);
         
         // Load and decode fractal-1 audio
@@ -157,11 +199,25 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
   };
 
   const handlePlayPause = () => {
-    setIsPlaying(!isPlaying);
+    setPlaying(!isPlaying);
+  };
+  
+  const handleClose = () => {
+    if (currentTrack && isPlaying) {
+      // Enable background mode instead of stopping
+      setBackgroundMode(true);
+    }
+    const neonPlayerWindow = openWindows.find(w => w.appId === 'neonPlayer');
+    if (neonPlayerWindow) {
+      closeWindow(neonPlayerWindow.id);
+    }
   };
 
   const handleSeek = (time: number) => {
-    if (audioRef.current) {
+    if (isVideo && videoRef.current) {
+      videoRef.current.currentTime = time;
+      setCurrentTime(time);
+    } else if (!isVideo && audioRef.current) {
       audioRef.current.currentTime = time;
       setCurrentTime(time);
     }
@@ -174,29 +230,69 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
   };
 
   return (
-    <WindowFrame
-      id="neonPlayer"
-      title="NEON Player"
-      width={800}
-      height={600}
-    >
-      <div className="w-full h-full bg-abyss-dark/90 backdrop-blur-sm flex flex-col">
-        {/* Visualizer */}
+    <div className="w-full h-full bg-abyss-dark/90 backdrop-blur-sm flex flex-col">
+        {/* Visualizer / Video Player */}
         <div className="flex-1 relative overflow-hidden">
-          <NeonVisualizer beatmap={beatmap} isPlaying={isPlaying} currentTime={currentTime} />
+          {isVideo && currentTrack?.uri ? (
+            <video
+              ref={videoRef}
+              src={currentTrack.uri}
+              className="w-full h-full object-contain"
+              onTimeUpdate={(e) => {
+                const video = e.currentTarget;
+                setCurrentTime(video.currentTime);
+                setDuration(video.duration || 0);
+              }}
+              onLoadedMetadata={(e) => {
+                const video = e.currentTarget;
+                setDuration(video.duration || 0);
+              }}
+              onEnded={() => {
+                setPlaying(false);
+                // TODO: Handle next track
+              }}
+              playsInline
+              controls={false}
+            />
+          ) : (
+            <>
+              <NeonVisualizer beatmap={beatmap} isPlaying={isPlaying} currentTime={currentTime} />
+              
+              {/* Album Art / Metadata Overlay */}
+              {currentTrack && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="text-center">
+                    <h2 className="text-2xl font-bold text-abyss-cyan mb-2">
+                      {currentTrack.music?.trackName || currentTrack.name}
+                    </h2>
+                    <p className="text-gray-300">
+                      {currentTrack.music?.artistName || 'Unknown Artist'}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
           
-          {/* Album Art / Metadata Overlay */}
-          {currentTrack && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold text-abyss-cyan mb-2">
-                  {currentTrack.music?.trackName || currentTrack.name}
-                </h2>
-                <p className="text-gray-300">
-                  {currentTrack.music?.artistName || 'Unknown Artist'}
-                </p>
-              </div>
-            </div>
+          {/* Hidden audio element for audio-only playback */}
+          {!isVideo && (
+            <audio
+              ref={audioRef}
+              src={currentTrack?.uri}
+              onTimeUpdate={(e) => {
+                const audio = e.currentTarget;
+                setCurrentTime(audio.currentTime);
+                setDuration(audio.duration || 0);
+              }}
+              onLoadedMetadata={(e) => {
+                const audio = e.currentTarget;
+                setDuration(audio.duration || 0);
+              }}
+              onEnded={() => {
+                setPlaying(false);
+                // TODO: Handle next track
+              }}
+            />
           )}
         </div>
 
@@ -257,11 +353,10 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
             </div>
           )}
         </div>
-      </div>
 
       {/* Desktop Reactivity */}
       {isPlaying && <NeonDesktopReactivity beatmap={beatmap} currentTime={currentTime} />}
-    </WindowFrame>
+    </div>
   );
 }
 

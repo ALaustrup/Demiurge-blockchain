@@ -1,0 +1,16 @@
+[Unit]
+Description=Abyss Gateway (Indexer + GraphQL)
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/node /opt/demiurge/abyss-gateway/dist/index.js
+WorkingDirectory=/opt/demiurge/abyss-gateway/
+Restart=always
+RestartSec=5
+User=root
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,39 @@
+[Unit]
+Description=Demiurge L1 Chain Node
+Documentation=https://github.com/demiurge-blockchain/demiurge
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/demiurge/bin/demiurge-chain
+WorkingDirectory=/opt/demiurge/
+Restart=always
+RestartSec=5
+User=root
+Group=root
+LimitNOFILE=65535
+
+# Environment
+Environment=RUST_LOG=info
+Environment=RUST_BACKTRACE=1
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=demiurge-chain
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/demiurge/.demiurge /opt/demiurge/configs
+ReadOnlyPaths=/opt/demiurge/bin /opt/demiurge/keys
+
+# Resource limits
+LimitNOFILE=65535
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target
+
