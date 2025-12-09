@@ -14,9 +14,13 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
   const [showSignup, setShowSignup] = useState(false);
   const { session, isLoading } = useAbyssID();
 
-  // If authenticated, trigger login callback
+  // If authenticated, trigger login callback and start background music
   useEffect(() => {
     if (!isLoading && session) {
+      // Start background music after successful login
+      import('../../services/backgroundMusic').then(({ backgroundMusicService }) => {
+        backgroundMusicService.play();
+      });
       onLogin();
     }
   }, [session, isLoading, onLogin]);
@@ -38,6 +42,7 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
 
   const handleSignupSuccess = (_username: string, _publicKey: string) => {
     // Account already logged in via signup, just trigger onLogin
+    // Background music will start automatically after login
     onLogin();
   };
 

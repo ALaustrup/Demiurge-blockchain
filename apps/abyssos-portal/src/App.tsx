@@ -4,17 +4,19 @@ import { AbyssIDProvider } from './context/AbyssIDContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { BlockListenerProvider } from './context/BlockListenerContext';
 import { BootScreen } from './routes/BootScreen';
+import { IntroVideo } from './components/IntroVideo';
 import { LoginScreen } from './routes/LoginScreen';
 import { Desktop } from './routes/Desktop';
 import { WalletInitializer } from './components/WalletInitializer';
 import { migrateOldDemiNFTData } from './services/abyssid/drc369';
 import './styles/globals.css';
 
-type Screen = 'boot' | 'login' | 'desktop';
+type Screen = 'boot' | 'intro' | 'login' | 'desktop';
 
 function App() {
   const [screen, setScreen] = useState<Screen>('boot');
   const [showBoot, setShowBoot] = useState(true);
+  const [showIntro, setShowIntro] = useState(true);
   const { isAuthenticated, isLoading, initialize } = useAuthStore();
 
   useEffect(() => {
@@ -38,6 +40,13 @@ function App() {
   }, [initialize, isAuthenticated]);
 
   const handleBootComplete = () => {
+    // After boot, show intro video
+    setShowBoot(false);
+    setScreen('intro');
+  };
+
+  const handleIntroComplete = () => {
+    setShowIntro(false);
     if (isAuthenticated) {
       setScreen('desktop');
     } else {
@@ -62,6 +71,16 @@ function App() {
       <ThemeProvider>
         <AbyssIDProvider>
           <BootScreen onComplete={handleBootComplete} />
+        </AbyssIDProvider>
+      </ThemeProvider>
+    );
+  }
+
+  if (showIntro && screen === 'intro') {
+    return (
+      <ThemeProvider>
+        <AbyssIDProvider>
+          <IntroVideo onComplete={handleIntroComplete} />
         </AbyssIDProvider>
       </ThemeProvider>
     );

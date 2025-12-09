@@ -85,34 +85,50 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
     }
   };
 
-  const handleBackupConfirm = async () => {
-    if (!hasBackedUp) return;
+  const handleBackupConfirm = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
     
-    // Use the stored account from signup
-    if (createdAccount) {
-      // Login with unified AbyssID system - this will automatically initialize identity service
-      await abyssIDLogin(createdAccount.username);
-      onSuccess(createdAccount.username, createdAccount.publicKey);
-      handleClose();
-    } else {
-      // Fallback: look up account by normalized username
-      const normalizedUsername = username.toLowerCase();
-      const accounts = abyssIdClient.getAllAccounts();
-      const account = accounts[normalizedUsername];
-      if (account) {
-        await abyssIDLogin(account.username);
-        onSuccess(account.username, account.publicKey);
+    if (!hasBackedUp) {
+      console.warn('Backup confirmation checkbox not checked');
+      return;
+    }
+    
+    try {
+      // Use the stored account from signup
+      if (createdAccount) {
+        // Login with unified AbyssID system - this will automatically initialize identity service
+        await abyssIDLogin(createdAccount.username);
+        // Start background music after successful signup
+        import('../../services/backgroundMusic').then(({ backgroundMusicService }) => {
+          backgroundMusicService.play();
+        });
+        onSuccess(createdAccount.username, createdAccount.publicKey);
         handleClose();
       } else {
-        console.error('Account not found after signup');
-        // Try to get from current account as last resort
-        const account = await abyssIdClient.getCurrentAccount();
+        // Fallback: look up account by normalized username
+        const normalizedUsername = username.toLowerCase();
+        const accounts = abyssIdClient.getAllAccounts();
+        const account = accounts[normalizedUsername];
         if (account) {
           await abyssIDLogin(account.username);
           onSuccess(account.username, account.publicKey);
           handleClose();
+        } else {
+          console.error('Account not found after signup');
+          // Try to get from current account as last resort
+          const account = await abyssIdClient.getCurrentAccount();
+          if (account) {
+            await abyssIDLogin(account.username);
+            onSuccess(account.username, account.publicKey);
+            handleClose();
+          } else {
+            console.error('Failed to find account after signup');
+          }
         }
       }
+    } catch (error) {
+      console.error('Error during backup confirmation:', error);
     }
   };
 
@@ -226,9 +242,10 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
                   </label>
 
                   <Button
-                    onClick={handleBackupConfirm}
+                    onClick={(e) => handleBackupConfirm(e)}
                     disabled={!hasBackedUp}
                     className="w-full"
+                    type="button"
                   >
                     Continue
                   </Button>

@@ -5,8 +5,11 @@ import { useTheme } from '../../context/ThemeContext';
 import { useMusicPlayerStore } from '../../state/musicPlayerStore';
 import { useDesktopStore } from '../../state/desktopStore';
 import { useWalletStore } from '../../state/walletStore';
+import { useCustomizationStore } from '../../state/customizationStore';
+import { backgroundMusicService } from '../../services/backgroundMusic';
 import { StartButton } from './StartButton';
 import { SystemMenu } from './SystemMenu';
+import { CustomizationPanel } from './CustomizationPanel';
 
 export function StatusBar() {
   const { session, logout } = useAbyssID();
@@ -14,9 +17,20 @@ export function StatusBar() {
   const { currentTrack, isPlaying, togglePlayPause, nextTrack, isBackgroundMode } = useMusicPlayerStore();
   const { openApp } = useDesktopStore();
   const { refreshBalance } = useWalletStore();
+  const { toolbarWidgets, useCustomColors: useCustomColorsStore } = useCustomizationStore();
   const [showMenu, setShowMenu] = useState(false);
   const [showSystemMenu, setShowSystemMenu] = useState(false);
+  const [showCustomization, setShowCustomization] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [musicEnabled, setMusicEnabled] = useState(true);
+
+  // Subscribe to background music state
+  useEffect(() => {
+    const unsubscribe = backgroundMusicService.subscribe((enabled) => {
+      setMusicEnabled(enabled);
+    });
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -46,7 +60,7 @@ export function StatusBar() {
   const handleDisengage = async () => {
     await logout();
     setShowMenu(false);
-    window.location.reload(); // Reload to show login screen
+    window.location.reload();
   };
 
   const getInitials = (username: string) => {
@@ -54,7 +68,6 @@ export function StatusBar() {
   };
 
   const getAvatarColor = (username: string) => {
-    // Generate a consistent color based on username
     let hash = 0;
     for (let i = 0; i < username.length; i++) {
       hash = username.charCodeAt(i) + ((hash << 5) - hash);
@@ -63,16 +76,31 @@ export function StatusBar() {
     return `hsl(${hue}, 70%, 50%)`;
   };
 
+  // Get visible widgets in order
+  const visibleWidgets = toolbarWidgets
+    .filter(w => w.visible)
+    .sort((a, b) => a.order - b.order);
+
+  // Apply custom colors if enabled
+  const toolbarStyle = useCustomColorsStore && useCustomColorsStore
+    ? {
+        background: `var(--custom-background, ${themeConfig.toolbar.background})`,
+        borderBottom: `1px solid var(--custom-accent, ${themeConfig.toolbar.border})`,
+        backdropFilter: themeConfig.toolbar.backdropBlur,
+        WebkitBackdropFilter: themeConfig.toolbar.backdropBlur,
+      }
+    : {
+        background: themeConfig.toolbar.background,
+        borderBottom: `1px solid ${themeConfig.toolbar.border}`,
+        backdropFilter: themeConfig.toolbar.backdropBlur,
+        WebkitBackdropFilter: themeConfig.toolbar.backdropBlur,
+      };
+
   return (
     <>
       <div
         className="fixed top-0 left-0 right-0 h-8 z-50 flex items-center justify-between px-4 text-xs"
-        style={{
-          background: themeConfig.toolbar.background,
-          borderBottom: `1px solid ${themeConfig.toolbar.border}`,
-          backdropFilter: themeConfig.toolbar.backdropBlur,
-          WebkitBackdropFilter: themeConfig.toolbar.backdropBlur,
-        }}
+        style={toolbarStyle}
       >
         <div className="text-abyss-cyan">AbyssOS – Demiurge Devnet</div>
         
@@ -84,115 +112,141 @@ export function StatusBar() {
           />
         </div>
         
+        {/* Widgetized Right Side - Render widgets in order */}
         <div className="flex items-center space-x-4">
-          {/* RPC Status - moved further left to prevent overlap */}
-          <div className="ml-4">
-            <ChainStatusPill />
-          </div>
-          
-          {/* Music Player Widget */}
-          {(currentTrack && isBackgroundMode) && (
-            <div className="flex items-center gap-2 px-2 py-1 rounded bg-abyss-navy/60 border border-abyss-cyan/20">
-              <span className="text-abyss-cyan text-[10px] truncate max-w-[120px]">
-                {currentTrack.music?.trackName || currentTrack.name || 'Unknown Track'}
-              </span>
-              <button
-                onClick={togglePlayPause}
-                className="w-5 h-5 rounded bg-abyss-cyan/20 hover:bg-abyss-cyan/40 text-abyss-cyan flex items-center justify-center text-[10px]"
-              >
-                {isPlaying ? '⏸' : '▶'}
-              </button>
-              <button
-                onClick={nextTrack}
-                className="w-5 h-5 rounded bg-abyss-cyan/20 hover:bg-abyss-cyan/40 text-abyss-cyan flex items-center justify-center text-[10px]"
-              >
-                ⏭
-              </button>
-              <button
-                onClick={() => openApp('neonPlayer')}
-                className="w-5 h-5 rounded bg-abyss-cyan/20 hover:bg-abyss-cyan/40 text-abyss-cyan flex items-center justify-center text-[10px]"
-                title="Open NEON Player"
-              >
-                🎵
-              </button>
-            </div>
-          )}
-          
-          {/* Date and Time - moved closer to avatar */}
-          <div className="flex items-center gap-2 text-gray-300">
-            <span className="text-xs">{formatDate(currentTime)}</span>
-            <span className="text-abyss-cyan text-xs font-mono">{formatTime(currentTime)}</span>
-          </div>
+          {visibleWidgets.map((widget) => {
+            if (widget.id === 'rpc-status') {
+              return (
+                <div key={widget.id} className="ml-4">
+                  <ChainStatusPill />
+                </div>
+              );
+            }
+            
+            if (widget.id === 'music-player' && currentTrack && isBackgroundMode) {
+              return (
+                <div key={widget.id} className="flex items-center gap-2 px-2 py-1 rounded bg-abyss-navy/60 border border-abyss-cyan/20">
+                  <span className="text-abyss-cyan text-[10px] truncate max-w-[120px]">
+                    {currentTrack.music?.trackName || currentTrack.name || 'Unknown Track'}
+                  </span>
+                  <button
+                    onClick={togglePlayPause}
+                    className="w-5 h-5 rounded bg-abyss-cyan/20 hover:bg-abyss-cyan/40 text-abyss-cyan flex items-center justify-center text-[10px]"
+                  >
+                    {isPlaying ? '⏸' : '▶'}
+                  </button>
+                  <button
+                    onClick={nextTrack}
+                    className="w-5 h-5 rounded bg-abyss-cyan/20 hover:bg-abyss-cyan/40 text-abyss-cyan flex items-center justify-center text-[10px]"
+                  >
+                    ⏭
+                  </button>
+                  <button
+                    onClick={() => openApp('neonPlayer')}
+                    className="w-5 h-5 rounded bg-abyss-cyan/20 hover:bg-abyss-cyan/40 text-abyss-cyan flex items-center justify-center text-[10px]"
+                    title="Open NEON Player"
+                  >
+                    🎵
+                  </button>
+                </div>
+              );
+            }
+            
+            if (widget.id === 'date-time') {
+              return (
+                <div key={widget.id} className="flex items-center gap-2 text-gray-300">
+                  <span className="text-xs">{formatDate(currentTime)}</span>
+                  <span className="text-abyss-cyan text-xs font-mono">{formatTime(currentTime)}</span>
+                </div>
+              );
+            }
+            
+            if (widget.id === 'background-music') {
+              return (
+                <button
+                  key={widget.id}
+                  onClick={() => backgroundMusicService.toggle()}
+                  className="w-6 h-6 rounded flex items-center justify-center text-xs hover:bg-abyss-cyan/20 transition-colors"
+                  title={musicEnabled ? 'Disable background music' : 'Enable background music'}
+                >
+                  {musicEnabled ? '🔊' : '🔇'}
+                </button>
+              );
+            }
+            
+            return null;
+          })}
         </div>
 
         <div className="flex items-center space-x-2 relative">
-        {/* Avatar Button */}
-        <button
-          onClick={() => setShowMenu(!showMenu)}
-          className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold text-white transition-all hover:ring-2 hover:ring-abyss-cyan/50"
-          style={{
-            backgroundColor: session?.username ? getAvatarColor(session.username) : '#666',
-          }}
-          title={session?.username || 'Guest'}
-        >
-          {session?.username ? getInitials(session.username) : 'G'}
-        </button>
+          {/* Avatar Button */}
+          <button
+            onClick={() => setShowMenu(!showMenu)}
+            className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold text-white transition-all hover:ring-2 hover:ring-abyss-cyan/50"
+            style={{
+              backgroundColor: session?.username ? getAvatarColor(session.username) : '#666',
+            }}
+            title={session?.username || 'Guest'}
+          >
+            {session?.username ? getInitials(session.username) : 'G'}
+          </button>
 
-        {/* Dropdown Menu */}
-        {showMenu && (
-          <div className="absolute right-0 top-full mt-2 w-48 bg-abyss-navy/95 backdrop-blur-md border border-abyss-cyan/30 rounded-lg shadow-xl z-50">
-            <div className="p-2">
-              {/* Account Info */}
-              <div className="px-3 py-2 border-b border-abyss-cyan/20">
-                <div className="text-sm font-medium text-abyss-cyan">{session?.username || 'Guest'}</div>
-                <div className="text-xs text-gray-400 mt-1">
-                  {session?.username ? 'AbyssID Account' : 'Not logged in'}
+          {/* Dropdown Menu */}
+          {showMenu && (
+            <div className="absolute right-0 top-full mt-2 w-48 bg-abyss-navy/95 backdrop-blur-md border border-abyss-cyan/30 rounded-lg shadow-xl z-50">
+              <div className="p-2">
+                {/* Account Info */}
+                <div className="px-3 py-2 border-b border-abyss-cyan/20">
+                  <div className="text-sm font-medium text-abyss-cyan">{session?.username || 'Guest'}</div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {session?.username ? 'AbyssID Account' : 'Not logged in'}
+                  </div>
+                </div>
+
+                {/* Menu Items */}
+                <div className="py-1">
+                  <button
+                    onClick={() => {
+                      openApp('wallet');
+                      setShowMenu(false);
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-abyss-cyan/10 hover:text-abyss-cyan rounded transition-colors"
+                  >
+                    💎 Abyss Wallet
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowCustomization(true);
+                      setShowMenu(false);
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-abyss-cyan/10 hover:text-abyss-cyan rounded transition-colors"
+                  >
+                    🎨 Customize
+                  </button>
+                  <button
+                    onClick={() => {
+                      refreshBalance();
+                      setShowMenu(false);
+                    }}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-abyss-cyan/10 hover:text-abyss-cyan rounded transition-colors"
+                  >
+                    🔄 Refresh Balance
+                  </button>
+                </div>
+
+                {/* Disengage/Logout */}
+                <div className="pt-1 border-t border-abyss-cyan/20">
+                  <button
+                    onClick={handleDisengage}
+                    className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                  >
+                    Disengage
+                  </button>
                 </div>
               </div>
-
-              {/* Menu Items */}
-              <div className="py-1">
-                <button
-                  onClick={() => {
-                    openApp('wallet');
-                    setShowMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-abyss-cyan/10 hover:text-abyss-cyan rounded transition-colors"
-                >
-                  💎 Abyss Wallet
-                </button>
-                <button
-                  onClick={() => {
-                    // TODO: Open account settings
-                    setShowMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-abyss-cyan/10 hover:text-abyss-cyan rounded transition-colors"
-                >
-                  ⚙️ Account Settings
-                </button>
-                <button
-                  onClick={() => {
-                    refreshBalance();
-                    setShowMenu(false);
-                  }}
-                  className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-abyss-cyan/10 hover:text-abyss-cyan rounded transition-colors"
-                >
-                  🔄 Refresh Balance
-                </button>
-              </div>
-
-              {/* Disengage/Logout */}
-              <div className="pt-1 border-t border-abyss-cyan/20">
-                <button
-                  onClick={handleDisengage}
-                  className="w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded transition-colors"
-                >
-                  Disengage
-                </button>
-              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Click outside to close menu */}
@@ -202,10 +256,12 @@ export function StatusBar() {
           onClick={() => setShowMenu(false)}
         />
       )}
-      </div>
 
       {/* System Menu */}
       <SystemMenu isOpen={showSystemMenu} onClose={() => setShowSystemMenu(false)} />
+      
+      {/* Customization Panel */}
+      <CustomizationPanel isOpen={showCustomization} onClose={() => setShowCustomization(false)} />
     </>
   );
 }

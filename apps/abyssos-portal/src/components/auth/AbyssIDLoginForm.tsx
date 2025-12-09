@@ -26,6 +26,10 @@ export function AbyssIDLoginForm({ onSignupClick }: AbyssIDLoginFormProps) {
     try {
       // Use unified AbyssID login - this will automatically initialize identity service
       await login(username);
+      // Start background music after successful login
+      import('../../services/backgroundMusic').then(({ backgroundMusicService }) => {
+        backgroundMusicService.play();
+      });
       // Login success - identity service will handle wallet sync, etc.
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
