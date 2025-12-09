@@ -84,7 +84,12 @@ export function StatusBar() {
           />
         </div>
         
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-4">
+          {/* RPC Status - moved further left to prevent overlap */}
+          <div className="ml-4">
+            <ChainStatusPill />
+          </div>
+          
           {/* Music Player Widget */}
           {(currentTrack && isBackgroundMode) && (
             <div className="flex items-center gap-2 px-2 py-1 rounded bg-abyss-navy/60 border border-abyss-cyan/20">
@@ -113,13 +118,8 @@ export function StatusBar() {
             </div>
           )}
           
-          {/* RPC Status - moved right */}
-          <div className="mr-2">
-            <ChainStatusPill />
-          </div>
-          
           {/* Date and Time - moved closer to avatar */}
-          <div className="flex items-center gap-2 text-gray-300 mr-2">
+          <div className="flex items-center gap-2 text-gray-300">
             <span className="text-xs">{formatDate(currentTime)}</span>
             <span className="text-abyss-cyan text-xs font-mono">{formatTime(currentTime)}</span>
           </div>
