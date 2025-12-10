@@ -97,53 +97,45 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
     
     try {
       // Use the stored account from signup
-      if (createdAccount) {
-        // Account is already created and stored in localStorage
-        // Just need to set up the session - try login with username first (simpler)
-        try {
-          await abyssIDLogin(createdAccount.username);
-        } catch (loginError) {
-          // If username login fails, try with secret
-          if (createdAccount.abyssIdSecret) {
-            await abyssIDLogin(undefined, createdAccount.abyssIdSecret);
-          } else {
-            throw loginError;
-          }
-        }
-        // Start background music after successful signup
-        backgroundMusicService.play();
-        onSuccess(createdAccount.username, createdAccount.publicKey);
-        handleClose();
-      } else {
-        // Fallback: look up account by normalized username
+      let accountToUse = createdAccount;
+      
+      // If no createdAccount, try to find it
+      if (!accountToUse) {
         const normalizedUsername = username.toLowerCase();
         const accounts = abyssIdClient.getAllAccounts();
-        const account = accounts[normalizedUsername];
-        if (account) {
-          try {
-            await abyssIDLogin(account.username);
-          } catch (loginError) {
-            if (account.abyssIdSecret) {
-              await abyssIDLogin(undefined, account.abyssIdSecret);
-            } else {
-              throw loginError;
-            }
-          }
-          onSuccess(account.username, account.publicKey);
-          handleClose();
-        } else {
-          console.error('Account not found after signup');
-          // Try to get from current account as last resort
-          const account = await abyssIdClient.getCurrentAccount();
-          if (account) {
-            await abyssIDLogin(account.username);
-            onSuccess(account.username, account.publicKey);
-            handleClose();
-          } else {
-            throw new Error('Account not found after signup');
-          }
-        }
+        accountToUse = accounts[normalizedUsername];
       }
+      
+      // Last resort: get current account
+      if (!accountToUse) {
+        accountToUse = await abyssIdClient.getCurrentAccount();
+      }
+      
+      if (!accountToUse) {
+        throw new Error('Account not found after signup. Please try signing up again.');
+      }
+      
+      // Ensure account is properly stored
+      const normalizedUsername = accountToUse.username.toLowerCase();
+      const accounts = abyssIdClient.getAllAccounts();
+      if (!accounts[normalizedUsername]) {
+        accounts[normalizedUsername] = accountToUse;
+        localStorage.setItem('abyssos_accounts', JSON.stringify(accounts));
+      }
+      
+      // Login with the account - use username if available, otherwise use secret
+      if (accountToUse.username && accountToUse.username.trim()) {
+        await abyssIDLogin(accountToUse.username.trim());
+      } else if (accountToUse.abyssIdSecret) {
+        await abyssIDLogin(undefined, accountToUse.abyssIdSecret);
+      } else {
+        throw new Error('Account missing required information');
+      }
+      
+      // Start background music after successful signup
+      backgroundMusicService.play();
+      onSuccess(accountToUse.username, accountToUse.publicKey);
+      handleClose();
     } catch (error) {
       console.error('Error during backup confirmation:', error);
       // Show error to user with more details
