@@ -6,8 +6,8 @@ import { useDesktopStore } from '../../state/desktopStore';
 import { useWalletStore } from '../../state/walletStore';
 import { useCustomizationStore } from '../../state/customizationStore';
 import { backgroundMusicService } from '../../services/backgroundMusic';
-import { StartButton } from './StartButton';
-import { SystemMenu } from './SystemMenu';
+import { StartButton3D } from './StartButton3D';
+import { AppStoreMenu } from './AppStoreMenu';
 import { CustomizationPanel } from './CustomizationPanel';
 
 export function StatusBar() {
@@ -105,7 +105,7 @@ export function StatusBar() {
         
         {/* Start Button - Center */}
         <div className="absolute left-1/2 transform -translate-x-1/2">
-          <StartButton
+          <StartButton3D
             onClick={() => setShowSystemMenu(!showSystemMenu)}
             isOpen={showSystemMenu}
           />
@@ -250,8 +250,8 @@ export function StatusBar() {
         />
       )}
 
-      {/* System Menu */}
-      <SystemMenu isOpen={showSystemMenu} onClose={() => setShowSystemMenu(false)} />
+      {/* App Store Menu */}
+      <AppStoreMenu isOpen={showSystemMenu} onClose={() => setShowSystemMenu(false)} />
       
       {/* Customization Panel */}
       <CustomizationPanel isOpen={showCustomization} onClose={() => setShowCustomization(false)} />

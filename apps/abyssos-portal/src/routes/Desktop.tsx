@@ -1,6 +1,6 @@
 import React from 'react';
 import { FullscreenContainer } from '../components/layout/FullscreenContainer';
-import { AbyssBackground } from '../components/layout/AbyssBackground';
+import { AudioReactiveBackground } from '../components/layout/AudioReactiveBackground';
 import { StatusBar } from '../components/desktop/StatusBar';
 import { WindowFrame } from '../components/desktop/WindowFrame';
 import { useDesktopStore } from '../state/desktopStore';
@@ -78,7 +78,7 @@ export function Desktop() {
           // TODO: Show error notification
         }}
       />
-      <AbyssBackground />
+      <AudioReactiveBackground />
       <StatusBar />
 
       {/* Windows */}
