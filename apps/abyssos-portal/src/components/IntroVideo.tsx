@@ -27,6 +27,7 @@ export function IntroVideo({ onComplete, onSkip }: IntroVideoProps) {
     let skipTimer: ReturnType<typeof setTimeout> | null = null;
     let hasCompleted = false;
     let earlyEndRetries = 0;
+    let startedAt = 0;
 
     // Show skip button after 2 seconds
     skipTimer = setTimeout(() => {
@@ -37,19 +38,22 @@ export function IntroVideo({ onComplete, onSkip }: IntroVideoProps) {
     const handleEnded = () => {
       if (!video) return;
 
-      // Guard against premature end (e.g., partial load) by retrying playback
       const duration = video.duration || 0;
       const currentTime = video.currentTime || 0;
-      const endedTooEarly = duration > 5 && currentTime + 0.75 < duration;
+      const elapsed = startedAt ? (performance.now() - startedAt) / 1000 : currentTime;
 
-      if (endedTooEarly && earlyEndRetries < 3) {
+      // Require meaningful playback before completing
+      const minWatch = Math.min(12, Math.max(5, duration * 0.6)); // at least 5s or 60% up to 12s
+      const nearEnd = duration > 0 && currentTime >= duration - 0.35;
+      const watchedEnough = elapsed >= minWatch || nearEnd;
+
+      if (!watchedEnough && earlyEndRetries < 5) {
         earlyEndRetries += 1;
         console.warn(
-          `Intro video ended early (t=${currentTime.toFixed(
+          `Intro video ended early (t=${currentTime.toFixed(2)}/${duration.toFixed(
             2
-          )}/${duration.toFixed(2)}), retry ${earlyEndRetries}/3`
+          )}, elapsed=${elapsed.toFixed(2)}s). Retry ${earlyEndRetries}/5`
         );
-        // Restart from 0 to ensure full playback
         video.currentTime = 0;
         video.play().catch((err) => {
           console.error('Failed to resume intro video after early end:', err);
@@ -106,6 +110,7 @@ export function IntroVideo({ onComplete, onSkip }: IntroVideoProps) {
       playPromise
         .then(() => {
           console.log('Video playback started');
+          startedAt = performance.now();
           setIsPlaying(true);
           setHasPlayed(true);
         })
@@ -163,6 +168,7 @@ export function IntroVideo({ onComplete, onSkip }: IntroVideoProps) {
             playsInline
             muted={false}
             preload="auto"
+            autoPlay
             onClick={handleClickToPlay}
             onError={(e) => {
               console.error('Video element error:', e);

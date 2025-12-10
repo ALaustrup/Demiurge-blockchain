@@ -112,7 +112,7 @@ export function StatusBar() {
         </div>
         
         {/* Widgetized Right Side - Render widgets in order */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 pr-8">
           {visibleWidgets.map((widget) => {
             // RPC status removed from toolbar - now in Settings window
             
@@ -171,7 +171,7 @@ export function StatusBar() {
           })}
         </div>
 
-        <div className="flex items-center space-x-2 relative">
+        <div className="flex items-center space-x-2 relative ml-4">
           {/* Avatar Button */}
           <button
             onClick={() => setShowMenu(!showMenu)}
