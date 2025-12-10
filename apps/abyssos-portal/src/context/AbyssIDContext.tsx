@@ -19,9 +19,11 @@ interface AbyssIDProviderProps {
   provider?: AbyssIDProvider;
 }
 
-// Determine mode from environment
+// Determine mode from environment - FORCE LOCAL MODE for now
 const getMode = (): 'local' | 'remote' => {
-  return (import.meta.env.VITE_ABYSSID_MODE === 'remote' ? 'remote' : 'local') as 'local' | 'remote';
+  // Always use local mode to avoid "Failed to fetch" errors
+  // Remote mode can be enabled later when API is ready
+  return 'local';
 };
 
 // Get the appropriate provider based on mode

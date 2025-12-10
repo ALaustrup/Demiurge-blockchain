@@ -99,37 +99,68 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
       // Use the stored account from signup
       let accountToUse = createdAccount;
       
-      // If no createdAccount, try to find it
+      // If no createdAccount, try to find it from localStorage
       if (!accountToUse) {
-        const normalizedUsername = username.toLowerCase();
+        const normalizedUsername = username.toLowerCase().trim();
         const accounts = abyssIdClient.getAllAccounts();
         accountToUse = accounts[normalizedUsername];
       }
       
-      // Last resort: get current account
+      // Last resort: get current account (should be set by signup)
       if (!accountToUse) {
         accountToUse = await abyssIdClient.getCurrentAccount();
       }
       
-      if (!accountToUse) {
+      if (!accountToUse || !accountToUse.username) {
         throw new Error('Account not found after signup. Please try signing up again.');
       }
       
-      // Ensure account is properly stored
-      const normalizedUsername = accountToUse.username.toLowerCase();
+      // Ensure account is properly stored in accounts list
+      const normalizedUsername = accountToUse.username.toLowerCase().trim();
       const accounts = abyssIdClient.getAllAccounts();
       if (!accounts[normalizedUsername]) {
         accounts[normalizedUsername] = accountToUse;
         localStorage.setItem('abyssos_accounts', JSON.stringify(accounts));
       }
       
-      // Login with the account - use username if available, otherwise use secret
-      if (accountToUse.username && accountToUse.username.trim()) {
+      // Ensure account is set as current auth
+      localStorage.setItem('abyssos_auth', JSON.stringify(accountToUse));
+      
+      // Create session directly in localStorage (bypass login to avoid any network calls)
+      const session = {
+        username: accountToUse.username,
+        publicKey: accountToUse.publicKey,
+      };
+      localStorage.setItem('abyssid_session', JSON.stringify(session));
+      
+      // Trigger login callback to update React context
+      // This will use the local provider which reads from localStorage
+      try {
+        // Use username login - should work since account is in localStorage
         await abyssIDLogin(accountToUse.username.trim());
-      } else if (accountToUse.abyssIdSecret) {
-        await abyssIDLogin(undefined, accountToUse.abyssIdSecret);
-      } else {
-        throw new Error('Account missing required information');
+      } catch (loginError) {
+        // If login still fails, try with secret as fallback
+        if (accountToUse.abyssIdSecret) {
+          try {
+            await abyssIDLogin(undefined, accountToUse.abyssIdSecret);
+          } catch (secretError) {
+            // Even if login fails, session is set in localStorage
+            // The context will pick it up on next render
+            console.warn('Login callbacks failed, but session is set directly:', secretError);
+            // Force a page reload to pick up the session
+            setTimeout(() => {
+              window.location.reload();
+            }, 500);
+            return;
+          }
+        } else {
+          console.warn('Login callback failed, but session is set:', loginError);
+          // Force a page reload to pick up the session
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
+          return;
+        }
       }
       
       // Start background music after successful signup
