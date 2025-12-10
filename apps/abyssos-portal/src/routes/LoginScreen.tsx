@@ -6,6 +6,7 @@ import { AbyssIDLoginForm } from '../components/auth/AbyssIDLoginForm';
 import { AbyssIDSignupModal } from '../components/auth/AbyssIDSignupModal';
 import { useAbyssID } from '../hooks/useAbyssID';
 import { backgroundMusicService } from '../services/backgroundMusic';
+import { loginVoiceService } from '../services/loginVoice';
 
 interface LoginScreenProps {
   onLogin: () => void;
@@ -14,6 +15,11 @@ interface LoginScreenProps {
 export function LoginScreen({ onLogin }: LoginScreenProps) {
   const [showSignup, setShowSignup] = useState(false);
   const { session, isLoading } = useAbyssID();
+
+  // Play login voice when screen appears (after intro video ends)
+  useEffect(() => {
+    loginVoiceService.play();
+  }, []);
 
   // If authenticated, trigger login callback and start background music
   useEffect(() => {
