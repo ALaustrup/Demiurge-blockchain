@@ -20,7 +20,6 @@ export function StatusBar() {
   const [showMenu, setShowMenu] = useState(false);
   const [showSystemMenu, setShowSystemMenu] = useState(false);
   const [showCustomization, setShowCustomization] = useState(false);
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [musicEnabled, setMusicEnabled] = useState(true);
 
   // Subscribe to background music state
@@ -30,31 +29,6 @@ export function StatusBar() {
     });
     return unsubscribe;
   }, []);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false 
-    });
-  };
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'short',
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
-    });
-  };
 
   const handleDisengage = async () => {
     await logout();
@@ -145,15 +119,6 @@ export function StatusBar() {
               );
             }
             
-            if (widget.id === 'date-time') {
-              return (
-                <div key={widget.id} className="flex items-center gap-2 text-gray-300">
-                  <span className="text-xs">{formatDate(currentTime)}</span>
-                  <span className="text-abyss-cyan text-xs font-mono">{formatTime(currentTime)}</span>
-                </div>
-              );
-            }
-            
             if (widget.id === 'background-music') {
               return (
                 <button
@@ -198,15 +163,6 @@ export function StatusBar() {
 
                 {/* Menu Items */}
                 <div className="py-1">
-                  <button
-                    onClick={() => {
-                      openApp('wallet');
-                      setShowMenu(false);
-                    }}
-                    className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-abyss-cyan/10 hover:text-abyss-cyan rounded transition-colors"
-                  >
-                    💎 Abyss Wallet
-                  </button>
                   <button
                     onClick={() => {
                       setShowCustomization(true);
