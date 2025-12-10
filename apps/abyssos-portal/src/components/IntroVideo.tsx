@@ -2,7 +2,7 @@
  * Intro Video Component
  * 
  * Plays a full-screen intro video automatically on landing.
- * Place your .mp4 file at: apps/abyssos-portal/public/video/intro.mp4
+ * Place your .mp4 file at: apps/abyssos-portal/public/video/intro.mp4.mp4
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -96,7 +96,7 @@ export function IntroVideo({ onComplete, onSkip }: IntroVideoProps) {
             preload="auto"
             onClick={handleClickToPlay}
           >
-            <source src="/video/intro.mp4" type="video/mp4" />
+            <source src="/video/intro.mp4.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
         </div>
