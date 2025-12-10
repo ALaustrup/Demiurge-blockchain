@@ -3149,6 +3149,51 @@ async fn handle_rpc(
                 id,
             })
         }
+        "getLanSyncStatus" => {
+            // Get LAN synchronization status - ensures alignment across shared LAN
+            let status = node.get_lan_sync_status();
+            
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "total_nodes": status.total_nodes,
+                    "aligned_nodes": status.aligned_nodes,
+                    "misaligned_nodes": status.misaligned_nodes,
+                    "quarantined_nodes": status.quarantined_nodes,
+                    "average_alignment": status.average_alignment,
+                    "network_health": status.network_health,
+                    "last_full_sync": status.last_full_sync
+                        .map(|t| t.duration_since(std::time::UNIX_EPOCH)
+                            .unwrap()
+                            .as_secs()),
+                })),
+                error: None,
+                id,
+            })
+        }
+        "getKnownLanNodes" => {
+            // Get all known LAN nodes - each node is tended to with respect
+            let nodes = node.get_known_lan_nodes();
+            
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!(nodes.iter().map(|n| json!({
+                    "node_id": n.node_id,
+                    "address": n.address.to_string(),
+                    "rpc_endpoint": n.rpc_endpoint,
+                    "health_score": n.health_score,
+                    "alignment_score": n.alignment_score,
+                    "respect_level": format!("{:?}", n.respect_level),
+                    "sync_success_count": n.sync_success_count,
+                    "sync_failure_count": n.sync_failure_count,
+                    "last_seen": n.last_seen.duration_since(std::time::UNIX_EPOCH)
+                        .unwrap()
+                        .as_secs(),
+                })).collect::<Vec<_>>())),
+                error: None,
+                id,
+            })
+        }
         _ => Json(JsonRpcResponse {
             jsonrpc: "2.0".to_string(),
             result: None,

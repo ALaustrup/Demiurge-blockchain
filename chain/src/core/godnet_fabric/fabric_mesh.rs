@@ -8,9 +8,6 @@ use serde::{Deserialize, Serialize};
 /// Node identifier
 pub type NodeId = String;
 
-/// Node identifier
-pub type NodeId = String;
-
 /// Mesh link
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MeshLink {

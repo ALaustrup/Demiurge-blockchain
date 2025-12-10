@@ -16,6 +16,12 @@ db_path = "/opt/demiurge/.demiurge/data"
 # P2P listen address (for future P2P networking)
 p2p_listen = "0.0.0.0:30333"
 
+# LAN synchronization settings
+# Ensures alignment across shared LAN with respect for each node
+lan_broadcast_port = 30334
+lan_sync_enabled = true
+lan_sync_interval_secs = 30
+
 [genesis]
 # Path to genesis config file (relative to this config file)
 genesis_config = "genesis.toml"

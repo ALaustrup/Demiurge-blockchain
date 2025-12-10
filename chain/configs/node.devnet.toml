@@ -10,6 +10,12 @@ name = "Demiurge Devnet"
 # For now, single-node operation
 p2p_listen = "127.0.0.1:30333"
 
+# LAN synchronization settings
+# Ensures alignment across shared LAN with respect for each node
+lan_broadcast_port = 30334
+lan_sync_enabled = true
+lan_sync_interval_secs = 30
+
 # RPC server address
 rpc_host = "0.0.0.0"
 rpc_port = 8545
