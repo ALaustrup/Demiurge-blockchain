@@ -29,6 +29,9 @@ import { AWEAtlasApp } from '../components/desktop/apps/AWEAtlasApp';
 import { NeonPlayerApp } from '../components/desktop/apps/NeonPlayerApp';
 import { NeonRadioApp } from '../components/desktop/apps/NeonRadioApp';
 import { DocumentEditorApp } from '../components/desktop/apps/DocumentEditorApp';
+import { VYBSocialApp } from '../components/desktop/apps/VYBSocialApp';
+import { AbyssWriterApp } from '../components/desktop/apps/AbyssWriterApp';
+import { AbyssCalcApp } from '../components/desktop/apps/AbyssCalcApp';
 
 const appComponents: Record<string, React.ComponentType> = {
   chainOps: ChainOpsApp,
@@ -54,6 +57,9 @@ const appComponents: Record<string, React.ComponentType> = {
   neonPlayer: NeonPlayerApp,
   neonRadio: NeonRadioApp,
   documentEditor: DocumentEditorApp,
+  vybSocial: VYBSocialApp,
+  abyssWriter: AbyssWriterApp,
+  abyssCalc: AbyssCalcApp,
 };
 
 export function Desktop() {

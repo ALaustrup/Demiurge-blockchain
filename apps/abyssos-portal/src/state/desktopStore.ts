@@ -1,7 +1,33 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-export type AppId = 'chainOps' | 'miner' | 'wallet' | 'abyssBrowser' | 'abyssTorrent' | 'onChainFiles' | 'drc369Studio' | 'blockExplorer' | 'abyssShell' | 'abyssRuntime' | 'systemMonitor' | 'abyssGridMonitor' | 'abyssSpiritConsole' | 'cogFabricConsole' | 'cogSingularity' | 'genesisConsole' | 'temporalObservatory' | 'dnsConsole' | 'aweConsole' | 'aweAtlas' | 'neonPlayer' | 'neonRadio' | 'documentEditor';
+export type AppId =
+  | 'chainOps'
+  | 'miner'
+  | 'wallet'
+  | 'abyssBrowser'
+  | 'abyssTorrent'
+  | 'onChainFiles'
+  | 'drc369Studio'
+  | 'blockExplorer'
+  | 'abyssShell'
+  | 'abyssRuntime'
+  | 'systemMonitor'
+  | 'abyssGridMonitor'
+  | 'abyssSpiritConsole'
+  | 'cogFabricConsole'
+  | 'cogSingularity'
+  | 'genesisConsole'
+  | 'temporalObservatory'
+  | 'dnsConsole'
+  | 'aweConsole'
+  | 'aweAtlas'
+  | 'neonPlayer'
+  | 'neonRadio'
+  | 'documentEditor'
+  | 'vybSocial'
+  | 'abyssWriter'
+  | 'abyssCalc';
 
 export interface Window {
   id: string;
@@ -46,6 +72,9 @@ export const APP_INFOS: AppInfo[] = [
   { id: 'neonPlayer', label: 'NEON Player', icon: '🎵' },
   { id: 'neonRadio', label: 'Abyss Radio', icon: '📻' },
   { id: 'documentEditor', label: 'Document Editor', icon: '📄' },
+  { id: 'vybSocial', label: 'VYB Social', icon: '💬' },
+  { id: 'abyssWriter', label: 'Abyss Writer', icon: '📝' },
+  { id: 'abyssCalc', label: 'Abyss Calc', icon: '🧮' },
 ];
 
 interface DesktopState {
@@ -87,6 +116,10 @@ const appTitles: Record<AppId, string> = {
   aweAtlas: 'World Atlas',
   neonPlayer: 'NEON Player',
   neonRadio: 'Abyss Radio',
+  documentEditor: 'Document Editor',
+  vybSocial: 'VYB Social',
+  abyssWriter: 'Abyss Writer',
+  abyssCalc: 'Abyss Calc',
 };
 
 // Default launcher order

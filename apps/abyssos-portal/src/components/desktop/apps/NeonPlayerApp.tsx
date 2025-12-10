@@ -39,6 +39,12 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   const [sourceNode, setSourceNode] = useState<AudioBufferSourceNode | null>(null);
   const [gainNode, setGainNode] = useState<GainNode | null>(null);
+  const [activeMode, setActiveMode] = useState<'video' | 'music' | 'image'>('music');
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [eqPreset, setEqPreset] = useState<'flat' | 'warm' | 'bright' | 'vocal'>('flat');
+  const [spatialAudio, setSpatialAudio] = useState(false);
+  const [crossfade, setCrossfade] = useState(false);
+  const [slideshowInterval, setSlideshowInterval] = useState(5);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -80,6 +86,7 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
       const isVideoFile = contentType.startsWith('video/') || 
                          /\.(mp4|webm|ogg|mov|avi|mkv|flv|wmv|m4v)$/i.test(uri);
       setIsVideo(isVideoFile);
+      setActiveMode(isVideoFile ? 'video' : 'music');
     }
   }, [currentTrack]);
 
@@ -120,6 +127,16 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
       }
     };
   }, [isPlaying, isVideo, setCurrentTime]);
+
+  // Apply playback speed to media elements
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = playbackSpeed;
+    }
+    if (audioRef.current) {
+      audioRef.current.playbackRate = playbackSpeed;
+    }
+  }, [playbackSpeed, isVideo]);
 
   const loadTrack = async (id: string) => {
     try {
@@ -233,128 +250,218 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
 
   return (
     <div className="w-full h-full bg-abyss-dark/90 backdrop-blur-sm flex flex-col">
-        {/* Visualizer / Video Player */}
-        <div className="flex-1 relative overflow-hidden">
-          {isVideo && currentTrack?.uri ? (
-            <video
-              ref={videoRef}
-              src={currentTrack.uri}
-              className="w-full h-full object-contain"
-              onTimeUpdate={(e) => {
-                const video = e.currentTarget;
-                setCurrentTime(video.currentTime);
-                setDuration(video.duration || 0);
-              }}
-              onLoadedMetadata={(e) => {
-                const video = e.currentTarget;
-                setDuration(video.duration || 0);
-              }}
-              onEnded={() => {
-                setPlaying(false);
-                // TODO: Handle next track
-              }}
-              playsInline
-              controls={false}
-            />
-          ) : (
-            <>
-              <NeonVisualizer beatmap={beatmap} isPlaying={isPlaying} currentTime={currentTime} />
-              
-              {/* Album Art / Metadata Overlay */}
-              {currentTrack && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="text-center">
-                    <h2 className="text-2xl font-bold text-abyss-cyan mb-2">
-                      {currentTrack.music?.trackName || currentTrack.name}
-                    </h2>
-                    <p className="text-gray-300">
-                      {currentTrack.music?.artistName || 'Unknown Artist'}
-                    </p>
-                  </div>
+      <div className="px-4 py-3 border-b border-abyss-cyan/20 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {(['music', 'video', 'image'] as Array<'music' | 'video' | 'image'>).map((mode) => (
+            <button
+              key={mode}
+              onClick={() => setActiveMode(mode)}
+              className={`px-3 py-1 rounded text-sm ${
+                activeMode === mode ? 'bg-abyss-cyan text-black font-semibold' : 'bg-abyss-dark text-gray-300 border border-abyss-cyan/30'
+              }`}
+            >
+              {mode === 'music' && 'Music'}
+              {mode === 'video' && 'Video'}
+              {mode === 'image' && 'Images'}
+            </button>
+          ))}
+        </div>
+        <div className="text-xs text-gray-400">
+          Modes auto-detect media type; manual switching lets you prep playlists/slideshows.
+        </div>
+      </div>
+
+      {/* Visualizer / Video / Image */}
+      <div className="flex-1 relative overflow-hidden">
+        {activeMode === 'image' ? (
+          <div className="h-full w-full flex items-center justify-center text-gray-400 bg-abyss-dark/60 border-b border-abyss-cyan/20">
+            Image slideshow mode — drop media to begin. Interval {slideshowInterval}s.
+          </div>
+        ) : isVideo && currentTrack?.uri ? (
+          <video
+            ref={videoRef}
+            src={currentTrack.uri}
+            className="w-full h-full object-contain"
+            onTimeUpdate={(e) => {
+              const video = e.currentTarget;
+              setCurrentTime(video.currentTime);
+              setDuration(video.duration || 0);
+            }}
+            onLoadedMetadata={(e) => {
+              const video = e.currentTarget;
+              setDuration(video.duration || 0);
+            }}
+            onEnded={() => {
+              setPlaying(false);
+              // TODO: Handle next track
+            }}
+            playsInline
+            controls={false}
+          />
+        ) : (
+          <>
+            <NeonVisualizer beatmap={beatmap} isPlaying={isPlaying} currentTime={currentTime} />
+            
+            {/* Album Art / Metadata Overlay */}
+            {currentTrack && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold text-abyss-cyan mb-2">
+                    {currentTrack.music?.trackName || currentTrack.name}
+                  </h2>
+                  <p className="text-gray-300">
+                    {currentTrack.music?.artistName || 'Unknown Artist'}
+                  </p>
                 </div>
-              )}
-            </>
-          )}
-          
-          {/* Hidden audio element for audio-only playback */}
-          {!isVideo && (
-            <audio
-              ref={audioRef}
-              src={currentTrack?.uri}
-              onTimeUpdate={(e) => {
-                const audio = e.currentTarget;
-                setCurrentTime(audio.currentTime);
-                setDuration(audio.duration || 0);
-              }}
-              onLoadedMetadata={(e) => {
-                const audio = e.currentTarget;
-                setDuration(audio.duration || 0);
-              }}
-              onEnded={() => {
-                setPlaying(false);
-                // TODO: Handle next track
-              }}
-            />
-          )}
+              </div>
+            )}
+          </>
+        )}
+        
+        {/* Hidden audio element for audio-only playback */}
+        {!isVideo && activeMode !== 'image' && (
+          <audio
+            ref={audioRef}
+            src={currentTrack?.uri}
+            onTimeUpdate={(e) => {
+              const audio = e.currentTarget;
+              setCurrentTime(audio.currentTime);
+              setDuration(audio.duration || 0);
+            }}
+            onLoadedMetadata={(e) => {
+              const audio = e.currentTarget;
+              setDuration(audio.duration || 0);
+            }}
+            onEnded={() => {
+              setPlaying(false);
+              // TODO: Handle next track
+            }}
+          />
+        )}
+      </div>
+
+      {/* Controls + Settings */}
+      <div className="bg-abyss-dark/80 border-t border-abyss-cyan/30 p-4 space-y-4">
+        {/* Scrubber */}
+        <div>
+          <input
+            type="range"
+            min={0}
+            max={duration}
+            value={currentTime}
+            onChange={(e) => handleSeek(Number(e.target.value))}
+            className="w-full h-2 bg-abyss-dark rounded-lg appearance-none cursor-pointer accent-abyss-cyan"
+          />
+          <div className="flex justify-between text-xs text-gray-400 mt-1">
+            <span>{formatTime(currentTime)}</span>
+            <span>{formatTime(duration)}</span>
+          </div>
         </div>
 
-        {/* Controls */}
-        <div className="bg-abyss-dark/80 border-t border-abyss-cyan/30 p-4">
-          {/* Scrubber */}
-          <div className="mb-4">
-            <input
-              type="range"
-              min={0}
-              max={duration}
-              value={currentTime}
-              onChange={(e) => handleSeek(Number(e.target.value))}
-              className="w-full h-2 bg-abyss-dark rounded-lg appearance-none cursor-pointer accent-abyss-cyan"
-            />
-            <div className="flex justify-between text-xs text-gray-400 mt-1">
-              <span>{formatTime(currentTime)}</span>
-              <span>{formatTime(duration)}</span>
-            </div>
-          </div>
-
-          {/* Playback Controls */}
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <button
-              onClick={() => setShuffle(!shuffle)}
-              className={`px-3 py-1 rounded ${shuffle ? 'bg-abyss-cyan text-black' : 'bg-abyss-dark text-gray-300'}`}
-            >
-              🔀
-            </button>
-            <button className="px-3 py-1 rounded bg-abyss-dark text-gray-300">
-              ⏮
-            </button>
-            <button
-              onClick={handlePlayPause}
-              className="px-6 py-2 rounded bg-abyss-cyan text-black font-bold text-xl"
-            >
-              {isPlaying ? '⏸' : '▶'}
-            </button>
-            <button className="px-3 py-1 rounded bg-abyss-dark text-gray-300">
-              ⏭
-            </button>
-            <button
-              onClick={() => {
-                if (repeat === 'off') setRepeat('all');
-                else if (repeat === 'all') setRepeat('one');
-                else setRepeat('off');
-              }}
-              className={`px-3 py-1 rounded ${repeat !== 'off' ? 'bg-abyss-cyan text-black' : 'bg-abyss-dark text-gray-300'}`}
-            >
-              {repeat === 'all' ? '🔁' : repeat === 'one' ? '🔂' : '↩'}
-            </button>
-          </div>
-
-          {/* Metadata Panel Toggle */}
-          {currentTrack && (
-            <div className="mt-4">
-              <NFTMetadataPanel track={currentTrack} />
-            </div>
-          )}
+        {/* Playback Controls */}
+        <div className="flex items-center justify-center gap-4">
+          <button
+            onClick={() => setShuffle(!shuffle)}
+            className={`px-3 py-1 rounded ${shuffle ? 'bg-abyss-cyan text-black' : 'bg-abyss-dark text-gray-300'}`}
+          >
+            🔀
+          </button>
+          <button className="px-3 py-1 rounded bg-abyss-dark text-gray-300">
+            ⏮
+          </button>
+          <button
+            onClick={handlePlayPause}
+            className="px-6 py-2 rounded bg-abyss-cyan text-black font-bold text-xl"
+          >
+            {isPlaying ? '⏸' : '▶'}
+          </button>
+          <button className="px-3 py-1 rounded bg-abyss-dark text-gray-300">
+            ⏭
+          </button>
+          <button
+            onClick={() => {
+              if (repeat === 'off') setRepeat('all');
+              else if (repeat === 'all') setRepeat('one');
+              else setRepeat('off');
+            }}
+            className={`px-3 py-1 rounded ${repeat !== 'off' ? 'bg-abyss-cyan text-black' : 'bg-abyss-dark text-gray-300'}`}
+          >
+            {repeat === 'all' ? '🔁' : repeat === 'one' ? '🔂' : '↩'}
+          </button>
         </div>
+
+        {/* Settings grid */}
+        <div className="grid grid-cols-3 gap-4 text-sm">
+          <div className="bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-3 space-y-2">
+            <div className="font-semibold text-abyss-cyan">Playback</div>
+            <label className="flex items-center justify-between text-gray-300">
+              Speed
+              <select
+                className="bg-abyss-dark border border-abyss-cyan/30 rounded px-2 py-1 text-xs"
+                value={playbackSpeed}
+                onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
+              >
+                <option value={0.75}>0.75x</option>
+                <option value={1}>1.0x</option>
+                <option value={1.25}>1.25x</option>
+                <option value={1.5}>1.5x</option>
+                <option value={2}>2.0x</option>
+              </select>
+            </label>
+            <label className="flex items-center justify-between text-gray-300">
+              Crossfade
+              <input type="checkbox" checked={crossfade} onChange={(e) => setCrossfade(e.target.checked)} />
+            </label>
+            <label className="flex items-center justify-between text-gray-300">
+              Spatial audio
+              <input type="checkbox" checked={spatialAudio} onChange={(e) => setSpatialAudio(e.target.checked)} />
+            </label>
+          </div>
+
+          <div className="bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-3 space-y-2">
+            <div className="font-semibold text-abyss-cyan">Sound shaping</div>
+            <label className="text-gray-300 flex items-center justify-between">
+              EQ preset
+              <select
+                className="bg-abyss-dark border border-abyss-cyan/30 rounded px-2 py-1 text-xs"
+                value={eqPreset}
+                onChange={(e) => setEqPreset(e.target.value as typeof eqPreset)}
+              >
+                <option value="flat">Flat</option>
+                <option value="warm">Warm</option>
+                <option value="bright">Bright</option>
+                <option value="vocal">Vocal</option>
+              </select>
+            </label>
+            <div className="text-xs text-gray-500">Custom EQ bands coming; presets are UI-only today.</div>
+          </div>
+
+          <div className="bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-3 space-y-2">
+            <div className="font-semibold text-abyss-cyan">Library / Slideshow</div>
+            <label className="flex items-center justify-between text-gray-300">
+              Slideshow interval (s)
+              <input
+                type="number"
+                min={2}
+                max={60}
+                value={slideshowInterval}
+                onChange={(e) => setSlideshowInterval(Number(e.target.value))}
+                className="w-16 bg-abyss-dark border border-abyss-cyan/30 rounded px-2 py-1 text-xs"
+              />
+            </label>
+            <div className="text-xs text-gray-500">
+              Image mode rotates through selected media. Playlists for video/audio coming next.
+            </div>
+          </div>
+        </div>
+
+        {/* Metadata Panel */}
+        {currentTrack && (
+          <div className="mt-2">
+            <NFTMetadataPanel track={currentTrack} />
+          </div>
+        )}
+      </div>
 
       {/* Desktop Reactivity */}
       {isPlaying && <NeonDesktopReactivity beatmap={beatmap} currentTime={currentTime} />}
