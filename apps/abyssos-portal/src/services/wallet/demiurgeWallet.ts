@@ -79,6 +79,7 @@ function encodeCgtTransfer(params: SendCgtParams): Uint8Array {
 
 /**
  * Check if user can send CGT (must have minted/swapped an NFT)
+ * This now checks on-chain data directly for real-time sync
  */
 export async function canSendCgt(sessionToken: string | null): Promise<boolean> {
   if (!sessionToken) return false;
@@ -96,6 +97,33 @@ export async function canSendCgt(sessionToken: string | null): Promise<boolean> 
     }
   } catch (error) {
     console.error('Failed to check send permission:', error);
+  }
+  
+  return false;
+}
+
+/**
+ * Sync NFT mint status from on-chain data
+ * Call this after minting an NFT to ensure the wallet recognizes it immediately
+ */
+export async function syncNftMintStatus(sessionToken: string | null): Promise<boolean> {
+  if (!sessionToken) return false;
+  
+  try {
+    const response = await fetch(`${import.meta.env.VITE_ABYSSID_API_URL || 'http://localhost:8082'}/api/wallet/sync-nft-status`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${sessionToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (response.ok) {
+      const { hasMintedNft } = await response.json();
+      return hasMintedNft === true;
+    }
+  } catch (error) {
+    console.error('Failed to sync NFT mint status:', error);
   }
   
   return false;
