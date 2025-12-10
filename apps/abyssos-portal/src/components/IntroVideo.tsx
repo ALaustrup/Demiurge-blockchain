@@ -26,6 +26,7 @@ export function IntroVideo({ onComplete, onSkip }: IntroVideoProps) {
 
     let skipTimer: ReturnType<typeof setTimeout> | null = null;
     let hasCompleted = false;
+    let earlyEndRetries = 0;
 
     // Show skip button after 2 seconds
     skipTimer = setTimeout(() => {
@@ -34,6 +35,28 @@ export function IntroVideo({ onComplete, onSkip }: IntroVideoProps) {
 
     // Handle video end - ONLY call onComplete when video actually ends
     const handleEnded = () => {
+      if (!video) return;
+
+      // Guard against premature end (e.g., partial load) by retrying playback
+      const duration = video.duration || 0;
+      const currentTime = video.currentTime || 0;
+      const endedTooEarly = duration > 5 && currentTime + 0.75 < duration;
+
+      if (endedTooEarly && earlyEndRetries < 3) {
+        earlyEndRetries += 1;
+        console.warn(
+          `Intro video ended early (t=${currentTime.toFixed(
+            2
+          )}/${duration.toFixed(2)}), retry ${earlyEndRetries}/3`
+        );
+        // Restart from 0 to ensure full playback
+        video.currentTime = 0;
+        video.play().catch((err) => {
+          console.error('Failed to resume intro video after early end:', err);
+        });
+        return;
+      }
+
       if (hasCompleted) return; // Prevent multiple calls
       hasCompleted = true;
       console.log('Intro video ended naturally');

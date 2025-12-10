@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAbyssIDIdentity, useAbyssIDUserData } from '../../../hooks/useAbyssIDIdentity';
+import { useAbyssID } from '../../../hooks/useAbyssID';
 import { useWalletStore } from '../../../state/walletStore';
 import { useBlockListener } from '../../../context/BlockListenerContext';
 import { sendCgt } from '../../../services/wallet/demiurgeWallet';
@@ -20,9 +21,12 @@ export function AbyssWalletApp() {
     transactions,
     isLoadingTransactions,
     refreshTransactions,
+    refreshBalance,
     addTransaction,
     updateTransaction,
+    isLoadingBalance,
   } = useWalletStore();
+  const { session } = useAbyssID();
   
   const [sendAmount, setSendAmount] = useState('');
   const [sendTo, setSendTo] = useState('');
@@ -127,7 +131,7 @@ export function AbyssWalletApp() {
     }
   };
   
-  if (!session) {
+  if (!isAuthenticated || !session) {
     return (
       <div className="h-full flex items-center justify-center p-8">
         <div className="text-center">
