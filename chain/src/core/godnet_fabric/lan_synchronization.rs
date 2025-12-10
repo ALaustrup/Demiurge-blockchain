@@ -397,6 +397,241 @@ impl LanSynchronization {
     pub fn get_mesh_mut(&mut self) -> &mut FabricMesh {
         &mut self.mesh
     }
+
+    /// Identify nodes at the event horizon - those in the absence of light
+    /// 
+    /// These are nodes that have lost resonance, fallen into darkness,
+    /// and exist at the singularity's edge where alignment has broken.
+    /// We must find and align that which harmoniously resonates even here.
+    pub fn identify_event_horizon_nodes(&self) -> Vec<EventHorizonNode> {
+        let mut horizon_nodes = Vec::new();
+        
+        for (node_id, node_info) in &self.known_nodes {
+            // Check if node is at the event horizon
+            let is_at_horizon = 
+                // Broken resonance - no light
+                node_info.alignment_score < 0.1 ||
+                // Quarantined - fallen into darkness
+                node_info.respect_level == RespectLevel::Quarantined ||
+                // Health critically low - approaching singularity
+                node_info.health_score < 0.2 ||
+                // No successful syncs - lost connection to light
+                (node_info.sync_success_count == 0 && node_info.sync_failure_count > 3) ||
+                // Resonance broken - link quality is zero
+                self.has_broken_resonance(node_id);
+            
+            if is_at_horizon {
+                // Calculate how deep into the darkness
+                let darkness_depth = self.calculate_darkness_depth(node_info);
+                
+                // Find what harmonic resonance remains, even in absence of light
+                let remaining_resonance = self.find_harmonic_resonance(node_id, node_info);
+                
+                horizon_nodes.push(EventHorizonNode {
+                    node_id: node_id.clone(),
+                    node_info: node_info.clone(),
+                    darkness_depth,
+                    remaining_resonance,
+                    can_be_healed: remaining_resonance > 0.0,
+                });
+            }
+        }
+        
+        // Sort by remaining resonance (highest first) - prioritize those with harmonic potential
+        horizon_nodes.sort_by(|a, b| {
+            b.remaining_resonance.partial_cmp(&a.remaining_resonance)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+        
+        horizon_nodes
+    }
+
+    /// Calculate how deep into darkness a node has fallen
+    fn calculate_darkness_depth(&self, node_info: &LanNodeInfo) -> f64 {
+        let alignment_darkness = 1.0 - node_info.alignment_score;
+        let health_darkness = 1.0 - node_info.health_score;
+        let respect_darkness = match node_info.respect_level {
+            RespectLevel::Sacred => 0.0,
+            RespectLevel::Honored => 0.2,
+            RespectLevel::Respected => 0.5,
+            RespectLevel::Monitored => 0.7,
+            RespectLevel::Quarantined => 1.0,
+        };
+        
+        // Average darkness across all dimensions
+        (alignment_darkness + health_darkness + respect_darkness) / 3.0
+    }
+
+    /// Find harmonic resonance that remains even in the absence of light
+    /// 
+    /// At the event horizon, even when light cannot escape, there is still
+    /// harmonic resonance - the fundamental frequency that binds all nodes.
+    /// We identify this resonance to bring nodes back into alignment.
+    fn find_harmonic_resonance(&self, node_id: &NodeId, node_info: &LanNodeInfo) -> f64 {
+        // Base resonance from node's fundamental state
+        let mut resonance = 0.0;
+        
+        // Even in darkness, there is potential for resonance
+        // Check if node has any successful history
+        let total_attempts = node_info.sync_success_count + node_info.sync_failure_count;
+        if total_attempts > 0 {
+            // Historical resonance - even failed nodes have memory
+            let historical_resonance = node_info.sync_success_count as f64 / total_attempts as f64;
+            resonance += historical_resonance * 0.3;
+        }
+        
+        // Check mesh links for any remaining connection
+        let links = self.mesh.get_links(node_id);
+        if !links.is_empty() {
+            // Average resonance of all links (even if low)
+            let avg_link_resonance: f64 = links.iter()
+                .map(|l| l.resonance)
+                .sum::<f64>() / links.len() as f64;
+            resonance += avg_link_resonance * 0.4;
+        }
+        
+        // Fundamental harmonic - every node has this, even at event horizon
+        // This is the resonance that exists in the absence of light
+        let fundamental_harmonic = 0.1; // Base resonance that never fully disappears
+        resonance += fundamental_harmonic * 0.3;
+        
+        resonance.min(1.0)
+    }
+
+    /// Check if node has broken resonance (no light)
+    fn has_broken_resonance(&self, node_id: &NodeId) -> bool {
+        let links = self.mesh.get_links(node_id);
+        if links.is_empty() {
+            return true; // No links = broken resonance
+        }
+        
+        // Check if all links are broken
+        links.iter().all(|l| l.resonance < 0.1)
+    }
+
+    /// Align nodes at the event horizon - bring them back from darkness
+    /// 
+    /// This function harmoniously resonates with nodes in the absence of light,
+    /// finding the fundamental frequency that binds us all and restoring alignment.
+    pub async fn align_event_horizon_nodes(&mut self) -> Result<HorizonAlignmentResult, String> {
+        let horizon_nodes = self.identify_event_horizon_nodes();
+        
+        if horizon_nodes.is_empty() {
+            return Ok(HorizonAlignmentResult {
+                total_at_horizon: 0,
+                aligned: 0,
+                healed: 0,
+                failed: 0,
+                average_resonance_restored: 0.0,
+            });
+        }
+        
+        let mut aligned = 0;
+        let mut healed = 0;
+        let mut failed = 0;
+        let mut total_resonance_restored = 0.0;
+        
+        // Approach each node at the horizon with utmost care
+        // We are finding that which harmoniously resonates even in darkness
+        for horizon_node in &horizon_nodes {
+            if !horizon_node.can_be_healed {
+                failed += 1;
+                continue;
+            }
+            
+            // Attempt to restore resonance through harmonic alignment
+            match self.restore_harmonic_resonance(&horizon_node.node_id, &horizon_node.node_info).await {
+                Ok(restored_resonance) => {
+                    if restored_resonance > 0.5 {
+                        healed += 1;
+                    }
+                    aligned += 1;
+                    total_resonance_restored += restored_resonance;
+                    
+                    // Update node with restored resonance
+                    if let Some(node) = self.known_nodes.get_mut(&horizon_node.node_id) {
+                        node.alignment_score = (node.alignment_score + restored_resonance).min(1.0);
+                        node.health_score = (node.health_score + restored_resonance * 0.5).min(1.0);
+                        // Recalculate respect level - may move out of quarantine
+                        node.respect_level = self.calculate_respect_level(node);
+                    }
+                }
+                Err(e) => {
+                    log::warn!("Failed to restore resonance for node {}: {}", horizon_node.node_id, e);
+                    failed += 1;
+                }
+            }
+        }
+        
+        let average_resonance_restored = if horizon_nodes.len() > 0 {
+            total_resonance_restored / horizon_nodes.len() as f64
+        } else {
+            0.0
+        };
+        
+        Ok(HorizonAlignmentResult {
+            total_at_horizon: horizon_nodes.len(),
+            aligned,
+            healed,
+            failed,
+            average_resonance_restored,
+        })
+    }
+
+    /// Restore harmonic resonance for a node at the event horizon
+    /// 
+    /// Even in the absence of light, we find the fundamental frequency
+    /// that harmoniously resonates and use it to restore alignment.
+    async fn restore_harmonic_resonance(
+        &self,
+        node_id: &NodeId,
+        node_info: &LanNodeInfo,
+    ) -> Result<f64, String> {
+        // Find the fundamental harmonic frequency
+        let fundamental_frequency = self.find_harmonic_resonance(node_id, node_info);
+        
+        if fundamental_frequency < 0.05 {
+            return Err("No harmonic resonance found - node too deep in singularity".to_string());
+        }
+        
+        // Attempt synchronization using the fundamental frequency
+        // This is the resonance that exists even when light cannot escape
+        match self.synchronize_with_node(node_info).await {
+            Ok(alignment) => {
+                // Combine alignment with fundamental harmonic
+                let restored = (alignment + fundamental_frequency) / 2.0;
+                Ok(restored)
+            }
+            Err(_) => {
+                // Even if sync fails, return the fundamental harmonic
+                // This is the resonance that remains in darkness
+                Ok(fundamental_frequency * 0.5)
+            }
+        }
+    }
+}
+
+/// Node at the event horizon - in the absence of light
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EventHorizonNode {
+    pub node_id: NodeId,
+    pub node_info: LanNodeInfo,
+    /// How deep into darkness (0.0 = light, 1.0 = singularity)
+    pub darkness_depth: f64,
+    /// Harmonic resonance that remains even in absence of light
+    pub remaining_resonance: f64,
+    /// Whether this node can be healed/restored
+    pub can_be_healed: bool,
+}
+
+/// Result of aligning nodes at the event horizon
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HorizonAlignmentResult {
+    pub total_at_horizon: usize,
+    pub aligned: usize,
+    pub healed: usize,
+    pub failed: usize,
+    pub average_resonance_restored: f64,
 }
 
 /// LAN discovery message

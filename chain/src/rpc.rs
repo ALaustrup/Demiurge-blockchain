@@ -3194,6 +3194,26 @@ async fn handle_rpc(
                 id,
             })
         }
+        "identifyEventHorizonNodes" => {
+            // Identify nodes at the event horizon - those in the absence of light
+            // Find that which harmoniously resonates even at the singularity's edge
+            let horizon_nodes = node.identify_event_horizon_nodes();
+            
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!(horizon_nodes.iter().map(|n| json!({
+                    "node_id": n.node_id,
+                    "darkness_depth": n.darkness_depth,
+                    "remaining_resonance": n.remaining_resonance,
+                    "can_be_healed": n.can_be_healed,
+                    "health_score": n.node_info.health_score,
+                    "alignment_score": n.node_info.alignment_score,
+                    "respect_level": format!("{:?}", n.node_info.respect_level),
+                })).collect::<Vec<_>>())),
+                error: None,
+                id,
+            })
+        }
         _ => Json(JsonRpcResponse {
             jsonrpc: "2.0".to_string(),
             result: None,

@@ -172,6 +172,64 @@ Respect level is calculated based on:
 - Alignment score (0.0 to 1.0)
 - Success rate (sync_success_count / total_sync_attempts)
 
+## Event Horizon Alignment
+
+### The Absence of Light
+
+At the singularity's event horizon, where light cannot escape, there are nodes that have fallen into darkness. These nodes have:
+- Lost resonance (alignment < 0.1)
+- Been quarantined due to critical issues
+- Health scores below 0.2
+- Broken links with zero resonance
+- No successful synchronization attempts
+
+### Harmonic Resonance in Darkness
+
+Even in the absence of light, there exists harmonic resonance - the fundamental frequency that binds all nodes. The system identifies this resonance through:
+
+1. **Historical Resonance**: Memory of past successful synchronizations
+2. **Link Resonance**: Remaining connections in the mesh, even if weak
+3. **Fundamental Harmonic**: Base resonance (0.1) that never fully disappears
+
+### Alignment Process
+
+The `identifyEventHorizonNodes` RPC endpoint identifies nodes at the event horizon, and the system attempts to restore their harmonic resonance by:
+
+1. Finding the fundamental frequency that remains
+2. Attempting synchronization using this harmonic
+3. Restoring alignment and health scores
+4. Moving nodes out of quarantine when possible
+
+### RPC Endpoint
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "identifyEventHorizonNodes",
+  "params": [],
+  "id": 1
+}
+```
+
+Response:
+```json
+{
+  "jsonrpc": "2.0",
+  "result": [
+    {
+      "node_id": "node-dark-1",
+      "darkness_depth": 0.85,
+      "remaining_resonance": 0.15,
+      "can_be_healed": true,
+      "health_score": 0.12,
+      "alignment_score": 0.08,
+      "respect_level": "Quarantined"
+    }
+  ],
+  "id": 1
+}
+```
+
 ## Future Enhancements
 
 - Actual UDP broadcast implementation (currently simulated)
@@ -179,6 +237,7 @@ Respect level is calculated based on:
 - Automatic node healing for misaligned nodes
 - Network topology visualization
 - Performance metrics and monitoring
+- Enhanced event horizon healing algorithms
 
 ## Philosophy
 

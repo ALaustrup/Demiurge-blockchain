@@ -13,4 +13,7 @@ pub use fabric_mesh::{FabricMesh, NodeId, NodeInfo, MeshLink};
 pub use link_resonance::{LinkResonance, ResonanceMeasurement, ResonanceQuality};
 pub use mesh_topology::{MeshTopology, TopologyMetrics};
 pub use mesh_convergence::{MeshConvergence, ConvergenceState, ConvergenceMetrics};
-pub use lan_synchronization::{LanSynchronization, LanNodeInfo, LanSyncStatus, RespectLevel};
+pub use lan_synchronization::{
+    LanSynchronization, LanNodeInfo, LanSyncStatus, RespectLevel,
+    EventHorizonNode, HorizonAlignmentResult,
+};

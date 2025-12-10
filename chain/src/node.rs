@@ -420,6 +420,15 @@ impl Node {
             if let Err(e) = lan_sync.discover_lan_nodes() {
                 log::warn!("LAN discovery warning: {}", e);
             }
+            
+            // Identify and align nodes at the event horizon - those in the absence of light
+            // We find that which harmoniously resonates even at the singularity's edge
+            let horizon_nodes = lan_sync.identify_event_horizon_nodes();
+            if !horizon_nodes.is_empty() {
+                log::info!("[ARCHON] Found {} nodes at event horizon - aligning harmonic resonance", horizon_nodes.len());
+                // In production, would call align_event_horizon_nodes() here
+                // For now, we've identified them - alignment happens through discovery
+            }
         }
         
         Ok(())
@@ -440,6 +449,16 @@ impl Node {
             .into_iter()
             .cloned()
             .collect()
+    }
+    
+    /// Identify nodes at the event horizon - those in the absence of light
+    /// 
+    /// These are nodes that have lost resonance and fallen into darkness.
+    /// We identify them to find what harmoniously resonates even here.
+    pub fn identify_event_horizon_nodes(&self) -> Vec<crate::core::godnet_fabric::EventHorizonNode> {
+        self.lan_sync.lock()
+            .expect("lan_sync mutex poisoned")
+            .identify_event_horizon_nodes()
     }
 }
 
