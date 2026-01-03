@@ -25,10 +25,11 @@
 #### Phase 6: Archon ✅
 - Integrated in chain binary (no separate service)
 
-#### Phase 7: AbyssID ⚠️
-- ⚠️ Build has TypeScript errors (needs code fix)
-- ✅ systemd service created: `abyssid.service`
-- ⏳ Service not started (blocked by build errors)
+#### Phase 7: AbyssID ✅
+- ✅ TypeScript build errors fixed
+- ✅ Built successfully
+- ✅ systemd service: `abyssid.service` - **ACTIVE**
+- ✅ Endpoint: `http://127.0.0.1:8082`
 
 #### Phase 8: Abyss Gateway ✅
 - ✅ Built successfully
@@ -45,9 +46,12 @@
   - `rpc.demiurge.cloud` → Chain RPC proxy
 - ✅ Service: `nginx.service` - **ACTIVE**
 
-#### Phase 11: TLS ⏳
+#### Phase 11: TLS ✅
 - ✅ Certbot installed
-- ⏳ Certificates pending (requires DNS configuration)
+- ✅ SSL certificates obtained for `demiurge.cloud` and `www.demiurge.cloud`
+- ✅ HTTPS enabled on port 443
+- ✅ HTTP to HTTPS redirect configured
+- ✅ Auto-renewal configured
 
 #### Phase 12: Verification ✅
 - ✅ All critical services running
@@ -61,9 +65,9 @@
 | Service | Status | Port | Notes |
 |---------|--------|------|-------|
 | demiurge-chain | ✅ Active | 8545 | Chain node running |
-| abyss-gateway | ✅ Active | - | GraphQL gateway |
+| abyss-gateway | ✅ Active | 4000 | GraphQL gateway |
+| abyssid | ✅ Active | 8082 | Identity backend |
 | nginx | ✅ Active | 80, 443 | Web server & reverse proxy |
-| abyssid | ⏳ Not started | 8082 | Build errors need fixing |
 
 ---
 
@@ -146,16 +150,16 @@ sudo certbot --nginx -d rpc.demiurge.cloud \
    - Choose: Next.js server or static export
    - Deploy accordingly
 
-3. **DNS Configuration**
-   - Point `demiurge.cloud` → 51.210.209.112
+2. **DNS Configuration** (Optional - already accessible via IP)
+   - Point `demiurge.cloud` → 51.210.209.112 ✅ (already configured)
    - Point `rpc.demiurge.cloud` → 51.210.209.112
    - Point `demiurge.guru` → 51.210.209.112
 
-4. **TLS Certificates**
-   - Run certbot commands after DNS is configured
-   - Enable auto-renewal
+3. **TLS for Additional Domains**
+   - Obtain certificates for `rpc.demiurge.cloud` (when DNS configured)
+   - Obtain certificates for `demiurge.guru` (when DNS configured)
 
-5. **Final Testing**
+4. **Final Testing**
    - Test AbyssOS access
    - Test RPC endpoint
    - Verify all services after reboot
