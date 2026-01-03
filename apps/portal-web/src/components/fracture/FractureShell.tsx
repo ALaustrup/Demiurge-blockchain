@@ -21,6 +21,7 @@ export function FractureShell({ children, showNav = true }: FractureShellProps) 
         className="fixed inset-0 w-full h-full object-cover pointer-events-none z-0"
         poster="/media/fracture-bg-poster.jpg"
       >
+        <source src="/media/background.mp4" type="video/mp4" />
         <source src="/media/fracture-bg.webm" type="video/webm" />
         <source src="/media/fracture-bg.mp4" type="video/mp4" />
         {/* Fallback gradient if video fails */}

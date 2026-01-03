@@ -86,6 +86,9 @@ export default function DocsPage() {
             <p className="mt-2 text-xs text-zinc-500">
               Usernames must be 3-32 characters, lowercase letters, numbers, underscores, and dots only.
             </p>
+            <p className="mt-2 text-xs text-zinc-400">
+              See <a href="/docs/api" className="underline">Runtime Modules</a> for UrgeID documentation.
+            </p>
           </div>
         </Card>
 
@@ -159,15 +162,28 @@ export default function DocsPage() {
         </Card>
 
         <Card>
-          <h2 className="mb-3 text-xl font-semibold">API Reference</h2>
+          <h2 className="mb-3 text-xl font-semibold">Runtime Modules</h2>
           <p className="mb-4 text-zinc-400">
-            JSON-RPC and GraphQL API documentation for developers.
+            Complete documentation for all 9 runtime modules: bank_cgt, urgeid_registry, nft_dgen, and more.
           </p>
           <a
-            href="#"
+            href="/docs/api"
             className="text-zinc-300 hover:text-zinc-50 underline"
           >
-            Coming soon →
+            View Runtime Docs →
+          </a>
+        </Card>
+
+        <Card>
+          <h2 className="mb-3 text-xl font-semibold">AbyssID Authentication</h2>
+          <p className="mb-4 text-zinc-400">
+            Username-based authentication with seed phrase recovery. Learn how to sign up, log in, and recover accounts.
+          </p>
+          <a
+            href="/docs/api"
+            className="text-zinc-300 hover:text-zinc-50 underline"
+          >
+            Learn more →
           </a>
         </Card>
 

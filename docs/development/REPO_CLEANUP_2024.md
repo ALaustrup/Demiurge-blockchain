@@ -44,7 +44,8 @@ Removed all unnecessary and outdated files/folders that are not required for blo
 
 ### Core Blockchain Components
 - ✅ `chain/` - Rust L1 blockchain node
-- ✅ `runtime/` - Runtime modules (bank_cgt, nft_dgen, etc.)
+- ✅ `chain/src/runtime/` - Runtime modules (bank_cgt, urgeid_registry, etc.)
+- ✅ `other/legacy-runtime-stubs/` - Legacy placeholder crates (superseded)
 - ✅ `cli/` - Command-line interface
 - ✅ `sdk/` - TypeScript & Rust SDKs
 - ✅ `indexer/` - Block ingestor and GraphQL gateway
@@ -79,7 +80,8 @@ DEMIURGE/
 ├── *.json                       # Artifacts
 │
 ├── chain/                       # ✅ Core blockchain
-├── runtime/                     # ✅ Runtime modules
+├── other/                       # ✅ Legacy code
+│   └── legacy-runtime-stubs/    # Legacy placeholder runtime crates
 ├── cli/                         # ✅ CLI tool
 ├── sdk/                         # ✅ SDKs
 ├── indexer/                     # ✅ Indexer
@@ -101,7 +103,7 @@ DEMIURGE/
 
 All essential components remain:
 - ✅ Blockchain node builds and runs
-- ✅ Runtime modules functional
+- ✅ Runtime modules functional (in `chain/src/runtime/`)
 - ✅ SDKs available
 - ✅ Applications deployable
 - ✅ Deployment scripts intact

@@ -482,12 +482,13 @@ const QueryType = new GraphQLObjectType({
     },
     // Milestone 7: Operator queries
     operator: {
-      type: OperatorType,
+      type: OperatorType, // Allow null - operator may not exist
       args: {
         id: { type: new GraphQLNonNull(GraphQLID) },
       },
       resolve: async (parent, args, context) => {
-        return context.resolvers.getOperator(args, context);
+        const result = await context.resolvers.getOperator(args, context);
+        return result || null; // Explicitly return null if not found
       },
     },
     operators: {

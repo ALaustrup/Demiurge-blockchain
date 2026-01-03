@@ -22,7 +22,6 @@ interface NetworkEdge {
   strength: number;
   active: boolean;
 }
-import type { GenesisNode, GenesisEdge } from "@/lib/genesis/GenesisFabricService";
 
 interface FabricTopologyProps {
   connectedPeers?: number;

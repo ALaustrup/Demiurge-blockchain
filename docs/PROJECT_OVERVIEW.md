@@ -361,12 +361,10 @@ DEMIURGE/
 │   ├── src/
 │   │   ├── main.rs          # Entry point, RPC server
 │   │   ├── node.rs          # Node state management
-│   │   ├── rpc.rs           # JSON-RPC implementation
 │   │   ├── forge.rs         # Proof-of-Work
 │   │   ├── core/            # Block, Transaction, State
-│   │   └── runtime/         # Runtime modules
+│   │   └── runtime/         # Runtime modules (bank_cgt, urgeid_registry, etc.)
 │   └── configs/             # Devnet configurations
-├── runtime/                  # Runtime modules (bank_cgt, etc.)
 ├── apps/
 │   ├── abyssos-portal/      # ⭐ AbyssOS desktop environment (PRODUCTION)
 │   ├── portal-web/          # Fracture Portal (legacy)
@@ -378,6 +376,8 @@ DEMIURGE/
 ├── sdk/                     # TypeScript & Rust SDKs
 ├── deploy/
 │   └── node0/               # Node0 deployment scripts
+├── other/                   # Legacy code and experimental features
+│   └── legacy-runtime-stubs/ # Legacy placeholder runtime crates (superseded)
 └── docs/                    # Comprehensive documentation
 ```
 

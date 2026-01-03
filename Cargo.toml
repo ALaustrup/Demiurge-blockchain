@@ -1,11 +1,6 @@
 [workspace]
 members = [
     "chain",
-    "runtime/bank_cgt",
-    "runtime/nft_dgen",
-    "runtime/fabric_manager",
-    "runtime/abyss_registry",
-    "runtime/avatars_profiles",
     "indexer/ingestor-rs",
     "sdk/rust-sdk",
     "cli",

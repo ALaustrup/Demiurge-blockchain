@@ -12,51 +12,84 @@ export interface GeneratedAbyssIdentity {
   seedPhrase: string;
 }
 
+const WORD_LIST = [
+  "abyss", "void", "dark", "shadow", "fracture", "nexus", "haven", "scroll",
+  "conspire", "archon", "nomad", "demiurge", "sovereign", "chain", "crypto", "key",
+  "ritual", "binding", "memory", "threshold", "light", "consume", "forged", "guard",
+  "eternal", "flame", "will", "serve", "ancient", "majestic", "terrifying", "inevitable",
+];
+
 /**
- * Generate AbyssID identity
+ * Derive keys from a seed phrase (deterministic)
  */
-export async function generateKeys(username: string): Promise<GeneratedAbyssIdentity> {
-  // Use WebCrypto if available
-  let publicKey: string;
-  let privateKey: string;
-
+export async function deriveKeysFromSeed(seedPhrase: string): Promise<{ publicKey: string; privateKey: string }> {
+  // Normalize seed phrase
+  const normalized = seedPhrase.toLowerCase().trim();
+  
+  // Create a deterministic hash from the seed phrase
+  const encoder = new TextEncoder();
+  const data = encoder.encode(normalized);
+  
+  let hashBytes: Uint8Array;
   try {
-    // Try to use crypto.getRandomValues for pseudo-random generation
-    const randomBytes = new Uint8Array(32);
-    crypto.getRandomValues(randomBytes);
-
-    // Generate placeholder keys
-    const hexString = Array.from(randomBytes)
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-
-    publicKey = `ABYSS-PUB-${hexString.substring(0, 32)}`;
-    privateKey = `ABYSS-PRIV-${hexString.substring(32, 64)}`;
+    // Use WebCrypto to create a deterministic hash
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    hashBytes = new Uint8Array(hashBuffer);
   } catch (error) {
-    // Fallback if crypto not available
-    const timestamp = Date.now().toString(36);
-    const random = Math.random().toString(36).substring(2, 18);
-    publicKey = `ABYSS-PUB-${timestamp}-${random}`;
-    privateKey = `ABYSS-PRIV-${timestamp}-${random}`;
+    // Fallback: simple hash
+    let hash = 0;
+    for (let i = 0; i < normalized.length; i++) {
+      const char = normalized.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    hashBytes = new Uint8Array(32);
+    for (let i = 0; i < 32; i++) {
+      hashBytes[i] = (hash + i * 7) & 0xFF;
+    }
   }
 
-  // Generate seed phrase (6-12 words)
-  const wordList = [
-    "abyss", "void", "dark", "shadow", "fracture", "nexus", "haven", "scroll",
-    "conspire", "archon", "nomad", "demiurge", "sovereign", "chain", "crypto", "key",
-    "ritual", "binding", "memory", "threshold", "light", "consume", "forged", "guard",
-    "eternal", "flame", "will", "serve", "ancient", "majestic", "terrifying", "inevitable",
-  ];
+  // Generate keys from hash (deterministic)
+  const hexString = Array.from(hashBytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 
+  const publicKey = `ABYSS-PUB-${hexString.substring(0, 32)}`;
+  const privateKey = `ABYSS-PRIV-${hexString.substring(32, 64)}`;
+
+  return { publicKey, privateKey };
+}
+
+/**
+ * Generate AbyssID identity (creates new seed phrase and derives keys from it)
+ * This ensures the seed phrase can be used to recover the keys later.
+ */
+export async function generateKeys(username: string): Promise<GeneratedAbyssIdentity> {
+  // Generate seed phrase first (8 words)
   const seedWords: string[] = [];
-  const wordCount = 8; // 8 words for seed phrase
+  const wordCount = 8;
 
-  for (let i = 0; i < wordCount; i++) {
-    const randomIndex = Math.floor(Math.random() * wordList.length);
-    seedWords.push(wordList[randomIndex]);
+  try {
+    // Use crypto.getRandomValues for secure random selection
+    const randomBytes = new Uint8Array(wordCount);
+    crypto.getRandomValues(randomBytes);
+    
+    for (let i = 0; i < wordCount; i++) {
+      const randomIndex = randomBytes[i] % WORD_LIST.length;
+      seedWords.push(WORD_LIST[randomIndex]);
+    }
+  } catch (error) {
+    // Fallback: use Math.random
+    for (let i = 0; i < wordCount; i++) {
+      const randomIndex = Math.floor(Math.random() * WORD_LIST.length);
+      seedWords.push(WORD_LIST[randomIndex]);
+    }
   }
 
   const seedPhrase = seedWords.join(" ");
+
+  // Derive keys from seed phrase (deterministic)
+  const { publicKey, privateKey } = await deriveKeysFromSeed(seedPhrase);
 
   return {
     publicKey,

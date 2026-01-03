@@ -15,7 +15,7 @@ interface HeroPanelProps {
 }
 
 export function HeroPanel({ 
-  title = "FRACTURE", 
+  title = "[ alpha v1.0 }", 
   subtitle, 
   children,
   showCTAs = false 
@@ -24,12 +24,12 @@ export function HeroPanel({
   const [showAbyssID, setShowAbyssID] = useState(false);
 
   // Default dark subtitle if not provided
-  const defaultSubtitle = "The chain does not explain itself. It devours, remembers, and rewards those who dare to carve in its surface.";
+  const defaultSubtitle = "Demiuge Blockchain";
 
   return (
     <>
       <motion.div
-        className="max-w-3xl mx-auto py-12 px-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-2xl shadow-[0_0_60px_rgba(0,0,0,0.8)] relative"
+        className="max-w-3xl mx-auto py-8 px-8 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-2xl shadow-[0_0_60px_rgba(0,0,0,0.8)] relative mb-8"
         style={{
           transform: `translate(${panelJitter.x}px, ${panelJitter.y}px) rotate(${panelJitter.rotation}deg)`,
           boxShadow: `0 0 80px rgba(0,255,255,0.15), 0 0 60px rgba(0,0,0,0.8)`,
@@ -40,14 +40,14 @@ export function HeroPanel({
       >
         {/* Overline */}
         <div className="text-xs sm:text-sm text-zinc-500 font-mono tracking-widest mb-4 text-center">
-          DEM IURGE // ABYSSAL LATTICE
+          A B Y S S  OS
         </div>
 
         {/* Main Title */}
         <motion.h1
-          className="text-5xl sm:text-6xl lg:text-7xl font-display mb-6 text-center"
+          className="text-3xl sm:text-4xl lg:text-5xl font-display mb-4 text-center"
           style={{
-            transform: `scale(${1 + glyphPulse})`,
+            transform: `scale(${1 + glyphPulse * 0.5})`,
             textShadow: "0 0 30px rgba(34, 211, 238, 0.3), 0 0 20px rgba(0,0,0,0.8), 0 4px 8px rgba(0,0,0,0.6)",
             letterSpacing: "0.15em",
             fontFamily: "var(--font-bebas), sans-serif",

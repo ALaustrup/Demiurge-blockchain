@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { generateKeys, type GeneratedAbyssIdentity } from "@/lib/fracture/crypto/generateKeys";
+import { generateKeys, deriveKeysFromSeed, type GeneratedAbyssIdentity } from "@/lib/fracture/crypto/generateKeys";
 import { useAbyssID } from "@/lib/fracture/identity/AbyssIDContext";
 
-export type AbyssState = "idle" | "checking" | "reject" | "accept" | "binding" | "confirm";
+export type AbyssState = "idle" | "checking" | "reject" | "accept" | "binding" | "confirm" | "login" | "verifying";
 
 export interface AbyssContext {
   username: string;
@@ -12,6 +12,7 @@ export interface AbyssContext {
   publicKey?: string;
   address?: string;
   error?: string;
+  isExistingUser?: boolean; // True if username exists, showing login flow
 }
 
 // Get API URL from environment or use default
@@ -82,13 +83,20 @@ export function useAbyssStateMachine() {
       const data = await response.json();
 
       if (!data.available) {
-        setState("reject");
+        // Username exists - show login flow instead of reject
+        setState("login");
         setContext((prev) => ({
           ...prev,
-          error: data.error || "Username already taken",
+          isExistingUser: true,
+          error: undefined, // Clear any previous errors
         }));
       } else {
+        // Username is available - proceed with signup
         setState("accept");
+        setContext((prev) => ({
+          ...prev,
+          isExistingUser: false,
+        }));
       }
     } catch (error: any) {
       console.error("Username check failed:", error);
@@ -177,14 +185,96 @@ export function useAbyssStateMachine() {
     // Actual routing to /haven will be handled in the dialog component
   }, []);
 
+  const setSeedPhrase = useCallback((seedPhrase: string) => {
+    setContext((prev) => ({
+      ...prev,
+      seedPhrase,
+      error: undefined,
+    }));
+  }, []);
+
+  const verifyLogin = useCallback(async () => {
+    if (!context.seedPhrase || !context.username.trim()) {
+      setState("login");
+      setContext((prev) => ({
+        ...prev,
+        error: "Please enter your security words",
+      }));
+      return;
+    }
+
+    setState("verifying");
+
+    try {
+      const API_URL = getApiUrl();
+      const username = context.username.trim();
+      const seedPhrase = context.seedPhrase.trim();
+
+      // Derive keys from seed phrase
+      const { publicKey } = await deriveKeysFromSeed(seedPhrase);
+      
+      // Get stored identity from backend
+      const response = await fetch(`${API_URL}/api/abyssid/${username}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("Username not found");
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const identityData = await response.json();
+
+      // Verify the derived public key matches the stored one
+      if (identityData.publicKey && identityData.publicKey !== publicKey) {
+        throw new Error("Invalid security words. The words you entered do not match this identity.");
+      }
+
+      // Derive address from public key
+      const address = identityData.address || ("0x" + publicKey.replace(/[^0-9a-f]/gi, '').substring(0, 40).padEnd(40, '0'));
+      
+      // Update context with recovered keys
+      setContext((prev) => ({
+        ...prev,
+        publicKey: identityData.publicKey || publicKey,
+        address,
+        seedPhrase, // Keep the seed phrase for storage
+      }));
+
+      // Store identity in global context
+      setIdentity({
+        username,
+        address: identityData.address || address,
+        publicKey,
+        seedPhrase,
+        createdAt: identityData.createdAt || Date.now(),
+      });
+
+      // Success - proceed to confirm
+      setState("confirm");
+    } catch (error: any) {
+      console.error("Login verification failed:", error);
+      setState("login");
+      setContext((prev) => ({
+        ...prev,
+        error: error.message || "Invalid security words. Please try again.",
+      }));
+    }
+  }, [context.username, context.seedPhrase, setIdentity]);
+
   return {
     state,
     context,
     setUsername,
+    setSeedPhrase,
     startChecking,
     triggerReject,
     triggerAccept,
     startBinding,
     confirmAndProceed,
+    verifyLogin,
   };
 }
