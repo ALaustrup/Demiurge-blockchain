@@ -72,17 +72,10 @@ function AppContent() {
     );
   }
 
-  // Intro video DISABLED - skip directly to login/desktop
-  // if (showIntro && screen === 'intro') {
-  //   return <IntroVideo onComplete={handleIntroComplete} />;
-  // }
-  
-  // Immediately call handleIntroComplete to skip intro
-  useEffect(() => {
-    if (showIntro && screen === 'intro') {
-      handleIntroComplete();
-    }
-  }, [showIntro, screen]);
+  // Show intro video (no autoplay, muted, click-to-play only)
+  if (showIntro && screen === 'intro') {
+    return <IntroVideo onComplete={handleIntroComplete} />;
+  }
 
   // Show login/signup screen after intro (or if already authenticated, skip to desktop)
   if (screen === 'login' || (!session && !showIntro)) {

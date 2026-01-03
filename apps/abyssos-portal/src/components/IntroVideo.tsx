@@ -2,6 +2,7 @@
  * Intro Video Component
  * 
  * Plays a full-screen intro video automatically on landing.
+ * Video playback is "best effort" - if it fails, user can always skip.
  * Place your .mp4 file at: apps/abyssos-portal/public/video/intro.mp4
  */
 
@@ -18,169 +19,84 @@ export function IntroVideo({ onComplete, onSkip }: IntroVideoProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showSkip, setShowSkip] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
-  const [isMuted, setIsMuted] = useState(true); // Start muted for autoplay
+  const [videoFailed, setVideoFailed] = useState(false);
+  const hasCompletedRef = useRef(false);
 
-  // Auto-play video on mount
+  // Skip intro - ALWAYS works, independent of video state
+  const skipIntro = () => {
+    console.log('[IntroVideo] skipIntro called');
+    if (hasCompletedRef.current) {
+      console.log('[IntroVideo] Already completed, ignoring skip');
+      return;
+    }
+    hasCompletedRef.current = true;
+    
+    const video = videoRef.current;
+    if (video) {
+      video.pause();
+    }
+    
+    localStorage.setItem('abyssos_intro_seen', 'true');
+    onComplete();
+  };
+
+  // Setup video event listeners - no autoplay
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    let skipTimer: ReturnType<typeof setTimeout> | null = null;
-    let hasCompleted = false;
-    let earlyEndRetries = 0;
-    let startedAt = 0;
-
-    // Show skip button after 2 seconds
-    skipTimer = setTimeout(() => {
+    // Show skip button after 1 second
+    const skipButtonTimer = setTimeout(() => {
       setShowSkip(true);
-    }, 2000);
+    }, 1000);
 
-    // Handle video end - ONLY call onComplete when video actually ends
+    // Handle video end - complete naturally
     const handleEnded = () => {
-      if (!video) return;
-
-      const duration = video.duration || 0;
-      const currentTime = video.currentTime || 0;
-      const elapsed = startedAt ? (performance.now() - startedAt) / 1000 : currentTime;
-
-      // Require meaningful playback before completing
-      const minWatch = Math.min(12, Math.max(5, duration * 0.6)); // at least 5s or 60% up to 12s
-      const nearEnd = duration > 0 && currentTime >= duration - 0.35;
-      const watchedEnough = elapsed >= minWatch || nearEnd;
-
-      if (!watchedEnough && earlyEndRetries < 5) {
-        earlyEndRetries += 1;
-        console.warn(
-          `Intro video ended early (t=${currentTime.toFixed(2)}/${duration.toFixed(
-            2
-          )}, elapsed=${elapsed.toFixed(2)}s). Retry ${earlyEndRetries}/5`
-        );
-        video.currentTime = 0;
-        video.play().catch((err) => {
-          console.error('Failed to resume intro video after early end:', err);
-        });
-        return;
+      console.log('[IntroVideo] Video ended naturally');
+      if (!hasCompletedRef.current) {
+        skipIntro();
       }
-
-      if (hasCompleted) return; // Prevent multiple calls
-      hasCompleted = true;
-      console.log('Intro video ended naturally');
-      localStorage.setItem('abyssos_intro_seen', 'true');
-      onComplete();
     };
 
-    // Handle video errors - log but don't auto-complete
+    // Handle video errors - just log, user can skip
     const handleError = (e: Event) => {
-      console.error('Video error:', e);
+      console.error('[IntroVideo] Video error:', e);
       const error = video.error;
       if (error) {
-        console.error('Video error details:', {
+        console.error('[IntroVideo] Error details:', {
           code: error.code,
           message: error.message,
         });
       }
-      // Don't auto-complete on error - let user skip manually
-    };
-
-    // Handle video canplay - ensure video is ready
-    const handleCanPlay = () => {
-      console.log('Video can play');
-    };
-
-    // Handle video loadedmetadata
-    const handleLoadedMetadata = () => {
-      console.log('Video metadata loaded, duration:', video.duration);
-    };
-
-    // Handle video stalled - don't auto-complete
-    const handleStalled = () => {
-      console.warn('Video stalled - buffering');
+      setVideoFailed(true);
     };
 
     // Add event listeners
     video.addEventListener('ended', handleEnded);
     video.addEventListener('error', handleError);
-    video.addEventListener('canplay', handleCanPlay);
-    video.addEventListener('loadedmetadata', handleLoadedMetadata);
-    video.addEventListener('stalled', handleStalled);
-
-    // Attempt to play (start muted for better autoplay success)
-    video.muted = true;
-    setIsMuted(true);
-    
-    const playPromise = video.play();
-    
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          console.log('Video playback started (muted)');
-          startedAt = performance.now();
-          setIsPlaying(true);
-          setHasPlayed(true);
-          
-          // Unmute after a short delay (browsers allow unmuting after user interaction/playback starts)
-          setTimeout(() => {
-            if (video) {
-              video.muted = false;
-              setIsMuted(false);
-              console.log('Video unmuted');
-            }
-          }, 500);
-        })
-        .catch((error) => {
-          console.warn('Video autoplay failed:', error);
-          // If autoplay fails, user can click to play
-        });
-    }
 
     return () => {
-      if (skipTimer) {
-        clearTimeout(skipTimer);
-      }
+      if (skipButtonTimer) clearTimeout(skipButtonTimer);
       video.removeEventListener('ended', handleEnded);
       video.removeEventListener('error', handleError);
-      video.removeEventListener('canplay', handleCanPlay);
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      video.removeEventListener('stalled', handleStalled);
     };
-  }, [onComplete]);
+  }, []);
 
-  const handleSkip = () => {
-    const video = videoRef.current;
-    if (video) {
-      video.pause();
-    }
-    localStorage.setItem('abyssos_intro_seen', 'true');
-    onComplete();
-  };
-
+  // Click to play
   const handleClickToPlay = async () => {
+    console.log('[IntroVideo] handleClickToPlay called');
     const video = videoRef.current;
-    if (video && !isPlaying) {
-      try {
-        await video.play();
-        setIsPlaying(true);
-        setHasPlayed(true);
-        console.log('Video playback started via click');
-      } catch (error) {
-        console.error('Failed to play video on click:', error);
-        // Try unmuting and playing again (some browsers require user interaction + unmute)
-        video.muted = false;
-        try {
-          await video.play();
-          setIsPlaying(true);
-          setHasPlayed(true);
-        } catch (err2) {
-          console.error('Failed to play video even after unmuting:', err2);
-        }
-      }
-    }
-  };
+    if (!video || hasCompletedRef.current || isPlaying) return;
 
-  // Make entire screen clickable to start playback
-  const handleScreenClick = (e: React.MouseEvent) => {
-    if (!isPlaying && !hasPlayed) {
-      handleClickToPlay(e);
+    try {
+      await video.play();
+      console.log('[IntroVideo] Video playback started via click');
+      setIsPlaying(true);
+      setHasPlayed(true);
+      setVideoFailed(false);
+    } catch (error) {
+      console.error('[IntroVideo] Failed to play video on click:', error);
+      setVideoFailed(true);
     }
   };
 
@@ -192,33 +108,21 @@ export function IntroVideo({ onComplete, onSkip }: IntroVideoProps) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.5 }}
-        onClick={handleScreenClick}
-        style={{ cursor: !isPlaying && !hasPlayed ? 'pointer' : 'default' }}
       >
-        {/* Video Container */}
+        {/* Video Container - best effort, non-blocking */}
         <div 
           className="absolute inset-0 flex items-center justify-center"
-          style={{ pointerEvents: isPlaying ? 'auto' : 'none' }}
+          onClick={handleClickToPlay}
+          style={{ cursor: !isPlaying && !hasPlayed ? 'pointer' : 'default' }}
         >
           <video
             ref={videoRef}
             className="w-full h-full object-contain"
             playsInline
-            muted={false}
-            preload="auto"
-            autoPlay
-            onClick={handleClickToPlay}
+            preload="metadata"
+            muted
             onError={(e) => {
-              console.error('Video element error:', e);
-            }}
-            onLoadStart={() => {
-              console.log('Video load started');
-            }}
-            onLoadedData={() => {
-              console.log('Video data loaded');
-            }}
-            onCanPlay={() => {
-              console.log('Video can play');
+              console.error('[IntroVideo] Video element error:', e);
             }}
           >
             <source src="/video/intro.mp4" type="video/mp4" />
@@ -226,27 +130,32 @@ export function IntroVideo({ onComplete, onSkip }: IntroVideoProps) {
           </video>
         </div>
 
-        {/* Skip Button */}
+        {/* Skip Button - ALWAYS accessible, highest z-index, never blocked */}
         {showSkip && (
           <motion.button
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="absolute bottom-8 right-8 px-6 py-3 bg-black/60 hover:bg-black/80 text-white rounded-lg backdrop-blur-sm border border-white/20 transition-all z-10"
-            onClick={handleSkip}
+            className="absolute bottom-8 right-8 px-6 py-3 bg-black/80 hover:bg-black text-white rounded-lg backdrop-blur-sm border border-white/30 transition-all z-[10000]"
+            onClick={(e) => {
+              e.stopPropagation();
+              console.log('[IntroVideo] Skip button clicked');
+              skipIntro();
+            }}
+            style={{ pointerEvents: 'auto' }}
           >
             Skip Intro
           </motion.button>
         )}
 
-        {/* Click to Play Overlay (if autoplay failed) */}
-        {!isPlaying && !hasPlayed && (
+        {/* Click to Play Overlay - only if video hasn't played and hasn't failed */}
+        {!isPlaying && !hasPlayed && !videoFailed && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-[9998]"
+            onClick={handleClickToPlay}
             style={{ 
               pointerEvents: 'auto',
-              zIndex: 9999,
               cursor: 'pointer'
             }}
           >
@@ -258,8 +167,7 @@ export function IntroVideo({ onComplete, onSkip }: IntroVideoProps) {
               >
                 ▶
               </motion.div>
-              <div className="text-white text-lg mb-2">Click anywhere to play intro</div>
-              <div className="text-white/70 text-sm">(Video will start muted, then unmute automatically)</div>
+              <div className="text-white text-lg mb-2">Click to play intro</div>
             </div>
           </motion.div>
         )}
