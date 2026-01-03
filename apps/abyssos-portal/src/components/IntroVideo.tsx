@@ -18,6 +18,7 @@ export function IntroVideo({ onComplete, onSkip }: IntroVideoProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showSkip, setShowSkip] = useState(false);
   const [hasPlayed, setHasPlayed] = useState(false);
+  const [isMuted, setIsMuted] = useState(true); // Start muted for autoplay
 
   // Auto-play video on mount
   useEffect(() => {
@@ -103,16 +104,28 @@ export function IntroVideo({ onComplete, onSkip }: IntroVideoProps) {
     video.addEventListener('loadedmetadata', handleLoadedMetadata);
     video.addEventListener('stalled', handleStalled);
 
-    // Attempt to play
+    // Attempt to play (start muted for better autoplay success)
+    video.muted = true;
+    setIsMuted(true);
+    
     const playPromise = video.play();
     
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
-          console.log('Video playback started');
+          console.log('Video playback started (muted)');
           startedAt = performance.now();
           setIsPlaying(true);
           setHasPlayed(true);
+          
+          // Unmute after a short delay (browsers allow unmuting after user interaction/playback starts)
+          setTimeout(() => {
+            if (video) {
+              video.muted = false;
+              setIsMuted(false);
+              console.log('Video unmuted');
+            }
+          }, 500);
         })
         .catch((error) => {
           console.warn('Video autoplay failed:', error);
@@ -164,6 +177,13 @@ export function IntroVideo({ onComplete, onSkip }: IntroVideoProps) {
     }
   };
 
+  // Make entire screen clickable to start playback
+  const handleScreenClick = (e: React.MouseEvent) => {
+    if (!isPlaying && !hasPlayed) {
+      handleClickToPlay(e);
+    }
+  };
+
   return (
     <AnimatePresence>
       <motion.div
@@ -172,6 +192,8 @@ export function IntroVideo({ onComplete, onSkip }: IntroVideoProps) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.5 }}
+        onClick={handleScreenClick}
+        style={{ cursor: !isPlaying && !hasPlayed ? 'pointer' : 'default' }}
       >
         {/* Video Container */}
         <div 
