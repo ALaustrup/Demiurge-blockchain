@@ -100,9 +100,11 @@
 - **RPC**: `http://rpc.demiurge.cloud/rpc` (or `http://51.210.209.112/rpc`)
 - **Portal**: `http://demiurge.guru` (needs Next.js server setup)
 
-**Current (IP access):**
-- AbyssOS: `http://51.210.209.112`
-- RPC: `http://51.210.209.112/rpc` (via Nginx proxy)
+**Current Access:**
+- AbyssOS: `https://demiurge.cloud` ✅ (TLS configured)
+- RPC: `https://rpc.demiurge.cloud/rpc` (via Nginx proxy, TLS configured)
+- AbyssID: `http://127.0.0.1:8082` (internal only)
+- Gateway: `http://127.0.0.1:4000/graphql` (internal only)
 
 ---
 
@@ -142,24 +144,20 @@ sudo certbot --nginx -d rpc.demiurge.cloud \
 
 ## 📋 Next Steps
 
-1. **Fix AbyssID Build**
-   - Resolve TypeScript errors
-   - Rebuild and start service
-
-2. **Configure Portal**
+1. **Configure Portal**
    - Choose: Next.js server or static export
    - Deploy accordingly
 
-2. **DNS Configuration** (Optional - already accessible via IP)
-   - Point `demiurge.cloud` → 51.210.209.112 ✅ (already configured)
+3. **DNS Configuration**
+   - Point `demiurge.cloud` → 51.210.209.112
    - Point `rpc.demiurge.cloud` → 51.210.209.112
    - Point `demiurge.guru` → 51.210.209.112
 
-3. **TLS for Additional Domains**
-   - Obtain certificates for `rpc.demiurge.cloud` (when DNS configured)
-   - Obtain certificates for `demiurge.guru` (when DNS configured)
+4. **TLS Certificates**
+   - Run certbot commands after DNS is configured
+   - Enable auto-renewal
 
-4. **Final Testing**
+5. **Final Testing**
    - Test AbyssOS access
    - Test RPC endpoint
    - Verify all services after reboot
@@ -198,11 +196,11 @@ sudo systemctl reload nginx
 
 ## 📊 Deployment Statistics
 
-- **Total Time:** ~45 minutes
-- **Phases Completed:** 10/12 (83%)
-- **Services Running:** 3/4 (75%)
-- **Web Apps Deployed:** 1/2 (50%)
-- **TLS:** Pending DNS
+- **Total Time:** ~2 hours (including fixes and iterations)
+- **Phases Completed:** 12/12 (100%)
+- **Services Running:** 4/4 (100%)
+- **Web Apps Deployed:** 1/2 (50% - AbyssOS complete, Portal pending)
+- **TLS:** ✅ Configured for `demiurge.cloud`
 
 ---
 
