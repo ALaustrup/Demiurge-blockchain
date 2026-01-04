@@ -214,7 +214,7 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
           >
             <Card className="p-8">
               {step === 'username' ? (
-                <>
+                <div key="username-step">
                   <h2 className="text-3xl font-bold mb-6 text-abyss-cyan">Create AbyssID</h2>
                   
                   <form onSubmit={handleUsernameSubmit} className="space-y-4">
@@ -233,15 +233,17 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
                         className="w-full px-4 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded-lg text-white focus:outline-none focus:border-abyss-cyan focus:ring-2 focus:ring-abyss-cyan/50"
                         placeholder="Choose a username"
                       />
-                      {usernameStatus === 'checking' && (
-                        <div className="text-sm text-gray-400 mt-1">Checking...</div>
-                      )}
-                      {usernameStatus === 'available' && (
-                        <div className="text-sm text-green-400 mt-1">✓ Available</div>
-                      )}
-                      {usernameStatus === 'taken' && (
-                        <div className="text-sm text-red-400 mt-1">✗ Username taken</div>
-                      )}
+                      <div className="text-sm mt-1 min-h-[20px]">
+                        {usernameStatus === 'checking' && (
+                          <span className="text-gray-400">Checking...</span>
+                        )}
+                        {usernameStatus === 'available' && (
+                          <span className="text-green-400">✓ Available</span>
+                        )}
+                        {usernameStatus === 'taken' && (
+                          <span className="text-red-400">✗ Username taken</span>
+                        )}
+                      </div>
                     </div>
 
                     <Button
@@ -252,9 +254,9 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
                       Continue
                     </Button>
                   </form>
-                </>
+                </div>
               ) : (
-                <>
+                <div key="backup-step">
                   <h2 className="text-2xl font-bold mb-4 text-abyss-cyan">Back Up Your Secret</h2>
                   <p className="text-gray-300 mb-4 text-sm">
                     Save this code securely. You'll need it to access your AbyssID.
@@ -294,7 +296,7 @@ export function AbyssIDSignupModal({ isOpen, onClose, onSuccess }: AbyssIDSignup
                   >
                     Continue
                   </Button>
-                </>
+                </div>
               )}
 
               <button
