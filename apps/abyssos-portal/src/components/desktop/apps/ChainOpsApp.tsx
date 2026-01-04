@@ -74,55 +74,56 @@ export function ChainOpsApp() {
             </div>
           </div>
 
-        {isLoading && !chainInfo && (
-          <div className="text-gray-400">Loading chain info...</div>
-        )}
+          {isLoading && !chainInfo && (
+            <div className="text-gray-400">Loading chain info...</div>
+          )}
 
-        {error && (
-          <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4">
-            <div className="text-red-400 font-medium mb-1">Error</div>
-            <div className="text-sm text-red-300">{error}</div>
-          </div>
-        )}
-
-        {chainInfo && (
-          <>
-            <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-              <div className="text-sm text-gray-400 mb-1">Current Block Height</div>
-              <div className="text-3xl font-mono text-abyss-cyan">{chainInfo.height}</div>
+          {error && (
+            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4">
+              <div className="text-red-400 font-medium mb-1">Error</div>
+              <div className="text-sm text-red-300">{error}</div>
             </div>
-            
-            {chainInfo.block_hash && (
+          )}
+
+          {chainInfo && (
+            <>
               <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-                <div className="text-sm text-gray-400 mb-1">Latest Block Hash</div>
-                <div className="text-xs font-mono text-abyss-cyan break-all">{chainInfo.block_hash}</div>
+                <div className="text-sm text-gray-400 mb-1">Current Block Height</div>
+                <div className="text-3xl font-mono text-abyss-cyan">{chainInfo.height}</div>
               </div>
-            )}
-          </>
-        )}
+              
+              {chainInfo.block_hash && (
+                <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
+                  <div className="text-sm text-gray-400 mb-1">Latest Block Hash</div>
+                  <div className="text-xs font-mono text-abyss-cyan break-all">{chainInfo.block_hash}</div>
+                </div>
+              )}
+            </>
+          )}
 
-        <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-          <div className="text-sm text-gray-400 mb-1">RPC Endpoint</div>
-          <div className="text-xs font-mono text-gray-300 break-all">{rpcUrl}</div>
-          <div className="mt-2 text-xs text-gray-500">
-            {rpcStatus.state === 'connected' ? '✓ Endpoint responding' : '⚠ Endpoint not responding'}
-          </div>
-        </div>
-
-        {/* Network Metrics */}
-        <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-          <div className="text-sm text-gray-400 mb-3">Network Metrics</div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <div className="text-xs text-gray-500 mb-1">Connection State</div>
-              <div className="text-sm font-mono text-abyss-cyan capitalize">{rpcStatus.state}</div>
+          <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
+            <div className="text-sm text-gray-400 mb-1">RPC Endpoint</div>
+            <div className="text-xs font-mono text-gray-300 break-all">{rpcUrl}</div>
+            <div className="mt-2 text-xs text-gray-500">
+              {rpcStatus.state === 'connected' ? '✓ Endpoint responding' : '⚠ Endpoint not responding'}
             </div>
-            {rpcStatus.state === 'connected' && rpcStatus.height && (
+          </div>
+
+          {/* Network Metrics */}
+          <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
+            <div className="text-sm text-gray-400 mb-3">Network Metrics</div>
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <div className="text-xs text-gray-500 mb-1">Synced Height</div>
-                <div className="text-sm font-mono text-abyss-cyan">{rpcStatus.height}</div>
+                <div className="text-xs text-gray-500 mb-1">Connection State</div>
+                <div className="text-sm font-mono text-abyss-cyan capitalize">{rpcStatus.state}</div>
               </div>
-            )}
+              {rpcStatus.state === 'connected' && rpcStatus.height && (
+                <div>
+                  <div className="text-xs text-gray-500 mb-1">Synced Height</div>
+                  <div className="text-sm font-mono text-abyss-cyan">{rpcStatus.height}</div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
