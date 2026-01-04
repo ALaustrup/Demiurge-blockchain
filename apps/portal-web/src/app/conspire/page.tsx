@@ -59,15 +59,31 @@ export default function ConspirePage() {
     setError(null);
 
     try {
-      // TODO: Replace with actual ArchonAI backend endpoint
-      // For now, simulate a response
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Call ArchonAI service
+      const archonaiUrl = process.env.NEXT_PUBLIC_ARCHONAI_URL || 'http://localhost:8083';
+      
+      const apiResponse = await fetch(`${archonaiUrl}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userMessage.content,
+          context: messages.slice(-5).map(m => ({
+            role: m.role,
+            content: m.content,
+          })),
+        }),
+      });
 
-      // Simulated response - replace with actual API call
+      if (!apiResponse.ok) {
+        throw new Error(`ArchonAI service error: ${apiResponse.statusText}`);
+      }
+
+      const data = await apiResponse.json();
+      
       const response: Message = {
         id: `assistant-${Date.now()}`,
         role: "assistant",
-        content: `I understand you're asking about "${userMessage.content}". This is a placeholder response. The ArchonAI backend integration is pending. In production, this will connect to an LLM service that can assist with:\n\n- SDK integration and API usage\n- Documentation queries and code examples\n- Creation workflows for NFTs and worlds\n- Understanding Demiurge architecture\n\nWould you like to know more about any specific aspect of the Demiurge ecosystem?`,
+        content: data.response,
         timestamp: new Date(),
       };
 

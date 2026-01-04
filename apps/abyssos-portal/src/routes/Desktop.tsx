@@ -63,6 +63,9 @@ const appComponents: Record<string, React.ComponentType> = {
   vybSocial: VYBSocialApp,
   abyssWriter: AbyssWriterApp,
   abyssCalc: AbyssCalcApp,
+  onChainIDE: OnChainIDEApp,
+  appMarketplace: AppMarketplaceApp,
+  archonAI: ArchonAIAssistantApp,
 };
 
 export function Desktop() {

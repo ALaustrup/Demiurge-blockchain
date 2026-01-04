@@ -49,7 +49,7 @@ const CATEGORIES: Category[] = [
     id: 'development',
     label: 'Development',
     icon: '💻',
-    apps: ['abyssRuntime', 'abyssShell', 'systemMonitor'],
+    apps: ['onChainIDE', 'appMarketplace', 'archonAI', 'abyssRuntime', 'abyssShell', 'systemMonitor'],
   },
   {
     id: 'network',
