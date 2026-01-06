@@ -9,6 +9,7 @@ export * from './client';
 export * from './cgt';
 export * from './abyssid';
 export * from './activity';
+export * from './staking';
 export * from './nft';
 export * from './marketplace';
 export * from './types';

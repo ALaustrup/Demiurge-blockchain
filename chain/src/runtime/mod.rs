@@ -16,6 +16,7 @@ pub mod abyss_registry;
 pub mod abyssid_registry;
 pub mod activity_log;
 pub mod bank_cgt;
+pub mod cgt_staking;
 pub mod fabric_manager;
 pub mod nft_dgen;
 pub mod developer_registry;
@@ -51,6 +52,12 @@ pub use work_claim::{calculate_reward, WorkClaimModule, WorkClaimParams};
 pub use activity_log::{
     log_activity, get_activity, get_activities_for_address, get_activity_stats, get_recent_activities,
     ActivityEntry, ActivityLogModule, ActivityStats, ActivityType,
+};
+pub use cgt_staking::{
+    stake, request_unstake, complete_unstake, cancel_unstake, claim_rewards,
+    get_stake_info, get_total_staked, get_staking_stats, calculate_pending_rewards,
+    StakeInfo, StakingStats, CgtStakingModule,
+    MIN_STAKE_AMOUNT, UNSTAKE_LOCK_PERIOD, BASE_APY_BPS,
 };
 
 /// Trait that all runtime modules must implement.
@@ -114,7 +121,8 @@ impl Runtime {
             .with_module(Box::new(DevCapsulesModule::new()))
             .with_module(Box::new(RecursionRegistryModule::new()))
             .with_module(Box::new(WorkClaimModule::new()))
-            .with_module(Box::new(ActivityLogModule::new()));
+            .with_module(Box::new(ActivityLogModule::new()))
+            .with_module(Box::new(CgtStakingModule::new()));
         
         // PHASE OMEGA: Verify integrity in debug builds
         // In debug builds, fail fast if integrity check fails
@@ -170,7 +178,7 @@ mod tests {
     #[test]
     fn test_runtime_with_default_modules() {
         let runtime = Runtime::with_default_modules();
-        assert_eq!(runtime.modules.len(), 10);
+        assert_eq!(runtime.modules.len(), 11);
     }
 
     #[test]

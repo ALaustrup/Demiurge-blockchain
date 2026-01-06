@@ -39,6 +39,9 @@ use crate::runtime::activity_log::{
     get_activity, get_activities_for_address, get_activity_stats, get_recent_activities,
     ActivityType,
 };
+use crate::runtime::cgt_staking::{
+    get_stake_info, get_total_staked, get_staking_stats, calculate_pending_rewards,
+};
 
 /// JSON-RPC request envelope.
 #[derive(Debug, Deserialize)]
@@ -3428,6 +3431,118 @@ async fn handle_rpc(
                     })
                 }
             }
+        }
+
+        // ============================================
+        // CGT Staking RPC Methods
+        // ============================================
+        
+        "staking_getInfo" => {
+            #[derive(Deserialize)]
+            struct Params {
+                address: String,
+            }
+            
+            let params: Params = match req.params.as_ref() {
+                Some(p) => match serde_json::from_value(p.clone()) {
+                    Ok(parsed) => parsed,
+                    Err(e) => {
+                        return Json(JsonRpcResponse {
+                            jsonrpc: "2.0".to_string(),
+                            result: None,
+                            error: Some(JsonRpcError {
+                                code: -32602,
+                                message: format!("Invalid params: {}", e),
+                            }),
+                            id,
+                        });
+                    }
+                },
+                None => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: "Missing params".to_string(),
+                        }),
+                        id,
+                    });
+                }
+            };
+            
+            let address: Address = match hex::decode(params.address.strip_prefix("0x").unwrap_or(&params.address)) {
+                Ok(bytes) if bytes.len() == 32 => {
+                    let mut addr = [0u8; 32];
+                    addr.copy_from_slice(&bytes);
+                    addr
+                }
+                _ => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: "Invalid address format".to_string(),
+                        }),
+                        id,
+                    });
+                }
+            };
+            
+            let current_time = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_secs())
+                .unwrap_or(0);
+            
+            let stake_info = node.with_state(|state| get_stake_info(state, &address));
+            let pending_rewards = calculate_pending_rewards(&stake_info, current_time);
+            
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "amount": stake_info.amount.to_string(),
+                    "stake_timestamp": stake_info.stake_timestamp,
+                    "pending_rewards": pending_rewards.to_string(),
+                    "last_reward_calculation": stake_info.last_reward_calculation,
+                    "unstake_requested_at": stake_info.unstake_requested_at,
+                    "unstake_amount": stake_info.unstake_amount.to_string(),
+                    "has_pending_unstake": stake_info.unstake_requested_at > 0,
+                })),
+                error: None,
+                id,
+            })
+        }
+        
+        "staking_getStats" => {
+            let stats = node.with_state(|state| get_staking_stats(state));
+            
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "total_staked": stats.total_staked.to_string(),
+                    "apy_bps": stats.apy_bps,
+                    "apy_percent": stats.apy_bps as f64 / 100.0,
+                    "min_stake": stats.min_stake.to_string(),
+                    "lock_period_secs": stats.lock_period_secs,
+                    "lock_period_days": stats.lock_period_secs / (24 * 60 * 60),
+                })),
+                error: None,
+                id,
+            })
+        }
+        
+        "staking_getTotalStaked" => {
+            let total = node.with_state(|state| get_total_staked(state));
+            
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "total_staked": total.to_string(),
+                })),
+                error: None,
+                id,
+            })
         }
 
         _ => Json(JsonRpcResponse {
