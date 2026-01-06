@@ -27,7 +27,11 @@ export type AppId =
   | 'documentEditor'
   | 'vybSocial'
   | 'abyssWriter'
-  | 'abyssCalc';
+  | 'abyssCalc'
+  | 'craft'
+  | 'appMarketplace'
+  | 'archonAI'
+  | 'miningAccounting';
 
 export interface Window {
   id: string;
@@ -75,6 +79,9 @@ export const APP_INFOS: AppInfo[] = [
   { id: 'vybSocial', label: 'VYB Social', icon: '💬' },
   { id: 'abyssWriter', label: 'Abyss Writer', icon: '📝' },
   { id: 'abyssCalc', label: 'Abyss Calc', icon: '🧮' },
+  { id: 'onChainIDE', label: 'On-Chain IDE', icon: '💻' },
+  { id: 'appMarketplace', label: 'App Marketplace', icon: '🛒' },
+  { id: 'archonAI', label: 'ArchonAI', icon: '🤖' },
 ];
 
 interface DesktopState {
@@ -120,6 +127,10 @@ const appTitles: Record<AppId, string> = {
   vybSocial: 'VYB Social',
   abyssWriter: 'Abyss Writer',
   abyssCalc: 'Abyss Calc',
+  craft: 'CRAFT',
+  appMarketplace: 'App Marketplace',
+  archonAI: 'ArchonAI Assistant',
+  miningAccounting: 'Mining Accounting',
 };
 
 // Default launcher order

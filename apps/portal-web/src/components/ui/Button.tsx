@@ -34,9 +34,9 @@ export function Button({
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       className={`${baseStyles} ${variants[variant]} ${className}`}
-      {...props}
+      {...(props as any)}
     >
-      {children}
+      {children as any}
     </motion.button>
   );
 }

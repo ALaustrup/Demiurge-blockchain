@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useRef } from "react";
-import { ArchonProposal, ArchonContext, ArchonProposalStatus } from "./archonTypes";
+import type { ArchonProposal, ArchonContext, ArchonProposalStatus } from "./archonTypes";
 import { graphqlRequest } from "@/lib/graphql";
 import { useAbyssID } from "@/lib/fracture/identity/AbyssIDContext";
 

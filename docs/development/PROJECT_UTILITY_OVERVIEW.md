@@ -68,7 +68,7 @@
 ### 3. **Token Economy (CGT)**
 - **Name**: Creator God Token
 - **Symbol**: CGT
-- **Max Supply**: 1,000,000,000 CGT (1 billion)
+- **Max Supply**: 369,000,000,000 CGT (369 billion)
 - **Decimals**: 8 (precise to 10^-8)
 - **Uses**:
   - Gas/fees for transactions

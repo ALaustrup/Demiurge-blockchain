@@ -88,7 +88,7 @@ export const walletBalanceCommand: CommandHandler = {
       
       return {
         success: true,
-        output: `CGT Balance: ${balance.toFixed(4)} CGT\nAddress: ${publicKey.slice(0, 16)}...`,
+        output: `CGT Balance: ${typeof balance === 'number' ? balance.toFixed(8) : String(balance)} CGT\nAddress: ${publicKey.slice(0, 16)}...`,
       };
     } catch (error: any) {
       return {

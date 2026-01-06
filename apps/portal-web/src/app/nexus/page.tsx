@@ -1068,7 +1068,8 @@ export default function NexusPage() {
                       to: e.to, 
                       strength: e.strength,
                       active: e.active,
-                      latency: e.latency
+                      latency: e.latency,
+                      bandwidth: e.bandwidth ?? 10
                     })) : genesisContext?.fabricState?.edges}
                   />
                 </div>

@@ -5,14 +5,21 @@ import { useEffect, useState, useCallback } from 'react';
  */
 function getRpcUrl(): string {
   if (typeof window === 'undefined') {
-    return 'https://rpc.demiurge.cloud/rpc';
+    return 'https://rpc.demiurge.cloud';
   }
   
-  return (
-    import.meta.env.VITE_DEMIURGE_RPC_URL ||
-    (window as any).ABYSS_RPC_URL ||
-    'https://rpc.demiurge.cloud/rpc'
-  );
+  // Try environment variable first, then window global, then default
+  const envUrl = import.meta.env.VITE_DEMIURGE_RPC_URL;
+  const windowUrl = (window as any).ABYSS_RPC_URL;
+  const defaultUrl = 'https://rpc.demiurge.cloud';
+  
+  const baseUrl = envUrl || windowUrl || defaultUrl;
+  
+  // Ensure URL doesn't end with /rpc (we'll add it)
+  const cleanUrl = baseUrl.replace(/\/rpc$/, '');
+  
+  // Return with /rpc endpoint
+  return `${cleanUrl}/rpc`;
 }
 
 export type ChainStatus =

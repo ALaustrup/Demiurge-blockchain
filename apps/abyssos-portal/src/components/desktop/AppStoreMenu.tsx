@@ -49,7 +49,7 @@ const CATEGORIES: Category[] = [
     id: 'development',
     label: 'Development',
     icon: '💻',
-    apps: ['abyssRuntime', 'abyssShell', 'systemMonitor'],
+    apps: ['craft', 'appMarketplace', 'archonAI', 'miningAccounting', 'abyssRuntime', 'abyssShell', 'systemMonitor'],
   },
   {
     id: 'network',
@@ -124,9 +124,13 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
             onClick={onClose}
           />
 
-          {/* Menu Container - Ancient/Futuristic Cyber Design */}
+          {/* Menu Container - Attached to taskbar, full width */}
           <motion.div
-            className="fixed top-12 left-1/2 transform -translate-x-1/2 w-[95vw] max-w-6xl h-[80vh] max-h-[700px] z-50 flex overflow-hidden"
+            className="fixed top-8 left-0 right-0 w-full h-[calc(100vh-2rem)] max-h-[calc(100vh-2rem)] z-50 flex flex-col sm:flex-row overflow-hidden"
+            style={{
+              margin: '0',
+              maxWidth: '100vw',
+            }}
             style={{
               background: `
                 linear-gradient(135deg,
@@ -143,14 +147,14 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
                 inset 0 0 40px rgba(0, 0, 0, 0.5)
               `,
             }}
-            initial={{ y: '-100%', opacity: 0, scale: 0.9 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            exit={{ y: '-100%', opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           >
-            {/* Left Sidebar - Nano Profile */}
+            {/* Left Sidebar - Nano Profile (hidden on mobile, shown on larger screens) */}
             <div
-              className="w-80 border-r border-abyss-cyan/20 flex flex-col"
+              className="hidden sm:flex w-64 sm:w-80 border-r border-abyss-cyan/20 flex flex-col"
               style={{
                 background: `
                   linear-gradient(180deg,
@@ -230,7 +234,7 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
                   >
                     <div className="text-xs text-gray-400 mb-2">CGT Balance</div>
                     <div className="text-2xl font-mono font-bold text-abyss-cyan">
-                      {balance.toFixed(4)}
+                      {typeof balance === 'number' ? balance.toFixed(8) : String(balance)}
                       <span className="text-sm text-gray-400 ml-1">CGT</span>
                     </div>
                   </div>
@@ -315,15 +319,15 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
 
               {/* Content */}
               <div className="flex-1 flex min-h-0">
-                {/* Category Tabs */}
-                <div className="w-48 border-r border-abyss-cyan/20 bg-abyss-dark/30 overflow-y-auto">
+                {/* Category Tabs - Responsive: horizontal on mobile, vertical on desktop */}
+                <div className="w-full sm:w-48 sm:border-r border-b sm:border-b-0 border-abyss-cyan/20 bg-abyss-dark/30 overflow-x-auto sm:overflow-y-auto flex sm:flex-col">
                   {CATEGORIES.map((category) => (
                     <button
                       key={category.id}
                       onClick={() => setActiveCategory(category.id)}
-                      className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-all ${
+                      className={`flex-shrink-0 sm:w-full px-3 sm:px-4 py-2 sm:py-3 text-left flex items-center gap-2 sm:gap-3 transition-all ${
                         activeCategory === category.id
-                          ? 'bg-abyss-cyan/20 text-abyss-cyan border-l-2 border-abyss-cyan'
+                          ? 'bg-abyss-cyan/20 text-abyss-cyan border-l-2 sm:border-l-2 border-b-2 sm:border-b-0 border-abyss-cyan'
                           : 'text-gray-300 hover:bg-abyss-cyan/10 hover:text-abyss-cyan'
                       }`}
                       style={{
@@ -332,8 +336,8 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
                           : undefined,
                       }}
                     >
-                      <span className="text-xl">{category.icon}</span>
-                      <span className="font-medium">{category.label}</span>
+                      <span className="text-lg sm:text-xl">{category.icon}</span>
+                      <span className="font-medium text-xs sm:text-sm">{category.label}</span>
                       <span className="ml-auto text-xs text-gray-500">
                         {category.apps.length}
                       </span>
@@ -341,8 +345,8 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
                   ))}
                 </div>
 
-                {/* App Grid */}
-                <div className="flex-1 p-6 overflow-y-auto">
+                {/* App Grid - Responsive sizing */}
+                <div className="flex-1 p-3 sm:p-6 overflow-y-auto">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={activeCategory}
@@ -350,44 +354,32 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -20 }}
                       transition={{ duration: 0.2 }}
-                      className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4"
+                      className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4"
                     >
                       {activeCategoryData.apps.map((appId) => {
                         const appInfo = APP_INFOS.find((a) => a.id === appId);
                         if (!appInfo) return null;
 
                         return (
-                          <motion.button
+                          <button
                             key={appId}
                             onClick={() => handleAppClick(appId)}
-                            className="flex flex-col items-center gap-2 p-4 rounded-lg border border-abyss-cyan/10 hover:border-abyss-cyan/40 transition-all group relative overflow-hidden"
-                            style={{
-                              background: `
-                                linear-gradient(135deg,
-                                  rgba(0, 0, 0, 0.4) 0%,
-                                  rgba(10, 5, 30, 0.3) 100%
-                                )
-                              `,
-                            }}
-                            whileHover={{ scale: 1.05, y: -2 }}
-                            whileTap={{ scale: 0.95 }}
+                            className="flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-4 rounded-lg border border-abyss-cyan/20 bg-black/40 hover:border-abyss-cyan/60 hover:bg-abyss-cyan/10 hover:shadow-[0_0_15px_rgba(0,255,255,0.3)] transition-all group relative overflow-hidden"
                           >
-                            {/* Hover glow */}
-                            <motion.div
-                              className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100"
+                            {/* Subtle hover glow */}
+                            <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                               style={{
-                                background: 'radial-gradient(circle, rgba(0, 255, 255, 0.1), transparent)',
+                                background: 'radial-gradient(circle, rgba(0, 255, 255, 0.15), transparent)',
                               }}
-                              transition={{ duration: 0.2 }}
                             />
 
-                            <div className="text-4xl group-hover:scale-110 transition-transform relative z-10">
+                            <div className="text-2xl sm:text-3xl md:text-4xl relative z-10">
                               {appInfo.icon}
                             </div>
-                            <span className="text-xs text-gray-300 group-hover:text-abyss-cyan text-center font-medium relative z-10">
+                            <span className="text-[10px] sm:text-xs text-gray-300 group-hover:text-abyss-cyan text-center font-medium relative z-10 leading-tight transition-colors">
                               {appInfo.label}
                             </span>
-                          </motion.button>
+                          </button>
                         );
                       })}
                     </motion.div>

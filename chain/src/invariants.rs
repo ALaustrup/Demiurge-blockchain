@@ -28,7 +28,15 @@ impl ChainInvariants {
     }
 
     /// Verify block height is always increasing
+    /// 
+    /// Note: Genesis state (height 0) is allowed where current == previous == 0
     pub fn verify_height_invariant(current_height: u64, previous_height: u64) -> Result<(), String> {
+        // Allow genesis state: both heights can be 0
+        if current_height == 0 && previous_height == 0 {
+            return Ok(());
+        }
+        
+        // After genesis, height must always increase
         if current_height <= previous_height {
             return Err(format!(
                 "Height invariant violated: current {} <= previous {}",

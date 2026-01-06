@@ -5,7 +5,7 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { getArchonState, triggerAscensionEvent, getDirectives, getDiagnostics, getA0Directive } from '../services/archonState';
+import { getArchonState, triggerAscensionEvent, getDirectives, getDiagnostics, getA0Directive } from '../services/archonState.js';
 
 const router: Router = Router();
 

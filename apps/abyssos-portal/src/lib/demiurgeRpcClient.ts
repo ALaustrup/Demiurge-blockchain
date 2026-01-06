@@ -16,7 +16,10 @@ export class DemiurgeRPC {
   private rpcUrl: string;
 
   constructor(rpcUrl?: string) {
-    this.rpcUrl = rpcUrl || import.meta.env.VITE_DEMIURGE_RPC_URL || 'https://rpc.demiurge.cloud/rpc';
+    const envUrl = rpcUrl || import.meta.env.VITE_DEMIURGE_RPC_URL || 'https://rpc.demiurge.cloud';
+    // Ensure URL ends with /rpc
+    const cleanUrl = envUrl.replace(/\/rpc$/, '');
+    this.rpcUrl = `${cleanUrl}/rpc`;
   }
 
   async request<T = any>(method: string, params: any[] = []): Promise<T> {
@@ -61,6 +64,26 @@ export class DemiurgeRPC {
       console.error('Failed to get chain info:', error);
       // Return default on error to prevent UI crashes
       return { height: 0 };
+    }
+  }
+
+  async submitWorkClaim(params: {
+    address: string;
+    game_id: string;
+    session_id: string;
+    depth_metric: number;
+    active_ms: number;
+    extra?: string | null;
+  }): Promise<{ tx_hash: string; reward_estimate: string }> {
+    try {
+      const result = await this.request<{ tx_hash: string; reward_estimate: string }>(
+        'submitWorkClaim',
+        [params]
+      );
+      return result;
+    } catch (error) {
+      console.error('Failed to submit work claim:', error);
+      throw error;
     }
   }
 }

@@ -1,0 +1,12 @@
+[chain]
+chain_id = 77701
+name = "Demiurge Devnet"
+
+[node]
+rpc_host = "127.0.0.1"
+rpc_port = 8545
+db_path = "/opt/demiurge/chain/data"
+p2p_listen = "127.0.0.1:30333"
+
+[genesis]
+genesis_config = "genesis.devnet.toml"

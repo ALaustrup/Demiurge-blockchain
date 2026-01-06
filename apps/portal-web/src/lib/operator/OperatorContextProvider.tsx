@@ -34,8 +34,14 @@ export function OperatorContextProvider({ children }: { children: ReactNode }) {
         }
       `;
       try {
-        const data = await graphqlRequest<{ operator: any }>(query, { id: userId });
-        if (data.operator) {
+        // Suppress error logging for operator query - it's expected to fail if operator doesn't exist
+        const data = await graphqlRequest<{ operator: any }>(
+          query, 
+          { id: userId },
+          undefined,
+          { suppressErrors: true }
+        );
+        if (data && data.operator) {
           setOperator({
             id: data.operator.id,
             displayName: data.operator.displayName,
@@ -44,17 +50,24 @@ export function OperatorContextProvider({ children }: { children: ReactNode }) {
           setLoading(false);
           return;
         }
-      } catch (error) {
-        // Backend operator not found, fall back to config
-        console.warn("Operator not found in backend, using config:", error);
+        // Operator not found (null response) - fall through to config
+      } catch (error: any) {
+        // Backend operator query not available, operator not found, or GraphQL error
+        // This is expected if the GraphQL schema doesn't have the operator query or operator doesn't exist
+        // Silently fall back without logging as an error unless it's a connection issue
+        const errorMsg = error?.message || String(error);
+        if (errorMsg.includes("fetch") || errorMsg.includes("Connection failed") || errorMsg.includes("Failed to fetch")) {
+          console.warn("Cannot connect to GraphQL gateway, using config operator");
+        }
+        // All other errors are silently handled - no logging needed
       }
 
       // Fall back to config-based operator
       const configOperator = getCurrentOperator();
       setOperator(configOperator);
-    } catch (error) {
-      console.error("Failed to load operator:", error);
-      // Fall back to config
+    } catch (error: any) {
+      // Final fallback - use config-based operator
+      console.warn("Failed to load operator, using config fallback:", error.message);
       const configOperator = getCurrentOperator();
       setOperator(configOperator);
     } finally {

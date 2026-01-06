@@ -302,7 +302,8 @@ sudo tar -czf demiurge-backup-$(date +%Y%m%d).tar.gz /opt/demiurge/.demiurge
 ├── data/                   # Data directories
 ├── logs/                   # Log files
 ├── chain/                  # Chain source code
-├── runtime/                # Runtime modules
+├── other/                  # Legacy code and experimental features
+│   └── legacy-runtime-stubs/ # Legacy placeholder runtime crates
 ├── apps/                   # Applications
 ├── sdk/                    # SDKs
 ├── indexer/                # Indexer

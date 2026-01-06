@@ -18,7 +18,7 @@ use crate::core::transaction::{Address, Transaction};
 pub const CGT_NAME: &str = "Creator God Token";
 pub const CGT_SYMBOL: &str = "CGT";
 pub const CGT_DECIMALS: u8 = 8;
-pub const CGT_MAX_SUPPLY: u128 = 1_000_000_000u128 * 100_000_000u128; // 1B * 10^8
+pub const CGT_MAX_SUPPLY: u128 = 369_000_000_000u128 * 100_000_000u128; // 369B * 10^8
 
 const PREFIX_BALANCE: &[u8] = b"bank:balance:";
 const PREFIX_NONCE: &[u8] = b"bank:nonce:";

@@ -22,11 +22,13 @@ export function AbyssIDDialog({ open, onClose }: AbyssIDDialogProps) {
     state,
     context,
     setUsername,
+    setSeedPhrase,
     startChecking,
     triggerReject,
     triggerAccept,
     startBinding,
     confirmAndProceed,
+    verifyLogin,
   } = useAbyssStateMachine();
 
   // Get audio engine for background ambience
@@ -203,8 +205,8 @@ export function AbyssIDDialog({ open, onClose }: AbyssIDDialogProps) {
             </motion.div>
           )}
 
-          {/* REJECT STATE */}
-          {state === "reject" && (
+          {/* REJECT STATE - Only for actual errors, not existing users */}
+          {state === "reject" && !context.isExistingUser && (
             <motion.div
               initial={{ opacity: 0, x: -10 }}
               animate={{ 
@@ -235,6 +237,114 @@ export function AbyssIDDialog({ open, onClose }: AbyssIDDialogProps) {
               >
                 Try Again
               </button>
+            </motion.div>
+          )}
+
+          {/* LOGIN STATE - Username exists, need seed phrase */}
+          {state === "login" && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6 relative z-10"
+            >
+              <div className="space-y-2">
+                <p className="text-lg font-semibold text-cyan-400">
+                  The Abyss remembers this name.
+                </p>
+                <p className="text-zinc-300">
+                  Prove your claim with the words you were given.
+                </p>
+                {context.error && (
+                  <p className="text-sm text-red-400 mt-2">{context.error}</p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={context.username}
+                  disabled
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-zinc-300 opacity-75 cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-300 mb-2">
+                  Security Words (Seed Phrase)
+                </label>
+                <textarea
+                  value={context.seedPhrase || ""}
+                  onChange={(e) => setSeedPhrase(e.target.value)}
+                  placeholder="Enter your 8 security words separated by spaces…"
+                  rows={3}
+                  className="w-full px-4 py-3 bg-white/5 border border-cyan-500/30 rounded-lg text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all font-mono text-sm resize-none"
+                  autoFocus
+                />
+                <p className="text-xs text-zinc-500 mt-1">
+                  Enter the security words you saved when you created this identity.
+                </p>
+              </div>
+              <button
+                onClick={verifyLogin}
+                disabled={!context.seedPhrase?.trim()}
+                className="w-full px-6 py-3 bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-white font-semibold rounded-lg hover:from-cyan-400 hover:to-fuchsia-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
+              >
+                Verify & Enter
+              </button>
+              <button
+                onClick={() => {
+                  setUsername("");
+                  setSeedPhrase("");
+                }}
+                className="w-full px-4 py-2 text-sm text-zinc-400 hover:text-zinc-200 transition-colors"
+              >
+                Use a different username
+              </button>
+            </motion.div>
+          )}
+
+          {/* VERIFYING STATE - Verifying seed phrase */}
+          {state === "verifying" && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="space-y-6 text-center relative z-10"
+            >
+              <div className="py-8">
+                <motion.div
+                  animate={{
+                    opacity: [0.5, 1, 0.5],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className="text-lg text-zinc-300"
+                >
+                  The Abyss verifies your claim…
+                </motion.div>
+                <div className="mt-4 flex justify-center gap-2">
+                  {[0, 1, 2].map((i) => (
+                    <motion.div
+                      key={i}
+                      className="w-2 h-2 bg-cyan-400 rounded-full"
+                      animate={{
+                        scale: [1, 1.5, 1],
+                        opacity: [0.5, 1, 0.5],
+                      }}
+                      transition={{
+                        duration: 1,
+                        repeat: Infinity,
+                        delay: i * 0.2,
+                        ease: "easeInOut",
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
             </motion.div>
           )}
 

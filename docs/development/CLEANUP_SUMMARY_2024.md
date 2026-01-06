@@ -1,6 +1,6 @@
 # Repository Cleanup Summary - December 2024
 
-**Date:** December 2024  
+**Date:** January 5, 2026  
 **Status:** ✅ Complete
 
 ## Summary
@@ -31,7 +31,8 @@ All unnecessary and outdated files/folders have been removed from the repository
 
 ### Core Blockchain:
 - ✅ `chain/` - Rust L1 blockchain node
-- ✅ `runtime/` - Runtime modules (bank_cgt, nft_dgen, abyss_registry, etc.)
+- ✅ `chain/src/runtime/` - Runtime modules (bank_cgt, urgeid_registry, nft_dgen, etc.)
+- ✅ `other/legacy-runtime-stubs/` - Legacy placeholder crates (superseded)
 - ✅ `cli/` - Command-line interface
 - ✅ `sdk/` - TypeScript & Rust SDKs
 - ✅ `indexer/` - Block ingestor and GraphQL gateway
@@ -75,13 +76,13 @@ DEMIURGE/
 - ✅ **Reduced repository size** - Removed ~28 template files and obsolete code
 - ✅ **Cleaner structure** - Only essential components remain
 - ✅ **No functionality lost** - All removed items were not required for blockchain operation
-- ✅ **Maintained integrations** - Kept engine/recursion/ due to runtime module integration
+- ✅ **Maintained integrations** - Kept engine/recursion/ due to runtime module integration in `chain/src/runtime/recursion_registry.rs`
 
 ## Verification
 
 All essential components verified:
 - ✅ Blockchain node (`chain/`) - Functional
-- ✅ Runtime modules (`runtime/`) - All modules present
+- ✅ Runtime modules (`chain/src/runtime/`) - All modules present and functional
 - ✅ CLI tool (`cli/`) - Available
 - ✅ SDKs (`sdk/`) - TypeScript and Rust SDKs present
 - ✅ Indexer (`indexer/`) - Block ingestor and GraphQL gateway

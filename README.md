@@ -73,7 +73,7 @@ Other tokens (e.g., ETH, USDC) can exist later via bridges/swap modules, but the
 DEMIURGE/
 ├── docs/                    # Documentation
 ├── chain/                   # Rust L1 node (Archon node), Forge PoW, RPC
-├── runtime/                 # Rust runtime modules
+│   └── src/runtime/         # Runtime modules (bank_cgt, urgeid_registry, etc.)
 ├── indexer/                 # Block ingestor + GraphQL gateway
 ├── sdk/                     # TypeScript & Rust SDKs
 ├── apps/
@@ -81,7 +81,9 @@ DEMIURGE/
 │   ├── abyssos-portal/      # AbyssOS - Full-screen desktop environment
 │   └── desktop-qt/          # Qt 6.10 Pantheon Console
 ├── deploy/                  # Deployment scripts and configs
-└── infra/                   # Docker, k8s, devcontainer configs
+├── other/                   # Legacy code and experimental features
+│   └── legacy-runtime-stubs/ # Legacy placeholder runtime crates (superseded)
+└── docker/                  # Docker configurations
 ```
 
 ## Documentation

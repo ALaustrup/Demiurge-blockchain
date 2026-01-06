@@ -190,7 +190,7 @@ export function AbyssWalletApp() {
       <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-6 backdrop-blur-sm">
         <div className="text-sm text-gray-400 mb-2">CGT Balance</div>
         <div className="text-4xl font-mono text-abyss-cyan mb-2">
-          {isLoadingBalance ? '...' : balance.toFixed(4)}
+          {isLoadingBalance ? '...' : (typeof balance === 'number' ? balance.toFixed(8) : String(balance))}
           <span className="text-lg text-gray-400 ml-2">CGT</span>
         </div>
         <div className="text-xs text-gray-500">

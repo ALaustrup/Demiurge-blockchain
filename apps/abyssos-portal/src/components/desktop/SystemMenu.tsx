@@ -137,12 +137,10 @@ export function SystemMenu({ isOpen, onClose }: SystemMenuProps) {
                       if (!appInfo) return null;
 
                       return (
-                        <motion.button
+                        <button
                           key={appId}
                           onClick={() => handleAppClick(appId)}
-                          className="flex flex-col items-center gap-2 p-4 rounded-lg bg-abyss-dark/50 hover:bg-abyss-cyan/20 border border-abyss-cyan/10 hover:border-abyss-cyan/30 transition-all group"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
+                          className="flex flex-col items-center gap-2 p-4 rounded-lg bg-abyss-dark/40 border border-abyss-cyan/20 hover:bg-abyss-cyan/10 hover:border-abyss-cyan/50 hover:shadow-[0_0_12px_rgba(0,255,255,0.3)] transition-all group"
                         >
                           <div className="text-4xl group-hover:scale-110 transition-transform">
                             {appInfo.icon}

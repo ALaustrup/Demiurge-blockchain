@@ -11,10 +11,13 @@ import { sendRawTransaction } from '../rpc.js';
 import { bytesToHex } from '../tx/utils.js';
 
 export interface ChainUser {
-  id: number;
-  username: string;
-  public_key: string; // Identity public key
+  id?: number;
+  username?: string;
+  public_key: string; // Identity public key (required)
 }
+
+// Type helper for partial ChainUser (only public_key required)
+export type ChainUserMinimal = Pick<ChainUser, 'public_key'> & Partial<Pick<ChainUser, 'id' | 'username'>>;
 
 export interface MintResult {
   txHash: string;
@@ -30,7 +33,7 @@ export interface MintResult {
  * @returns Transaction hash and asset ID
  */
 export async function mintDrc369OnChain(
-  user: ChainUser,
+  user: ChainUserMinimal,
   asset: DRC369MintAsset
 ): Promise<MintResult> {
   // Derive the user's Demiurge chain private key

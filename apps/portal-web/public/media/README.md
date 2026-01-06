@@ -1,18 +1,26 @@
-# Fracture Background Media
+# Media Files
 
-This directory should contain the video background files for Fracture v1:
+## Video Background
 
-- `fracture-bg.webm` - WebM format video background
-- `fracture-bg.mp4` - MP4 format video background (fallback)
-- `fracture-bg-poster.jpg` - Poster image for video loading state
+To use a custom video background for the site:
 
-## TODO: Milestone 4.1
+1. Place your `.mp4` file in this directory (`apps/portal-web/public/media/`)
+2. Name it `background.mp4`
+3. The video will automatically play on loop as the site background
 
-Add actual video assets here. The videos should be:
-- Full-screen background suitable for dark UI
-- Looping seamlessly
-- Optimized for web (compressed)
-- Abstract/fractal/tech aesthetic matching the Fracture theme
+The video should be:
+- MP4 format (H.264 codec recommended for best compatibility)
+- Optimized for web (reasonable file size)
+- Suitable for looping (seamless start/end)
 
-For now, the FractureShell component will gracefully fall back to a gradient background if videos are not found.
+The video background is configured in `apps/portal-web/src/components/fracture/FractureShell.tsx` and will:
+- Auto-play on page load
+- Loop continuously
+- Be muted (required for autoplay)
+- Cover the full viewport
+- Fall back to gradient if video fails to load
 
+## Other Media Files
+
+- `fracture-bg.mp4` / `fracture-bg.webm` - Alternative background videos (fallback)
+- `fracture-bg-poster.jpg` - Poster image shown before video loads

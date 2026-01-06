@@ -1611,8 +1611,9 @@ export const resolvers = {
     return JSON.stringify(session, null, 2);
   },
   // Milestone 7: Operator resolvers
-  async getOperator(args: { id: string }, context: ChatContext): Promise<any> {
-    return getOperatorById(args.id);
+  async getOperator(args: { id: string }, context: ChatContext): Promise<any | null> {
+    const operator = getOperatorById(args.id);
+    return operator || null; // Explicitly return null if not found
   },
   async listOperators(args: {}, context: ChatContext): Promise<any[]> {
     return listOperators();

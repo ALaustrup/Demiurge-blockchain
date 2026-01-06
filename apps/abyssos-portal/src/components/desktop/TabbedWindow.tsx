@@ -91,7 +91,7 @@ export function TabbedWindow({ tabs, onTabsChange, defaultTab, className = '' }:
           const isLast = index === tabsState.length - 1;
 
           return (
-            <motion.button
+            <button
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
               className="relative flex items-center gap-2 px-4 py-2 rounded-t-lg border border-b-0 transition-all group"
@@ -184,15 +184,13 @@ export function TabbedWindow({ tabs, onTabsChange, defaultTab, className = '' }:
         })}
 
         {/* Add Tab Button */}
-        <motion.button
+        <button
           onClick={handleAddTab}
-          className="w-8 h-8 rounded-t-lg border border-abyss-cyan/20 hover:border-abyss-cyan/40 bg-abyss-dark/50 hover:bg-abyss-cyan/10 text-abyss-cyan flex items-center justify-center text-lg transition-all mb-0.5"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          className="w-8 h-8 rounded-t-lg border border-abyss-cyan/20 hover:border-abyss-cyan/50 hover:bg-abyss-cyan/10 hover:shadow-[0_0_8px_rgba(0,255,255,0.3)] text-abyss-cyan flex items-center justify-center text-lg transition-all mb-0.5 bg-abyss-dark/50"
           title="Add new tab"
         >
           +
-        </motion.button>
+        </button>
       </div>
 
       {/* Tab Content */}

@@ -128,7 +128,11 @@ export const useWalletStore = create<WalletState>()(
           
           const json = await response.json();
           if (json.result !== undefined) {
-            get().setBalance(Number(json.result) || 0);
+            // RPC returns balance as string (to avoid JS number overflow)
+            // Convert from smallest units (10^-8) to CGT
+            const balanceInSmallestUnits = BigInt(String(json.result));
+            const balanceInCGT = Number(balanceInSmallestUnits) / 100_000_000;
+            get().setBalance(balanceInCGT);
           }
         } catch (error) {
           console.error('Failed to refresh balance:', error);

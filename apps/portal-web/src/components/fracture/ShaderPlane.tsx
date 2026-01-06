@@ -174,19 +174,20 @@ export function ShaderPlane({ state, className = "", reactive, ritualEffects }: 
       return;
     }
 
-    glRef.current = gl;
+    const webglContext = gl as WebGLRenderingContext;
+    glRef.current = webglContext;
 
     // Set canvas size
     const resize = () => {
       canvas.width = canvas.offsetWidth * window.devicePixelRatio;
       canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-      gl.viewport(0, 0, canvas.width, canvas.height);
+      webglContext.viewport(0, 0, canvas.width, canvas.height);
     };
     resize();
     window.addEventListener("resize", resize);
 
     // Create shader program
-    const program = createProgram(gl);
+    const program = createProgram(webglContext);
     if (!program) {
       setWebglSupported(false);
       return;
@@ -194,27 +195,27 @@ export function ShaderPlane({ state, className = "", reactive, ritualEffects }: 
     programRef.current = program;
 
     // Set up geometry (full-screen quad)
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+    const positionBuffer = webglContext.createBuffer();
+    webglContext.bindBuffer(webglContext.ARRAY_BUFFER, positionBuffer);
+    webglContext.bufferData(webglContext.ARRAY_BUFFER, new Float32Array([
       -1, -1,
        1, -1,
       -1,  1,
        1,  1,
-    ]), gl.STATIC_DRAW);
+    ]), webglContext.STATIC_DRAW);
 
     // Get attribute and uniform locations
-    const positionLocation = gl.getAttribLocation(program, "a_position");
-    const timeLocation = gl.getUniformLocation(program, "u_time");
-    const resolutionLocation = gl.getUniformLocation(program, "u_resolution");
-    const turbulenceLocation = gl.getUniformLocation(program, "u_turbulence");
-    const chromaShiftLocation = gl.getUniformLocation(program, "u_chromaShift");
-    const glitchLocation = gl.getUniformLocation(program, "u_glitch");
-    const bloomLocation = gl.getUniformLocation(program, "u_bloom");
-    const vignetteLocation = gl.getUniformLocation(program, "u_vignette");
-    const lowFreqLocation = gl.getUniformLocation(program, "u_lowFreq");
-    const midFreqLocation = gl.getUniformLocation(program, "u_midFreq");
-    const highFreqLocation = gl.getUniformLocation(program, "u_highFreq");
+    const positionLocation = webglContext.getAttribLocation(program, "a_position");
+    const timeLocation = webglContext.getUniformLocation(program, "u_time");
+    const resolutionLocation = webglContext.getUniformLocation(program, "u_resolution");
+    const turbulenceLocation = webglContext.getUniformLocation(program, "u_turbulence");
+    const chromaShiftLocation = webglContext.getUniformLocation(program, "u_chromaShift");
+    const glitchLocation = webglContext.getUniformLocation(program, "u_glitch");
+    const bloomLocation = webglContext.getUniformLocation(program, "u_bloom");
+    const vignetteLocation = webglContext.getUniformLocation(program, "u_vignette");
+    const lowFreqLocation = webglContext.getUniformLocation(program, "u_lowFreq");
+    const midFreqLocation = webglContext.getUniformLocation(program, "u_midFreq");
+    const highFreqLocation = webglContext.getUniformLocation(program, "u_highFreq");
 
     // Shader parameters based on state + audio-reactive values
     const getShaderParams = () => {
@@ -331,45 +332,45 @@ export function ShaderPlane({ state, className = "", reactive, ritualEffects }: 
 
     // Render loop
     const render = () => {
-      if (!gl || !program) return;
+      if (!webglContext || !program) return;
 
       const params = getShaderParams();
       timeRef.current += 0.01;
 
       // Clear
-      gl.clearColor(0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
+      webglContext.clearColor(0, 0, 0, 0);
+      webglContext.clear(webglContext.COLOR_BUFFER_BIT);
 
       // Use program
-      gl.useProgram(program);
+      webglContext.useProgram(program);
 
       // Set up geometry
-      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-      gl.enableVertexAttribArray(positionLocation);
-      gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+      webglContext.bindBuffer(webglContext.ARRAY_BUFFER, positionBuffer);
+      webglContext.enableVertexAttribArray(positionLocation);
+      webglContext.vertexAttribPointer(positionLocation, 2, webglContext.FLOAT, false, 0, 0);
 
       // Set uniforms
-      gl.uniform1f(timeLocation, timeRef.current);
-      gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
-      gl.uniform1f(turbulenceLocation, params.turbulence);
-      gl.uniform1f(chromaShiftLocation, params.chromaShift);
-      gl.uniform1f(glitchLocation, params.glitch);
-      gl.uniform1f(bloomLocation, params.bloom);
-      gl.uniform1f(vignetteLocation, params.vignette);
+      webglContext.uniform1f(timeLocation, timeRef.current);
+      webglContext.uniform2f(resolutionLocation, canvas.width, canvas.height);
+      webglContext.uniform1f(turbulenceLocation, params.turbulence);
+      webglContext.uniform1f(chromaShiftLocation, params.chromaShift);
+      webglContext.uniform1f(glitchLocation, params.glitch);
+      webglContext.uniform1f(bloomLocation, params.bloom);
+      webglContext.uniform1f(vignetteLocation, params.vignette);
       
       // Audio-reactive uniforms
       if (reactive) {
-        gl.uniform1f(lowFreqLocation, reactive.low);
-        gl.uniform1f(midFreqLocation, reactive.mid);
-        gl.uniform1f(highFreqLocation, reactive.high);
+        webglContext.uniform1f(lowFreqLocation, reactive.low);
+        webglContext.uniform1f(midFreqLocation, reactive.mid);
+        webglContext.uniform1f(highFreqLocation, reactive.high);
       } else {
-        gl.uniform1f(lowFreqLocation, 0);
-        gl.uniform1f(midFreqLocation, 0);
-        gl.uniform1f(highFreqLocation, 0);
+        webglContext.uniform1f(lowFreqLocation, 0);
+        webglContext.uniform1f(midFreqLocation, 0);
+        webglContext.uniform1f(highFreqLocation, 0);
       }
 
       // Draw
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      webglContext.drawArrays(webglContext.TRIANGLE_STRIP, 0, 4);
 
       animationFrameRef.current = requestAnimationFrame(render);
     };
@@ -382,7 +383,7 @@ export function ShaderPlane({ state, className = "", reactive, ritualEffects }: 
         cancelAnimationFrame(animationFrameRef.current);
       }
       if (program) {
-        gl.deleteProgram(program);
+        webglContext.deleteProgram(program);
       }
     };
   }, [state, reactive]);

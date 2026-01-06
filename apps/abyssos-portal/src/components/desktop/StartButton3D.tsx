@@ -58,7 +58,7 @@ export function StartButton3D({ onClick, isOpen }: StartButton3DProps) {
         rotateX,
         rotateY,
         translateZ,
-        scale: isHovered ? 1.1 : isOpen ? 1.05 : 1,
+        scale: isOpen ? 1.05 : 1,
       }}
       transition={{
         type: 'spring',

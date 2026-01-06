@@ -306,11 +306,11 @@ function applyPhaseEffects(
                 active: true,
                 latency: 15 + Math.random() * 10,
                 bandwidth: 20,
-              };
+              } as GenesisEdge;
             }
             return null;
           })
-          .filter((e): e is GenesisEdge => e !== null);
+          .filter((e): e is GenesisEdge => e !== null) as GenesisEdge[];
         newState.edges = [...newState.edges, ...newEdges];
       }
       newState.anomalies = state.nodes.filter((n) => n.stability < 0.8).map((n) => n.id);

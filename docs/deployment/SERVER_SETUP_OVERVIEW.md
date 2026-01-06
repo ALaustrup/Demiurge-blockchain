@@ -1,6 +1,6 @@
 # Demiurge Server Setup Overview
 
-**Last Updated:** Current  
+**Last Updated:** January 5, 2026  
 **Server Environment:** Ubuntu 24.04.3 LTS  
 **Hostname:** demiurge-node0
 

@@ -180,11 +180,14 @@ export function BlockExplorerApp() {
       
       const balanceJson = await balanceResponse.json();
       if (balanceJson.result !== undefined) {
+        // RPC returns balance in smallest units (10^-8), convert to CGT
+        const balanceInSmallestUnits = BigInt(String(balanceJson.result));
+        const balanceInCGT = Number(balanceInSmallestUnits) / 100_000_000;
         setSearchResult({
           type: 'address',
           data: {
             address: searchQuery,
-            balance: Number(balanceJson.result) / 1e18,
+            balance: balanceInCGT,
           },
         });
         return;
@@ -239,7 +242,7 @@ export function BlockExplorerApp() {
             {searchResult.type === 'address' && (
               <div>
                 <p className="text-abyss-cyan font-medium">Address</p>
-                <p className="text-xs text-gray-400 mt-1">Balance: {searchResult.data.balance.toFixed(4)} CGT</p>
+                <p className="text-xs text-gray-400 mt-1">Balance: {typeof searchResult.data.balance === 'number' ? searchResult.data.balance.toFixed(8) : String(searchResult.data.balance)} CGT</p>
               </div>
             )}
             {searchResult.type === 'not_found' && (
@@ -314,7 +317,7 @@ export function BlockExplorerApp() {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <code className="text-xs text-abyss-cyan">{tx.hash.slice(0, 16)}...</code>
-                    <div className="text-sm font-mono text-abyss-cyan">{tx.amount.toFixed(4)} CGT</div>
+                    <div className="text-sm font-mono text-abyss-cyan">{tx.amount.toFixed(8)} CGT</div>
                   </div>
                   <div className="text-xs text-gray-400 space-y-1">
                     <div>From: <code className="text-gray-500">{tx.from.slice(0, 16)}...</code></div>

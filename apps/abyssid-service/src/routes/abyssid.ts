@@ -55,7 +55,7 @@ router.get('/username-available', (req, res) => {
 });
 
 // Register new AbyssID
-router.post('/register', (req, res) => {
+router.post('/register', async (req, res) => {
   try {
     const { username, publicKey } = RegisterRequestSchema.parse(req.body);
     const db = getDb();
@@ -115,8 +115,9 @@ router.post('/register', (req, res) => {
       });
       
       if (mintResponse.ok) {
-        const mintResult = await mintResponse.json();
-        if (mintResult.result !== undefined) {
+        const jsonResponse = await mintResponse.json();
+        const mintResult = jsonResponse as { result?: string | number };
+        if (mintResult && typeof mintResult === 'object' && mintResult.result !== undefined) {
           // Update wallet record
           const balance = Number(mintResult.result) / 100000000; // Convert from smallest units
           db.prepare(`

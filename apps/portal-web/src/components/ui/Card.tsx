@@ -17,7 +17,7 @@ export function Card({ children, className = "" }: CardProps) {
       transition={{ duration: 0.5 }}
       className={`rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-sm ${className}`}
     >
-      {children}
+      {children as any}
     </motion.div>
   );
 }

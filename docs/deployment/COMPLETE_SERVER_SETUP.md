@@ -114,7 +114,7 @@ sudo chown -R ubuntu:ubuntu /opt/demiurge
 
 ```bash
 ls -la
-# Should see: chain/, runtime/, apps/, sdk/, indexer/, deploy/, etc.
+# Should see: chain/, apps/, sdk/, indexer/, deploy/, other/, etc.
 ```
 
 ---

@@ -5,7 +5,7 @@
 - **Name**: Creator God Token
 - **Symbol**: CGT
 - **Decimals**: 8 (smallest unit: 10^-8 CGT)
-- **Max Supply**: 1,000,000,000 CGT (1 billion)
+- **Max Supply**: 369,000,000,000 CGT (369 billion)
 - **Storage**: All amounts stored as `u128` in smallest units
 
 ## Minting & Distribution
@@ -27,7 +27,7 @@ Only the following modules can mint CGT:
 
 ### Supply Enforcement
 - Max supply is enforced at mint time
-- Minting fails if it would exceed 1 billion CGT
+- Minting fails if it would exceed 369 billion CGT
 - Total supply tracked on-chain
 
 ## Usage & Utilities

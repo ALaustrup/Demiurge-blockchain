@@ -16,7 +16,8 @@ export interface GraphQLResponse<T> {
 export async function graphqlRequest<T>(
   query: string,
   variables?: Record<string, any>,
-  headers?: Record<string, string>
+  headers?: Record<string, string>,
+  options?: { suppressErrors?: boolean }
 ): Promise<T> {
   try {
     const response = await fetch(ABYSS_GATEWAY_URL, {
@@ -39,12 +40,17 @@ export async function graphqlRequest<T>(
 
     if (json.errors) {
       const errorDetails = json.errors.map(e => e.message).join(", ");
-      console.error("GraphQL errors:", json.errors);
+      // Only log errors if not suppressed (for expected fallback scenarios)
+      if (!options?.suppressErrors) {
+        console.error("GraphQL errors:", json.errors);
+      }
       throw new Error(errorDetails);
     }
 
     if (!json.data) {
-      console.error("No data in response:", json);
+      if (!options?.suppressErrors) {
+        console.error("No data in response:", json);
+      }
       throw new Error("No data returned from GraphQL query");
     }
 

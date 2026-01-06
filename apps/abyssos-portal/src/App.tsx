@@ -72,7 +72,7 @@ function AppContent() {
     );
   }
 
-  // Show intro video first (unless already authenticated and intro was skipped)
+  // Show intro video (no autoplay, muted, click-to-play only)
   if (showIntro && screen === 'intro') {
     return <IntroVideo onComplete={handleIntroComplete} />;
   }

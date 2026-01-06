@@ -9,6 +9,7 @@ import { backgroundMusicService } from '../../services/backgroundMusic';
 import { StartButton3D } from './StartButton3D';
 import { AppStoreMenu } from './AppStoreMenu';
 import { CustomizationPanel } from './CustomizationPanel';
+import { ChainStatusPill } from '../ChainStatusPill';
 
 export function StatusBar() {
   const { session, logout } = useAbyssID();
@@ -86,10 +87,10 @@ export function StatusBar() {
         </div>
         
         {/* Widgetized Right Side - Render widgets in order */}
-        <div className="flex items-center space-x-4 pr-8">
+        <div className="flex items-center space-x-2 sm:space-x-4 pr-2 sm:pr-8">
+          {/* RPC Status removed from status bar - now in Chain Ops app */}
+          
           {visibleWidgets.map((widget) => {
-            // RPC status removed from toolbar - now in Settings window
-            
             if (widget.id === 'music-player' && currentTrack && isBackgroundMode) {
               return (
                 <div key={widget.id} className="flex items-center gap-2 px-2 py-1 rounded bg-abyss-navy/60 border border-abyss-cyan/20">

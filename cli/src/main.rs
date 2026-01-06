@@ -9,6 +9,7 @@ use demiurge_rust_sdk::DemiurgeSDK;
 use reqwest;
 
 mod keygen;
+mod help;
 
 #[derive(Parser)]
 #[command(name = "demiurge")]
@@ -59,6 +60,26 @@ enum Commands {
     Abyss {
         #[command(subcommand)]
         command: AbyssCommands,
+    },
+    /// Mining operations
+    Mine {
+        #[command(subcommand)]
+        command: MineCommands,
+    },
+    /// Help and documentation system
+    Help {
+        /// Topic to get help for (leave empty for list)
+        topic: Option<String>,
+    },
+    /// Show lore and stories
+    Lore {
+        /// Specific lore topic (leave empty for list)
+        topic: Option<String>,
+    },
+    /// Interactive documentation browser
+    Docs {
+        /// Open specific documentation page
+        page: Option<String>,
     },
 }
 
@@ -762,6 +783,150 @@ async fn main() -> anyhow::Result<()> {
                     println!("  • Visit: http://localhost:5173");
                 }
             }
+        }
+        Commands::Mine { command } => {
+            match command {
+                MineCommands::Start { game_id, session_id } => {
+                    let sid = session_id.unwrap_or_else(|| {
+                        format!("session-{}-{}", 
+                            chrono::Utc::now().timestamp(),
+                            hex::encode(&rand::random::<[u8; 8]>())
+                        )
+                    });
+                    println!("🚀 Starting mining session...");
+                    println!("  Game ID: {}", game_id);
+                    println!("  Session ID: {}", sid);
+                    println!("\nMining session started. Use 'demiurge mine submit' to submit work claims.");
+                }
+                MineCommands::Submit { depth, time, game_id, session_id } => {
+                    println!("📤 Submitting work claim...");
+                    println!("  Game ID: {}", game_id);
+                    println!("  Session ID: {}", session_id);
+                    println!("  Depth Metric: {}", depth);
+                    println!("  Active Time: {}ms", time);
+                    
+                    match sdk.client().call::<serde_json::Value>(
+                        "work_claim_submit",
+                        Some(serde_json::json!({
+                            "game_id": game_id,
+                            "session_id": session_id,
+                            "depth_metric": depth,
+                            "active_ms": time,
+                        }))
+                    ).await {
+                        Ok(result) => {
+                            println!("✅ Work claim submitted successfully!");
+                            if let Some(reward) = result.get("reward") {
+                                println!("  Reward: {} CGT", reward);
+                            }
+                        }
+                        Err(e) => {
+                            eprintln!("❌ Failed to submit work claim: {}", e);
+                        }
+                    }
+                }
+                MineCommands::Stats => {
+                    println!("📊 Mining Statistics");
+                    println!("\nNote: Full statistics require local database.");
+                    println!("Use the Mining Accounting app in AbyssOS for detailed stats.");
+                }
+                MineCommands::Pending => {
+                    println!("⏳ Pending Rewards");
+                    println!("\nNote: Pending rewards are tracked on-chain.");
+                    println!("Use 'demiurge cgt balance <address>' to check your balance.");
+                }
+                MineCommands::History { limit } => {
+                    println!("📜 Mining History (last {} entries)", limit);
+                    println!("\nNote: Full history requires local database.");
+                    println!("Use the Mining Accounting app in AbyssOS for complete history.");
+                }
+                MineCommands::Adjust { reason, amount, evidence } => {
+                    println!("📝 Requesting Manual Adjustment");
+                    println!("  Reason: {}", reason);
+                    println!("  Amount: {} CGT", amount);
+                    if let Some(ev) = evidence {
+                        println!("  Evidence: {}", ev);
+                    }
+                    println!("\n⚠️  Adjustment requests require manual review.");
+                    println!("Your request has been logged. Check the Mining Accounting app for status.");
+                }
+            }
+        }
+        Commands::Help { topic } => {
+            let help_system = help::HelpSystem::new();
+            if let Some(t) = topic {
+                help_system.show_topic(&t);
+            } else {
+                help_system.list_topics();
+            }
+        }
+        Commands::Lore { topic } => {
+            let help_system = help::HelpSystem::new();
+            if let Some(t) = topic {
+                if let Some(help) = help_system.topics.get(&t) {
+                    if let Some(lore) = &help.lore {
+                        println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                        println!("📖 Lore: {}", help.title);
+                        println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+                        println!("{}", lore);
+                        println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+                    } else {
+                        println!("No lore available for topic: {}", t);
+                    }
+                } else {
+                    println!("Topic '{}' not found. Use 'demiurge lore' to see all topics.", t);
+                }
+            } else {
+                println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                println!("📖 Demiurge Lore - Available Stories");
+                println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+                let help_system = help::HelpSystem::new();
+                for (key, topic) in &help_system.topics {
+                    if topic.lore.is_some() {
+                        println!("  • demiurge lore {}", key);
+                        println!("    {}", topic.title);
+                        println!();
+                    }
+                }
+                println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+            }
+        }
+        Commands::Docs { page } => {
+            println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+            println!("📚 Demiurge Documentation");
+            println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+            
+            if let Some(p) = page {
+                println!("Opening documentation page: {}\n", p);
+                println!("Documentation is available in the docs/ directory:");
+                println!("  • docs/README.md - Main documentation index");
+                println!("  • docs/overview/ - Architecture and core concepts");
+                println!("  • docs/api/ - API documentation");
+                println!("  • docs/development/ - Development guides");
+                println!("  • docs/lore/ - Lore and stories");
+                println!("\nFor web documentation, visit: https://demiurge.guru/docs");
+            } else {
+                println!("Available Documentation Categories:\n");
+                println!("  📖 Overview:");
+                println!("    • docs/overview/ARCHITECTURE_DEMIURGE_CURRENT.md");
+                println!("    • docs/overview/RUNTIME.md");
+                println!("    • docs/overview/CONSENSUS.md");
+                println!();
+                println!("  🔌 API:");
+                println!("    • docs/api/RPC.md");
+                println!("    • docs/api/WORK_CLAIM.md");
+                println!();
+                println!("  🛠️  Development:");
+                println!("    • docs/development/COMPREHENSIVE_DEVELOPMENT_ROADMAP.md");
+                println!("    • docs/development/DEVELOPER_INTEGRATION.md");
+                println!();
+                println!("  📖 Lore:");
+                println!("    • docs/lore/ - All lore stories");
+                println!();
+                println!("Usage: demiurge docs <page>");
+                println!("Example: demiurge docs overview/ARCHITECTURE_DEMIURGE_CURRENT.md");
+            }
+            println!("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
         }
     }
 

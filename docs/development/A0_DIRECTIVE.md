@@ -1,7 +1,7 @@
 # A0 — THE PRIME ARCHON ROOT DIRECTIVE
 
 **Status:** ACTIVATED  
-**Date:** 2024-12-19  
+**Date:** January 5, 2026  
 **Version:** 1.0.0
 
 ---
