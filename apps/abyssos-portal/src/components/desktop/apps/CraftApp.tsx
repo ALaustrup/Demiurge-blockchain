@@ -71,7 +71,7 @@ const TEMPLATES: Template[] = [
   {
     id: 'web-app-nextjs',
     name: 'Next.js Web App',
-    description: 'Full-featured Next.js dApp with UrgeID, CGT, NFTs',
+    description: 'Full-featured Next.js dApp with AbyssID, CGT, NFTs',
     category: 'web',
     icon: '🌐',
     type: 'web-app',
@@ -985,10 +985,10 @@ function getWebAppPackageJson(): string {
 }
 
 function getWebAppPageTemplate(): string {
-  return `import { useUrgeID } from '@demiurge/ts-sdk';
+  return `import { useAbyssID } from '@demiurge/ts-sdk';
 
 export default function HomePage() {
-  const { identity, balance } = useUrgeID();
+  const { identity, balance } = useAbyssID();
   
   return (
     <div className="min-h-screen p-8">
@@ -1005,11 +1005,11 @@ export default function HomePage() {
 }
 
 function getWalletPageTemplate(): string {
-  return `import { useUrgeID } from '@demiurge/ts-sdk';
+  return `import { useAbyssID } from '@demiurge/ts-sdk';
 import { sdk } from '@/lib/sdk';
 
 export default function WalletPage() {
-  const { identity } = useUrgeID();
+  const { identity } = useAbyssID();
   const [balance, setBalance] = useState('0');
   
   useEffect(() => {
@@ -1049,10 +1049,10 @@ function getReactAppPackageJson(): string {
 
 function getReactAppTemplate(): string {
   return `import { useState } from 'react';
-import { useUrgeID } from '@demiurge/ts-sdk';
+import { useAbyssID } from '@demiurge/ts-sdk';
 
 export default function App() {
-  const { identity, balance } = useUrgeID();
+  const { identity, balance } = useAbyssID();
   const [count, setCount] = useState(0);
   
   return (
@@ -1222,11 +1222,11 @@ function getDeFiPackageJson(): string {
 
 function getDeFiAppTemplate(): string {
   return `import { useState } from 'react';
-import { useUrgeID } from '@demiurge/ts-sdk';
+import { useAbyssID } from '@demiurge/ts-sdk';
 import { sdk } from './lib/sdk';
 
 export default function DeFiApp() {
-  const { identity } = useUrgeID();
+  const { identity } = useAbyssID();
   const [stakeAmount, setStakeAmount] = useState('');
   
   const handleStake = async () => {
@@ -1295,11 +1295,11 @@ function getNFTMarketplacePackageJson(): string {
 
 function getNFTMarketplaceTemplate(): string {
   return `import { useState, useEffect } from 'react';
-import { useUrgeID } from '@demiurge/ts-sdk';
+import { useAbyssID } from '@demiurge/ts-sdk';
 import { sdk } from './lib/sdk';
 
 export default function NFTMarketplace() {
-  const { identity } = useUrgeID();
+  const { identity } = useAbyssID();
   const [nfts, setNfts] = useState([]);
   
   useEffect(() => {

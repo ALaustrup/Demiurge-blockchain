@@ -11,6 +11,7 @@ import { useWalletStore } from '../../../state/walletStore';
 import { useBlockListener } from '../../../context/BlockListenerContext';
 import { sendCgt } from '../../../services/wallet/demiurgeWallet';
 import { Button } from '../../shared/Button';
+import { AddressDisplay } from '../../shared/AddressDisplay';
 import { NFTSwapPanel } from './NFTSwapPanel';
 
 export function AbyssWalletApp() {
@@ -194,7 +195,7 @@ export function AbyssWalletApp() {
           <span className="text-lg text-gray-400 ml-2">CGT</span>
         </div>
         <div className="text-xs text-gray-500">
-          Demiurge Address: <code className="text-abyss-cyan">{demiurgePublicKey?.slice(0, 16)}...</code>
+          Demiurge Address: {demiurgePublicKey && <AddressDisplay address={demiurgePublicKey} truncateLength={12} />}
         </div>
       </div>
       
@@ -302,7 +303,9 @@ export function AbyssWalletApp() {
                   </div>
                 </div>
                 <div className="text-xs text-gray-400 space-y-1">
-                  <div>To: <code className="text-abyss-cyan">{tx.to.slice(0, 16)}...</code></div>
+                  <div className="flex items-center gap-1">
+                    <span>To:</span> <AddressDisplay address={tx.to} truncateLength={8} />
+                  </div>
                   {tx.blockHeight && <div>Block: #{tx.blockHeight}</div>}
                   <div>Hash: <code className="text-gray-500">{tx.hash.slice(0, 16)}...</code></div>
                 </div>

@@ -7,6 +7,8 @@
 import { useState, useEffect } from 'react';
 import { useBlockListener } from '../../../context/BlockListenerContext';
 import { Button } from '../../shared/Button';
+import { AddressDisplay, AddressWithUsername } from '../../shared/AddressDisplay';
+import { useBatchAddressDisplay } from '../../../hooks/useAddressDisplay';
 
 const RPC_URL = import.meta.env.VITE_DEMIURGE_RPC_URL || 'https://rpc.demiurge.cloud/rpc';
 
@@ -242,6 +244,9 @@ export function BlockExplorerApp() {
             {searchResult.type === 'address' && (
               <div>
                 <p className="text-abyss-cyan font-medium">Address</p>
+                <div className="mt-1">
+                  <AddressWithUsername address={searchResult.data.address} layout="horizontal" />
+                </div>
                 <p className="text-xs text-gray-400 mt-1">Balance: {typeof searchResult.data.balance === 'number' ? searchResult.data.balance.toFixed(8) : String(searchResult.data.balance)} CGT</p>
               </div>
             )}
@@ -319,9 +324,15 @@ export function BlockExplorerApp() {
                     <code className="text-xs text-abyss-cyan">{tx.hash.slice(0, 16)}...</code>
                     <div className="text-sm font-mono text-abyss-cyan">{tx.amount.toFixed(8)} CGT</div>
                   </div>
-                  <div className="text-xs text-gray-400 space-y-1">
-                    <div>From: <code className="text-gray-500">{tx.from.slice(0, 16)}...</code></div>
-                    <div>To: <code className="text-gray-500">{tx.to.slice(0, 16)}...</code></div>
+                  <div className="text-xs space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500">From:</span>
+                      <AddressDisplay address={tx.from} truncateLength={6} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500">To:</span>
+                      <AddressDisplay address={tx.to} truncateLength={6} />
+                    </div>
                   </div>
                 </div>
               ))}
