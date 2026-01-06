@@ -14,6 +14,7 @@ pub mod version;
 
 pub mod abyss_registry;
 pub mod abyssid_registry;
+pub mod activity_log;
 pub mod bank_cgt;
 pub mod fabric_manager;
 pub mod nft_dgen;
@@ -47,6 +48,10 @@ pub use recursion_registry::{
     create_world, get_world, list_worlds_by_owner, RecursionWorldMeta, RecursionRegistryModule,
 };
 pub use work_claim::{calculate_reward, WorkClaimModule, WorkClaimParams};
+pub use activity_log::{
+    log_activity, get_activity, get_activities_for_address, get_activity_stats, get_recent_activities,
+    ActivityEntry, ActivityLogModule, ActivityStats, ActivityType,
+};
 
 /// Trait that all runtime modules must implement.
 ///
@@ -108,7 +113,8 @@ impl Runtime {
             .with_module(Box::new(DeveloperRegistryModule::new()))
             .with_module(Box::new(DevCapsulesModule::new()))
             .with_module(Box::new(RecursionRegistryModule::new()))
-            .with_module(Box::new(WorkClaimModule::new()));
+            .with_module(Box::new(WorkClaimModule::new()))
+            .with_module(Box::new(ActivityLogModule::new()));
         
         // PHASE OMEGA: Verify integrity in debug builds
         // In debug builds, fail fast if integrity check fails
@@ -164,7 +170,7 @@ mod tests {
     #[test]
     fn test_runtime_with_default_modules() {
         let runtime = Runtime::with_default_modules();
-        assert_eq!(runtime.modules.len(), 9);
+        assert_eq!(runtime.modules.len(), 10);
     }
 
     #[test]

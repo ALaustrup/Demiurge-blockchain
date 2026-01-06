@@ -8,6 +8,7 @@ export * from './sdk';
 export * from './client';
 export * from './cgt';
 export * from './abyssid';
+export * from './activity';
 export * from './nft';
 export * from './marketplace';
 export * from './types';

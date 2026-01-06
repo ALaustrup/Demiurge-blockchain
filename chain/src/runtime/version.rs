@@ -6,10 +6,10 @@
 use crate::runtime::Runtime;
 
 /// Runtime version - increment when module order or registration changes
-pub const RUNTIME_VERSION: u32 = 1;
+pub const RUNTIME_VERSION: u32 = 2;
 
 /// Expected module count - must match actual registered modules
-pub const EXPECTED_MODULE_COUNT: usize = 9;
+pub const EXPECTED_MODULE_COUNT: usize = 10;
 
 /// Expected module IDs in registration order
 pub const EXPECTED_MODULE_IDS: &[&str] = &[
@@ -22,6 +22,7 @@ pub const EXPECTED_MODULE_IDS: &[&str] = &[
     "dev_capsules",
     "recursion_registry",
     "work_claim",
+    "activity_log",
 ];
 
 /// Verify runtime module registration integrity

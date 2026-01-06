@@ -7,12 +7,14 @@ import { CgtApi } from './cgt';
 import { AbyssIdApi } from './abyssid';
 import { NftApi } from './nft';
 import { MarketplaceApi } from './marketplace';
+import { ActivityApi } from './activity';
 
 export class DemiurgeSDK {
   public readonly cgt: CgtApi;
   public readonly abyssid: AbyssIdApi;
   public readonly nft: NftApi;
   public readonly marketplace: MarketplaceApi;
+  public readonly activity: ActivityApi;
 
   /** @deprecated Use abyssid instead */
   public readonly urgeid: AbyssIdApi;
@@ -26,6 +28,7 @@ export class DemiurgeSDK {
     this.urgeid = this.abyssid; // Legacy alias
     this.nft = new NftApi(this.client);
     this.marketplace = new MarketplaceApi(this.client);
+    this.activity = new ActivityApi(this.client);
   }
 
   /**

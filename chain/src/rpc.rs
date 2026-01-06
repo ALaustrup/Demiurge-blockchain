@@ -35,6 +35,10 @@ use crate::runtime::{
     create_world, get_world, list_worlds_by_owner,
 };
 use crate::runtime::work_claim::{calculate_reward, WorkClaimParams};
+use crate::runtime::activity_log::{
+    get_activity, get_activities_for_address, get_activity_stats, get_recent_activities,
+    ActivityType,
+};
 
 /// JSON-RPC request envelope.
 #[derive(Debug, Deserialize)]
@@ -3149,6 +3153,283 @@ async fn handle_rpc(
                 id,
             })
         }
+
+        // ============================================
+        // Activity Log RPC Methods
+        // ============================================
+        
+        "activity_getStats" => {
+            #[derive(Deserialize)]
+            struct Params {
+                address: String,
+            }
+            
+            let params: Params = match req.params.as_ref() {
+                Some(p) => match serde_json::from_value(p.clone()) {
+                    Ok(parsed) => parsed,
+                    Err(e) => {
+                        return Json(JsonRpcResponse {
+                            jsonrpc: "2.0".to_string(),
+                            result: None,
+                            error: Some(JsonRpcError {
+                                code: -32602,
+                                message: format!("Invalid params: {}", e),
+                            }),
+                            id,
+                        });
+                    }
+                },
+                None => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: "Missing params".to_string(),
+                        }),
+                        id,
+                    });
+                }
+            };
+            
+            let addr_hex = params.address.strip_prefix("0x").unwrap_or(&params.address);
+            let address = match hex::decode(addr_hex) {
+                Ok(bytes) if bytes.len() == 32 => {
+                    let mut arr = [0u8; 32];
+                    arr.copy_from_slice(&bytes);
+                    arr
+                }
+                _ => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: "Invalid address format".to_string(),
+                        }),
+                        id,
+                    });
+                }
+            };
+            
+            let stats = node.with_state(|state| get_activity_stats(state, &address));
+            
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "total_activities": stats.total_activities,
+                    "transfers_sent": stats.transfers_sent,
+                    "transfers_received": stats.transfers_received,
+                    "total_cgt_sent": stats.total_cgt_sent.to_string(),
+                    "total_cgt_received": stats.total_cgt_received.to_string(),
+                    "nfts_minted": stats.nfts_minted,
+                    "nfts_transferred": stats.nfts_transferred,
+                    "work_claims": stats.work_claims,
+                    "total_work_rewards": stats.total_work_rewards.to_string(),
+                    "listings_created": stats.listings_created,
+                    "purchases_made": stats.purchases_made,
+                })),
+                error: None,
+                id,
+            })
+        }
+        
+        "activity_getHistory" => {
+            #[derive(Deserialize)]
+            struct Params {
+                address: String,
+                activity_type: Option<String>,
+                limit: Option<u64>,
+                offset: Option<u64>,
+            }
+            
+            let params: Params = match req.params.as_ref() {
+                Some(p) => match serde_json::from_value(p.clone()) {
+                    Ok(parsed) => parsed,
+                    Err(e) => {
+                        return Json(JsonRpcResponse {
+                            jsonrpc: "2.0".to_string(),
+                            result: None,
+                            error: Some(JsonRpcError {
+                                code: -32602,
+                                message: format!("Invalid params: {}", e),
+                            }),
+                            id,
+                        });
+                    }
+                },
+                None => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: "Missing params".to_string(),
+                        }),
+                        id,
+                    });
+                }
+            };
+            
+            let addr_hex = params.address.strip_prefix("0x").unwrap_or(&params.address);
+            let address = match hex::decode(addr_hex) {
+                Ok(bytes) if bytes.len() == 32 => {
+                    let mut arr = [0u8; 32];
+                    arr.copy_from_slice(&bytes);
+                    arr
+                }
+                _ => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: "Invalid address format".to_string(),
+                        }),
+                        id,
+                    });
+                }
+            };
+            
+            let activity_type = params.activity_type.map(|s| ActivityType::from_str(&s));
+            let limit = params.limit.unwrap_or(50).min(100);
+            let offset = params.offset.unwrap_or(0);
+            
+            let activities = node.with_state(|state| {
+                get_activities_for_address(state, &address, activity_type, limit, offset)
+            });
+            
+            let entries: Vec<_> = activities.iter().map(|a| {
+                json!({
+                    "id": a.id,
+                    "address": format!("0x{}", hex::encode(a.address)),
+                    "activity_type": a.activity_type.as_str(),
+                    "block_height": a.block_height,
+                    "timestamp": a.timestamp,
+                    "target": a.target.map(|t| format!("0x{}", hex::encode(t))),
+                    "amount": a.amount.map(|a| a.to_string()),
+                    "reference_id": a.reference_id.clone(),
+                    "metadata": a.metadata.clone(),
+                })
+            }).collect();
+            
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "activities": entries,
+                    "count": entries.len(),
+                })),
+                error: None,
+                id,
+            })
+        }
+        
+        "activity_getRecent" => {
+            #[derive(Deserialize)]
+            struct Params {
+                limit: Option<u64>,
+            }
+            
+            let params: Params = req.params.as_ref()
+                .and_then(|p| serde_json::from_value(p.clone()).ok())
+                .unwrap_or(Params { limit: None });
+            
+            let limit = params.limit.unwrap_or(20).min(100);
+            
+            let activities = node.with_state(|state| get_recent_activities(state, limit));
+            
+            let entries: Vec<_> = activities.iter().map(|a| {
+                json!({
+                    "id": a.id,
+                    "address": format!("0x{}", hex::encode(a.address)),
+                    "activity_type": a.activity_type.as_str(),
+                    "block_height": a.block_height,
+                    "timestamp": a.timestamp,
+                    "target": a.target.map(|t| format!("0x{}", hex::encode(t))),
+                    "amount": a.amount.map(|a| a.to_string()),
+                    "reference_id": a.reference_id.clone(),
+                    "metadata": a.metadata.clone(),
+                })
+            }).collect();
+            
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "activities": entries,
+                    "count": entries.len(),
+                })),
+                error: None,
+                id,
+            })
+        }
+        
+        "activity_get" => {
+            #[derive(Deserialize)]
+            struct Params {
+                id: u64,
+            }
+            
+            let params: Params = match req.params.as_ref() {
+                Some(p) => match serde_json::from_value(p.clone()) {
+                    Ok(parsed) => parsed,
+                    Err(e) => {
+                        return Json(JsonRpcResponse {
+                            jsonrpc: "2.0".to_string(),
+                            result: None,
+                            error: Some(JsonRpcError {
+                                code: -32602,
+                                message: format!("Invalid params: {}", e),
+                            }),
+                            id,
+                        });
+                    }
+                },
+                None => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: "Missing params".to_string(),
+                        }),
+                        id,
+                    });
+                }
+            };
+            
+            match node.with_state(|state| get_activity(state, params.id)) {
+                Some(a) => {
+                    Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: Some(json!({
+                            "id": a.id,
+                            "address": format!("0x{}", hex::encode(a.address)),
+                            "activity_type": a.activity_type.as_str(),
+                            "block_height": a.block_height,
+                            "timestamp": a.timestamp,
+                            "target": a.target.map(|t| format!("0x{}", hex::encode(t))),
+                            "amount": a.amount.map(|a| a.to_string()),
+                            "reference_id": a.reference_id.clone(),
+                            "metadata": a.metadata.clone(),
+                        })),
+                        error: None,
+                        id,
+                    })
+                }
+                None => {
+                    Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32000,
+                            message: "Activity not found".to_string(),
+                        }),
+                        id,
+                    })
+                }
+            }
+        }
+
         _ => Json(JsonRpcResponse {
             jsonrpc: "2.0".to_string(),
             result: None,
