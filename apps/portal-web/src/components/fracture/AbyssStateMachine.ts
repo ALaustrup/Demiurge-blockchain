@@ -16,11 +16,13 @@ export interface AbyssContext {
 }
 
 // Get API URL from environment or use default
+// NOTE: Using abyssid-service (port 8082) - the full-featured TypeScript backend
+// (Previously used abyssid-backend on port 3001 which has been deprecated)
 const getApiUrl = () => {
   if (typeof window !== 'undefined') {
-    return process.env.NEXT_PUBLIC_ABYSSID_API_URL || 'http://localhost:3001';
+    return process.env.NEXT_PUBLIC_ABYSSID_API_URL || 'http://localhost:8082';
   }
-  return 'http://localhost:3001';
+  return 'http://localhost:8082';
 };
 
 /**
