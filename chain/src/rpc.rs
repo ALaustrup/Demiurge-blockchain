@@ -12,11 +12,14 @@
 //! - cgt_getFabricAsset: Get Fabric asset by root hash
 
 use std::sync::Arc;
+use std::time::Duration;
 
 use axum::{extract::Extension, routing::post, Json, Router};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tower_http::cors::{Any, CorsLayer};
+use tower_http::timeout::TimeoutLayer;
+use tower_http::limit::RequestBodyLimitLayer;
 
 #[cfg(debug_assertions)]
 use crate::config::DEV_FAUCET_AMOUNT;
@@ -344,12 +347,27 @@ pub fn rpc_router(node: Arc<Node>) -> Router {
     let cors = CorsLayer::new()
         .allow_origin(Any)
         .allow_methods(Any)
-        .allow_headers(Any);
+        .allow_headers(Any)
+        .max_age(Duration::from_secs(3600)); // Cache CORS preflight for 1 hour
+
+    // Request timeout - 30 seconds for most operations
+    let timeout = TimeoutLayer::new(Duration::from_secs(30));
+    
+    // Limit request body size to 1MB
+    let body_limit = RequestBodyLimitLayer::new(1024 * 1024);
 
     Router::new()
         .route("/rpc", post(handle_rpc))
+        .route("/health", axum::routing::get(health_check))
         .layer(cors)
+        .layer(timeout)
+        .layer(body_limit)
         .layer(Extension(node))
+}
+
+/// Health check endpoint for load balancers and monitoring
+async fn health_check() -> &'static str {
+    "OK"
 }
 
 /// Handle JSON-RPC requests.

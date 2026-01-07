@@ -129,12 +129,15 @@ async fn main() -> Result<()> {
     let app = rpc_router(node);
 
     tracing::info!("JSON-RPC server listening on http://{}", addr);
+    tracing::info!("Health check available at http://{}/health", addr);
     tracing::info!(
         "Available methods: cgt_getChainInfo, cgt_getBlockByHeight, cgt_sendRawTransaction, cgt_getBalance, cgt_*"
     );
 
-    // Serve requests
-    axum::serve(listener, app).await?;
+    // Serve requests with graceful shutdown support
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await?;
 
     Ok(())
 }
@@ -152,7 +155,38 @@ async fn run_with_defaults() -> Result<()> {
     let app = rpc_router(node);
 
     tracing::info!("JSON-RPC server listening on http://{}", addr);
-    axum::serve(listener, app).await?;
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await?;
 
     Ok(())
+}
+
+/// Graceful shutdown signal handler
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("Failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("Failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {
+            tracing::info!("Received Ctrl+C, shutting down gracefully...");
+        },
+        _ = terminate => {
+            tracing::info!("Received SIGTERM, shutting down gracefully...");
+        },
+    }
 }
