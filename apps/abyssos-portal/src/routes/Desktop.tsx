@@ -10,6 +10,7 @@ import { ChainOpsApp } from '../components/desktop/apps/ChainOpsApp';
 import { MinerApp } from '../components/desktop/apps/MinerApp';
 import { AbyssWalletApp } from '../components/desktop/apps/AbyssWalletApp';
 import { AbyssBrowserApp } from '../components/desktop/apps/AbyssBrowserApp';
+import { AbyssExplorerApp } from '../components/desktop/apps/AbyssExplorerApp';
 import { AbyssTorrentApp } from '../components/desktop/apps/AbyssTorrentApp';
 import { OnChainFilesApp } from '../components/desktop/apps/OnChainFilesApp';
 import { DRC369StudioApp } from '../components/desktop/apps/DRC369StudioApp';
@@ -41,7 +42,9 @@ const appComponents: Record<string, React.ComponentType> = {
   chainOps: ChainOpsApp,
   miner: MinerApp,
   wallet: AbyssWalletApp,
-  abyssBrowser: AbyssBrowserApp,
+  abyssBrowser: AbyssExplorerApp,  // Upgraded to Abyss Explorer
+  abyssExplorer: AbyssExplorerApp,
+  legacyBrowser: AbyssBrowserApp,  // Keep legacy for reference
   abyssTorrent: AbyssTorrentApp,
   onChainFiles: OnChainFilesApp,
   drc369Studio: DRC369StudioApp,
