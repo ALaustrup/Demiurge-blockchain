@@ -4,9 +4,9 @@
  * Full-featured music player for Fractal-1 audio with NEON-reactive effects
  */
 
-import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import { NeonVisualizer, NFTMetadataPanel, NeonDesktopReactivity } from './neonPlayer';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { NeonVisualizer, NFTMetadataPanel, NeonDesktopReactivity, createMediaItemFromFile, useNeonStore } from './neonPlayer';
 import type { DRC369 } from '../../../services/drc369/schema';
 import { Fractal1Codec } from '@abyssos/fractall/codec';
 import type { FractalBeatmap } from '@abyssos/fractall/types';
@@ -50,6 +50,110 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const animationFrameRef = useRef<number>();
   const [isVideo, setIsVideo] = useState(false);
+  
+  // Drag and drop state
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounter = useRef(0);
+  const { addToLibrary, playItem } = useNeonStore();
+  
+  // Prevent browser default drag/drop behavior globally
+  useEffect(() => {
+    const preventDefaults = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    
+    // Prevent browser from opening files dropped anywhere on the window
+    window.addEventListener('dragover', preventDefaults);
+    window.addEventListener('drop', preventDefaults);
+    
+    return () => {
+      window.removeEventListener('dragover', preventDefaults);
+      window.removeEventListener('drop', preventDefaults);
+    };
+  }, []);
+  
+  // Drag and drop handlers
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current++;
+    
+    if (e.dataTransfer?.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  }, []);
+  
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current--;
+    
+    if (dragCounter.current === 0) {
+      setIsDragging(false);
+    }
+  }, []);
+  
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+  }, []);
+  
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    dragCounter.current = 0;
+    
+    const files = Array.from(e.dataTransfer?.files || []);
+    if (files.length > 0) {
+      // Process the first valid media file
+      for (const file of files) {
+        const mediaItem = createMediaItemFromFile(file);
+        if (mediaItem) {
+          // Add to new library
+          addToLibrary(mediaItem);
+          
+          // Create a DRC369-compatible track object for existing player
+          const trackForPlayer: DRC369 = {
+            id: mediaItem.id,
+            name: mediaItem.name,
+            uri: mediaItem.uri,
+            owner: 'local',
+            contentType: file.type,
+            attributes: {
+              mimeType: file.type,
+            },
+            music: mediaItem.type === 'audio' ? {
+              trackName: mediaItem.name,
+              artistName: mediaItem.metadata.artist || 'Unknown Artist',
+              albumName: mediaItem.metadata.album || 'Unknown Album',
+              duration: mediaItem.duration || 0,
+            } : undefined,
+          };
+          
+          // Set track in music player store
+          setTrack(trackForPlayer);
+          setPlaying(true);
+          
+          // Auto-detect mode based on media type
+          if (mediaItem.type === 'video') {
+            setActiveMode('video');
+            setIsVideo(true);
+          } else if (mediaItem.type === 'image') {
+            setActiveMode('image');
+            setIsVideo(false);
+          } else {
+            setActiveMode('music');
+            setIsVideo(false);
+          }
+          
+          break; // Only handle first file for now
+        }
+      }
+    }
+  }, [addToLibrary, setTrack, setPlaying]);
   
   // Enable background mode when window is closed
   useEffect(() => {
@@ -249,7 +353,42 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
   };
 
   return (
-    <div className="w-full h-full bg-abyss-dark/90 backdrop-blur-sm flex flex-col">
+    <div 
+      className="w-full h-full bg-abyss-dark/90 backdrop-blur-sm flex flex-col relative"
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
+      {/* Drag and Drop Overlay */}
+      <AnimatePresence>
+        {isDragging && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 bg-abyss-dark/90 backdrop-blur-md flex flex-col items-center justify-center border-4 border-dashed border-abyss-cyan rounded-lg"
+          >
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              className="text-center"
+            >
+              <div className="text-8xl mb-6">🎵</div>
+              <h2 className="text-3xl font-bold text-abyss-cyan mb-2">Drop Media Here</h2>
+              <p className="text-gray-400 text-lg">
+                Audio, Video, or Images
+              </p>
+              <div className="mt-4 flex gap-4 justify-center text-sm text-gray-500">
+                <span>🎧 MP3, FLAC, WAV</span>
+                <span>🎬 MP4, WebM, MKV</span>
+                <span>🖼️ JPG, PNG, GIF</span>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
       <div className="px-4 py-3 border-b border-abyss-cyan/20 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {(['music', 'video', 'image'] as Array<'music' | 'video' | 'image'>).map((mode) => (
