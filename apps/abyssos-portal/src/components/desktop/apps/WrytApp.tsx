@@ -7,65 +7,260 @@
  * Write. Create. Publish.
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import { StarterKit } from '@tiptap/starter-kit';
+import { Underline } from '@tiptap/extension-underline';
+import { TextAlign } from '@tiptap/extension-text-align';
+import { Placeholder } from '@tiptap/extension-placeholder';
+import { CharacterCount } from '@tiptap/extension-character-count';
+import { Link } from '@tiptap/extension-link';
+import { Image } from '@tiptap/extension-image';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { FontFamily } from '@tiptap/extension-font-family';
+import { Color } from '@tiptap/extension-color';
+import { Highlight } from '@tiptap/extension-highlight';
 import { useAbyssIDIdentity } from '../../../hooks/useAbyssIDIdentity';
-import { Button } from '../../shared/Button';
+import { 
+  WrytProjectManager, 
+  WrytTemplateSelector, 
+  WrytToolbar,
+  useWrytStore,
+  getTemplateById,
+} from './wryt';
+import { useAutoSave, useSaveShortcut } from './wryt/hooks/useAutoSave';
 
 // ============================================================================
-// Types
+// Editor Styles
 // ============================================================================
 
-interface Document {
-  id: string;
+const editorStyles = `
+  .ProseMirror {
+    outline: none;
+    min-height: 100%;
+  }
+  
+  .ProseMirror.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: #6b7280;
+    pointer-events: none;
+    height: 0;
+  }
+  
+  .ProseMirror p {
+    margin: 0 0 1em 0;
+  }
+  
+  .ProseMirror h1 {
+    font-size: 2em;
+    font-weight: bold;
+    margin: 1em 0 0.5em 0;
+  }
+  
+  .ProseMirror h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 1em 0 0.5em 0;
+  }
+  
+  .ProseMirror h3 {
+    font-size: 1.25em;
+    font-weight: bold;
+    margin: 1em 0 0.5em 0;
+  }
+  
+  .ProseMirror h4 {
+    font-size: 1.125em;
+    font-weight: bold;
+    margin: 1em 0 0.5em 0;
+  }
+  
+  .ProseMirror ul,
+  .ProseMirror ol {
+    margin: 0 0 1em 1.5em;
+    padding: 0;
+  }
+  
+  .ProseMirror li {
+    margin: 0.25em 0;
+  }
+  
+  .ProseMirror blockquote {
+    border-left: 3px solid #00d4ff;
+    margin: 1em 0;
+    padding-left: 1em;
+    color: #9ca3af;
+    font-style: italic;
+  }
+  
+  .ProseMirror code {
+    background: rgba(0, 212, 255, 0.1);
+    border-radius: 0.25em;
+    padding: 0.2em 0.4em;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9em;
+  }
+  
+  .ProseMirror pre {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 0.5em;
+    padding: 1em;
+    margin: 1em 0;
+    overflow-x: auto;
+  }
+  
+  .ProseMirror pre code {
+    background: none;
+    padding: 0;
+  }
+  
+  .ProseMirror hr {
+    border: none;
+    border-top: 1px solid rgba(0, 212, 255, 0.2);
+    margin: 2em 0;
+  }
+  
+  .ProseMirror img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .ProseMirror mark {
+    background-color: rgba(255, 230, 0, 0.3);
+    border-radius: 0.25em;
+  }
+`;
+
+// ============================================================================
+// Navigator Panel
+// ============================================================================
+
+interface NavigatorPanelProps {
   title: string;
   content: string;
-  createdAt: number;
-  updatedAt: number;
-  wordCount: number;
-  characterCount: number;
 }
 
-interface DocumentStyle {
-  bold: boolean;
-  italic: boolean;
-  underline: boolean;
-  strikethrough: boolean;
-  heading: number | null; // 1-6 or null
-  align: 'left' | 'center' | 'right' | 'justify';
-  listType: 'none' | 'bullet' | 'number' | 'check';
-}
-
-// ============================================================================
-// Toolbar Components
-// ============================================================================
-
-interface ToolbarButtonProps {
-  icon: string;
-  title: string;
-  active?: boolean;
-  onClick: () => void;
-}
-
-function ToolbarButton({ icon, title, active, onClick }: ToolbarButtonProps) {
+function NavigatorPanel({ title, content }: NavigatorPanelProps) {
+  // Extract headings from content for outline
+  const extractHeadings = (html: string) => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const headings = doc.querySelectorAll('h1, h2, h3, h4');
+    return Array.from(headings).map((h, i) => ({
+      id: `heading-${i}`,
+      level: parseInt(h.tagName[1]),
+      text: h.textContent || '',
+    }));
+  };
+  
+  const headings = extractHeadings(content);
+  
   return (
-    <button
-      onClick={onClick}
-      title={title}
-      className={`
-        p-1.5 rounded transition-colors
-        ${active 
-          ? 'bg-abyss-cyan/20 text-abyss-cyan' 
-          : 'text-gray-400 hover:text-white hover:bg-abyss-dark/50'
-        }
-      `}
-    >
-      {icon}
-    </button>
+    <div className="w-48 border-r border-abyss-cyan/20 p-3 overflow-y-auto flex-shrink-0">
+      <h3 className="text-xs font-medium text-gray-500 mb-2">📄 Outline</h3>
+      <div className="text-sm text-gray-400">
+        {headings.length > 0 ? (
+          headings.map((h) => (
+            <div 
+              key={h.id}
+              className="py-1 hover:text-white cursor-pointer truncate"
+              style={{ paddingLeft: `${(h.level - 1) * 12}px` }}
+            >
+              {h.text}
+            </div>
+          ))
+        ) : (
+          <div className="text-gray-600 text-xs italic">No headings yet</div>
+        )}
+      </div>
+    </div>
   );
 }
 
-function ToolbarSeparator() {
-  return <div className="w-px h-6 bg-abyss-cyan/20 mx-1" />;
+// ============================================================================
+// Info Panel
+// ============================================================================
+
+interface InfoPanelProps {
+  wordCount: number;
+  charCount: number;
+  hasUnsavedChanges: boolean;
+  lastSavedAt: number | null;
+  onSave: () => void;
+  onExport: (format: string) => void;
+}
+
+function InfoPanel({ 
+  wordCount, 
+  charCount, 
+  hasUnsavedChanges, 
+  lastSavedAt, 
+  onSave,
+  onExport 
+}: InfoPanelProps) {
+  const readingTime = Math.ceil(wordCount / 200);
+  
+  const formatTime = (timestamp: number) => {
+    return new Date(timestamp).toLocaleTimeString();
+  };
+  
+  return (
+    <div className="w-48 border-l border-abyss-cyan/20 p-3 overflow-y-auto flex-shrink-0">
+      <h3 className="text-xs font-medium text-gray-500 mb-3">📊 Document Info</h3>
+      
+      <div className="space-y-2 text-sm">
+        <div className="flex justify-between">
+          <span className="text-gray-500">Words</span>
+          <span className="text-white">{wordCount.toLocaleString()}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-500">Characters</span>
+          <span className="text-white">{charCount.toLocaleString()}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-500">Reading</span>
+          <span className="text-white">{readingTime} min</span>
+        </div>
+      </div>
+      
+      <div className="mt-4 pt-4 border-t border-abyss-cyan/20">
+        <div className="flex items-center gap-2 text-sm">
+          {hasUnsavedChanges ? (
+            <span className="text-yellow-400">● Modified</span>
+          ) : (
+            <span className="text-green-400">✓ Saved</span>
+          )}
+        </div>
+        {lastSavedAt && (
+          <div className="text-xs text-gray-500 mt-1">
+            Last: {formatTime(lastSavedAt)}
+          </div>
+        )}
+        
+        <button 
+          onClick={onSave}
+          className="w-full mt-3 px-4 py-2 bg-abyss-cyan text-abyss-dark font-medium rounded-lg
+                   hover:bg-abyss-cyan/80 transition-colors text-sm"
+        >
+          Save
+        </button>
+      </div>
+      
+      <h3 className="text-xs font-medium text-gray-500 mt-4 mb-2">📤 Export</h3>
+      <div className="space-y-1">
+        {['pdf', 'docx', 'md', 'html', 'txt'].map((format) => (
+          <button 
+            key={format}
+            onClick={() => onExport(format)} 
+            className="w-full text-left text-sm text-gray-400 hover:text-white py-1"
+          >
+            • {format.toUpperCase()}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 // ============================================================================
@@ -75,142 +270,166 @@ function ToolbarSeparator() {
 export function WrytApp() {
   const { identity } = useAbyssIDIdentity();
   
-  // Document state
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [activeDoc, setActiveDoc] = useState<Document | null>(null);
-  const [content, setContent] = useState('');
-  const [title, setTitle] = useState('Untitled Document');
+  // Store state
+  const {
+    currentView,
+    setView,
+    projects,
+    documents,
+    activeProjectId,
+    activeDocumentId,
+    editorSettings,
+    panels,
+    hasUnsavedChanges,
+    lastSavedAt,
+    createProject,
+    setActiveProject,
+    updateDocumentContent,
+    markSaved,
+    getActiveDocument,
+    getActiveProject,
+    togglePanel,
+  } = useWrytStore();
   
-  // Editor state
-  const [currentStyle, setCurrentStyle] = useState<DocumentStyle>({
-    bold: false,
-    italic: false,
-    underline: false,
-    strikethrough: false,
-    heading: null,
-    align: 'left',
-    listType: 'none',
+  // Local state
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [focusMode, setFocusMode] = useState(false);
+  const [documentTitle, setDocumentTitle] = useState('');
+  
+  // Get active document and project
+  const activeDocument = getActiveDocument();
+  const activeProject = getActiveProject();
+  
+  // Initialize TipTap editor
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        heading: { levels: [1, 2, 3, 4, 5, 6] },
+      }),
+      Underline,
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      Placeholder.configure({ placeholder: 'Start writing...' }),
+      CharacterCount,
+      Link.configure({ openOnClick: false }),
+      Image,
+      TextStyle,
+      FontFamily,
+      Color,
+      Highlight.configure({ multicolor: true }),
+    ],
+    content: activeDocument?.content || '',
+    editable: true,
+    onUpdate: ({ editor }) => {
+      if (activeDocument) {
+        const html = editor.getHTML();
+        const text = editor.getText();
+        const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+        const charCount = text.length;
+        updateDocumentContent(activeDocument.id, html, wordCount, charCount);
+      }
+    },
   });
   
-  // UI state
-  const [showOutline, setShowOutline] = useState(true);
-  const [showInfo, setShowInfo] = useState(true);
-  const [isModified, setIsModified] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [focusMode, setFocusMode] = useState(false);
+  // Update editor content when document changes
+  useEffect(() => {
+    if (editor && activeDocument) {
+      const currentContent = editor.getHTML();
+      if (activeDocument.content !== currentContent) {
+        editor.commands.setContent(activeDocument.content || '');
+      }
+      setDocumentTitle(activeDocument.title);
+    }
+  }, [activeDocument?.id, editor]);
   
-  // Refs
-  const editorRef = useRef<HTMLDivElement>(null);
-
-  // Word count
-  const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
-  const charCount = content.length;
-  const readingTime = Math.ceil(wordCount / 200); // Avg 200 wpm
-
-  // Create new document
-  const createNewDoc = useCallback(() => {
-    const newDoc: Document = {
-      id: `doc-${Date.now()}`,
-      title: 'Untitled Document',
-      content: '',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      wordCount: 0,
-      characterCount: 0,
-    };
-    setDocuments(prev => [...prev, newDoc]);
-    setActiveDoc(newDoc);
-    setTitle(newDoc.title);
-    setContent('');
-    setIsModified(false);
-  }, []);
-
-  // Save document
-  const saveDoc = useCallback(() => {
-    if (!activeDoc) return;
-    
-    const updated: Document = {
-      ...activeDoc,
-      title,
-      content,
-      updatedAt: Date.now(),
-      wordCount,
-      characterCount: charCount,
-    };
-    
-    setDocuments(prev => prev.map(d => d.id === activeDoc.id ? updated : d));
-    setActiveDoc(updated);
-    setIsModified(false);
-    setLastSaved(new Date());
-    
-    // TODO: Sync to AbyssID storage
-  }, [activeDoc, title, content, wordCount, charCount]);
-
-  // Format commands
-  const formatCommand = useCallback((command: string, value?: string) => {
-    document.execCommand(command, false, value);
-    editorRef.current?.focus();
-    
-    // Update style state
-    setCurrentStyle({
-      bold: document.queryCommandState('bold'),
-      italic: document.queryCommandState('italic'),
-      underline: document.queryCommandState('underline'),
-      strikethrough: document.queryCommandState('strikeThrough'),
-      heading: null, // TODO: detect heading
-      align: 'left', // TODO: detect alignment
-      listType: 'none', // TODO: detect list
-    });
-  }, []);
-
-  // Export handlers
-  const exportAs = useCallback((format: 'pdf' | 'docx' | 'md' | 'txt' | 'html') => {
-    // TODO: Implement actual export
-    console.log(`Exporting as ${format}...`);
+  // Save function
+  const handleSave = useCallback(() => {
+    if (activeDocument && editor) {
+      const html = editor.getHTML();
+      const text = editor.getText();
+      const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+      const charCount = text.length;
+      updateDocumentContent(activeDocument.id, html, wordCount, charCount);
+      markSaved();
+      // TODO: Sync to AbyssID storage
+    }
+  }, [activeDocument, editor, updateDocumentContent, markSaved]);
+  
+  // Auto-save
+  useAutoSave({
+    content: activeDocument?.content || '',
+    hasChanges: hasUnsavedChanges,
+    enabled: editorSettings.autoSave,
+    interval: editorSettings.autoSaveInterval * 1000,
+    onSave: handleSave,
+  });
+  
+  // Save shortcut
+  useSaveShortcut(handleSave);
+  
+  // Export handler
+  const handleExport = useCallback((format: string) => {
     alert(`Export to ${format.toUpperCase()} - Coming soon!`);
   }, []);
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey) {
-        switch (e.key.toLowerCase()) {
-          case 's':
-            e.preventDefault();
-            saveDoc();
-            break;
-          case 'b':
-            e.preventDefault();
-            formatCommand('bold');
-            break;
-          case 'i':
-            e.preventDefault();
-            formatCommand('italic');
-            break;
-          case 'u':
-            e.preventDefault();
-            formatCommand('underline');
-            break;
-        }
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [saveDoc, formatCommand]);
-
-  // Initialize with a new document
-  useEffect(() => {
-    if (documents.length === 0) {
-      createNewDoc();
-    }
-  }, [documents.length, createNewDoc]);
-
+  
+  // Handle new project
+  const handleNewProject = () => {
+    setShowTemplateSelector(true);
+  };
+  
+  // Handle template selection
+  const handleTemplateSelect = (templateId: string, projectName: string) => {
+    createProject(projectName, templateId);
+    setShowTemplateSelector(false);
+    setView('editor');
+  };
+  
+  // Handle project open
+  const handleOpenProject = (projectId: string) => {
+    setActiveProject(projectId);
+    setView('editor');
+  };
+  
+  // Calculate word count from active document
+  const wordCount = activeDocument?.wordCount || 0;
+  const charCount = activeDocument?.characterCount || 0;
+  
+  // Render based on current view
+  if (currentView === 'welcome' || projects.length === 0) {
+    return (
+      <div className="h-full flex flex-col bg-abyss-navy/30">
+        <style>{editorStyles}</style>
+        
+        <WrytProjectManager
+          username={identity?.username}
+          onNewProject={handleNewProject}
+          onOpenProject={handleOpenProject}
+        />
+        
+        {showTemplateSelector && (
+          <WrytTemplateSelector
+            onSelect={handleTemplateSelect}
+            onCancel={() => setShowTemplateSelector(false)}
+          />
+        )}
+      </div>
+    );
+  }
+  
+  // Editor view
   return (
     <div className={`h-full flex flex-col bg-abyss-navy/30 ${focusMode ? 'focus-mode' : ''}`}>
+      <style>{editorStyles}</style>
+      
       {/* Menu Bar */}
       {!focusMode && (
         <div className="flex items-center gap-4 px-4 py-2 bg-abyss-dark/50 border-b border-abyss-cyan/20 text-sm">
+          <button 
+            onClick={() => setView('welcome')}
+            className="text-gray-400 hover:text-white"
+          >
+            ← Projects
+          </button>
+          <div className="text-gray-600">|</div>
           <button className="text-gray-400 hover:text-white">File</button>
           <button className="text-gray-400 hover:text-white">Edit</button>
           <button className="text-gray-400 hover:text-white">View</button>
@@ -231,92 +450,46 @@ export function WrytApp() {
       
       {/* Toolbar */}
       {!focusMode && (
-        <div className="flex items-center gap-1 px-4 py-2 bg-abyss-dark/30 border-b border-abyss-cyan/20">
-          {/* Text formatting */}
-          <ToolbarButton icon="B" title="Bold (Ctrl+B)" active={currentStyle.bold} onClick={() => formatCommand('bold')} />
-          <ToolbarButton icon="I" title="Italic (Ctrl+I)" active={currentStyle.italic} onClick={() => formatCommand('italic')} />
-          <ToolbarButton icon="U̲" title="Underline (Ctrl+U)" active={currentStyle.underline} onClick={() => formatCommand('underline')} />
-          <ToolbarButton icon="S̶" title="Strikethrough" active={currentStyle.strikethrough} onClick={() => formatCommand('strikeThrough')} />
-          
-          <ToolbarSeparator />
-          
-          {/* Heading selector */}
-          <select 
-            className="bg-abyss-dark border border-abyss-cyan/30 rounded px-2 py-1 text-sm text-gray-300"
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === 'p') {
-                formatCommand('formatBlock', '<p>');
-              } else {
-                formatCommand('formatBlock', `<${value}>`);
-              }
-            }}
+        <WrytToolbar 
+          editor={editor} 
+          onSave={handleSave}
+          hasUnsavedChanges={hasUnsavedChanges}
+        />
+      )}
+      
+      {/* Extra toolbar row for view toggles */}
+      {!focusMode && (
+        <div className="flex items-center gap-2 px-4 py-1.5 bg-abyss-dark/20 border-b border-abyss-cyan/10 text-xs">
+          <button 
+            onClick={() => togglePanel('navigator')}
+            className={`px-2 py-1 rounded ${panels.navigator ? 'text-abyss-cyan bg-abyss-cyan/10' : 'text-gray-500 hover:text-white'}`}
           >
-            <option value="p">Normal</option>
-            <option value="h1">Heading 1</option>
-            <option value="h2">Heading 2</option>
-            <option value="h3">Heading 3</option>
-            <option value="h4">Heading 4</option>
-          </select>
-          
-          <ToolbarSeparator />
-          
-          {/* Alignment */}
-          <ToolbarButton icon="≡" title="Align Left" onClick={() => formatCommand('justifyLeft')} />
-          <ToolbarButton icon="≣" title="Align Center" onClick={() => formatCommand('justifyCenter')} />
-          <ToolbarButton icon="≡" title="Align Right" onClick={() => formatCommand('justifyRight')} />
-          <ToolbarButton icon="☰" title="Justify" onClick={() => formatCommand('justifyFull')} />
-          
-          <ToolbarSeparator />
-          
-          {/* Lists */}
-          <ToolbarButton icon="•" title="Bullet List" onClick={() => formatCommand('insertUnorderedList')} />
-          <ToolbarButton icon="1." title="Numbered List" onClick={() => formatCommand('insertOrderedList')} />
-          
-          <ToolbarSeparator />
-          
-          {/* Insert */}
-          <ToolbarButton icon="🔗" title="Insert Link" onClick={() => {
-            const url = prompt('Enter URL:');
-            if (url) formatCommand('createLink', url);
-          }} />
-          <ToolbarButton icon="📷" title="Insert Image" onClick={() => {
-            const url = prompt('Enter image URL:');
-            if (url) formatCommand('insertImage', url);
-          }} />
-          <ToolbarButton icon="📊" title="Insert Table" onClick={() => alert('Tables coming soon!')} />
-          
+            📋 Outline
+          </button>
+          <button 
+            onClick={() => togglePanel('info')}
+            className={`px-2 py-1 rounded ${panels.info ? 'text-abyss-cyan bg-abyss-cyan/10' : 'text-gray-500 hover:text-white'}`}
+          >
+            ℹ️ Info
+          </button>
           <div className="flex-1" />
-          
-          {/* View toggles */}
-          <ToolbarButton icon="📋" title="Toggle Outline" active={showOutline} onClick={() => setShowOutline(!showOutline)} />
-          <ToolbarButton icon="ℹ️" title="Toggle Info Panel" active={showInfo} onClick={() => setShowInfo(!showInfo)} />
-          <ToolbarButton icon="🎯" title="Focus Mode" active={focusMode} onClick={() => setFocusMode(!focusMode)} />
+          <button 
+            onClick={() => setFocusMode(!focusMode)}
+            className="px-2 py-1 rounded text-gray-500 hover:text-white"
+          >
+            🎯 Focus Mode
+          </button>
         </div>
       )}
       
       {/* Main Content */}
-      <div className="flex-1 flex min-h-0">
-        {/* Outline Panel */}
-        {showOutline && !focusMode && (
-          <div className="w-48 border-r border-abyss-cyan/20 p-3 overflow-y-auto">
-            <h3 className="text-xs font-medium text-gray-500 mb-2">📄 Outline</h3>
-            <div className="text-sm text-gray-400">
-              {/* TODO: Parse headings from content */}
-              <div className="py-1 hover:text-white cursor-pointer">Introduction</div>
-              <div className="py-1 pl-3 hover:text-white cursor-pointer text-xs">Section 1.1</div>
-              <div className="py-1 hover:text-white cursor-pointer">Content</div>
-              <div className="py-1 hover:text-white cursor-pointer">Conclusion</div>
-            </div>
-            
-            <h3 className="text-xs font-medium text-gray-500 mt-4 mb-2">📑 Styles</h3>
-            <div className="text-xs text-gray-400 space-y-1">
-              <div className="py-1 hover:text-white cursor-pointer">• Normal</div>
-              <div className="py-1 hover:text-white cursor-pointer">• Heading 1</div>
-              <div className="py-1 hover:text-white cursor-pointer">• Heading 2</div>
-              <div className="py-1 hover:text-white cursor-pointer">• Quote</div>
-            </div>
-          </div>
+      <div className="flex-1 flex min-h-0 overflow-hidden">
+        {/* Navigator Panel */}
+        {panels.navigator && !focusMode && (
+          <NavigatorPanel 
+            title={documentTitle}
+            content={activeDocument?.content || ''} 
+          />
         )}
         
         {/* Editor Area */}
@@ -325,103 +498,43 @@ export function WrytApp() {
           <div className="p-4 border-b border-abyss-cyan/10">
             <input
               type="text"
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value);
-                setIsModified(true);
-              }}
+              value={documentTitle}
+              onChange={(e) => setDocumentTitle(e.target.value)}
               className="w-full text-2xl font-bold bg-transparent text-white focus:outline-none placeholder-gray-600"
               placeholder="Document Title"
             />
+            {activeProject && (
+              <div className="text-xs text-gray-500 mt-1">
+                {activeProject.name} • {getTemplateById(activeDocument?.template || '')?.name || 'Document'}
+              </div>
+            )}
           </div>
           
           {/* Content Editor */}
           <div className="flex-1 overflow-y-auto p-8">
-            <div
-              ref={editorRef}
-              contentEditable
-              suppressContentEditableWarning
-              className="prose prose-invert max-w-none min-h-[500px] focus:outline-none"
+            <div 
+              className="prose prose-invert max-w-none min-h-[500px]"
               style={{ 
-                lineHeight: 1.8,
-                fontSize: '16px',
+                lineHeight: editorSettings.lineHeight,
+                fontSize: `${editorSettings.fontSize}px`,
+                fontFamily: editorSettings.fontFamily,
               }}
-              onInput={(e) => {
-                const newContent = (e.target as HTMLDivElement).innerHTML;
-                setContent(newContent);
-                setIsModified(true);
-              }}
-              onKeyUp={() => {
-                setCurrentStyle({
-                  bold: document.queryCommandState('bold'),
-                  italic: document.queryCommandState('italic'),
-                  underline: document.queryCommandState('underline'),
-                  strikethrough: document.queryCommandState('strikeThrough'),
-                  heading: null,
-                  align: 'left',
-                  listType: 'none',
-                });
-              }}
-              dangerouslySetInnerHTML={{ __html: content || '<p>Start writing...</p>' }}
-            />
+            >
+              <EditorContent editor={editor} className="h-full" />
+            </div>
           </div>
         </div>
         
         {/* Info Panel */}
-        {showInfo && !focusMode && (
-          <div className="w-48 border-l border-abyss-cyan/20 p-3 overflow-y-auto">
-            <h3 className="text-xs font-medium text-gray-500 mb-3">📊 Document Info</h3>
-            
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Words</span>
-                <span className="text-white">{wordCount.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Characters</span>
-                <span className="text-white">{charCount.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Reading</span>
-                <span className="text-white">{readingTime} min</span>
-              </div>
-            </div>
-            
-            <div className="mt-4 pt-4 border-t border-abyss-cyan/20">
-              <div className="flex items-center gap-2 text-sm">
-                {isModified ? (
-                  <span className="text-yellow-400">● Modified</span>
-                ) : (
-                  <span className="text-green-400">✓ Saved</span>
-                )}
-              </div>
-              {lastSaved && (
-                <div className="text-xs text-gray-500 mt-1">
-                  Last: {lastSaved.toLocaleTimeString()}
-                </div>
-              )}
-              
-              <Button onClick={saveDoc} variant="primary" className="w-full mt-3 text-sm">
-                Save
-              </Button>
-            </div>
-            
-            <h3 className="text-xs font-medium text-gray-500 mt-4 mb-2">📤 Export</h3>
-            <div className="space-y-1">
-              <button onClick={() => exportAs('pdf')} className="w-full text-left text-sm text-gray-400 hover:text-white py-1">
-                • PDF
-              </button>
-              <button onClick={() => exportAs('docx')} className="w-full text-left text-sm text-gray-400 hover:text-white py-1">
-                • DOCX
-              </button>
-              <button onClick={() => exportAs('md')} className="w-full text-left text-sm text-gray-400 hover:text-white py-1">
-                • Markdown
-              </button>
-              <button onClick={() => exportAs('html')} className="w-full text-left text-sm text-gray-400 hover:text-white py-1">
-                • HTML
-              </button>
-            </div>
-          </div>
+        {panels.info && !focusMode && (
+          <InfoPanel
+            wordCount={wordCount}
+            charCount={charCount}
+            hasUnsavedChanges={hasUnsavedChanges}
+            lastSavedAt={lastSavedAt}
+            onSave={handleSave}
+            onExport={handleExport}
+          />
         )}
       </div>
       
@@ -431,20 +544,31 @@ export function WrytApp() {
           <div className="flex items-center gap-4">
             <span>Page 1 of 1</span>
             <span>100%</span>
-            <span className="text-green-400">✓ Spell Check</span>
+            {editorSettings.spellCheck && <span className="text-green-400">✓ Spell Check</span>}
           </div>
           <div className="flex items-center gap-4">
-            <span>Ln 1, Col 1</span>
-            <span>{wordCount} words</span>
+            <span>{wordCount.toLocaleString()} words</span>
+            <span>{charCount.toLocaleString()} chars</span>
           </div>
         </div>
       )}
       
       {/* Focus mode exit hint */}
       {focusMode && (
-        <div className="fixed bottom-4 right-4 text-xs text-gray-600">
-          Press Esc to exit focus mode
-        </div>
+        <button
+          onClick={() => setFocusMode(false)}
+          className="fixed bottom-4 right-4 text-xs text-gray-600 hover:text-white transition-colors"
+        >
+          Press Esc or click to exit focus mode
+        </button>
+      )}
+      
+      {/* Template selector modal */}
+      {showTemplateSelector && (
+        <WrytTemplateSelector
+          onSelect={handleTemplateSelect}
+          onCancel={() => setShowTemplateSelector(false)}
+        />
       )}
     </div>
   );
