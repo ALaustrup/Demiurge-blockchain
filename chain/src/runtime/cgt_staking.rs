@@ -27,8 +27,9 @@ const PREFIX_LAST_REWARD_TIME: &[u8] = b"staking/last_reward:";
 pub const MIN_STAKE_AMOUNT: u128 = 100_000_000;
 /// Lock period in seconds (7 days)
 pub const UNSTAKE_LOCK_PERIOD: u64 = 7 * 24 * 60 * 60;
-/// Annual percentage yield (10% APY)
-pub const BASE_APY_BPS: u64 = 1000; // 10% = 1000 basis points
+/// Annual percentage yield (5% APY)
+/// Reduced from 10% to balance with 20% fee burn for net-neutral inflation
+pub const BASE_APY_BPS: u64 = 500; // 5% = 500 basis points
 /// Reward calculation interval (1 hour)
 pub const REWARD_INTERVAL_SECS: u64 = 3600;
 /// Maximum stake per address (10 million CGT)
@@ -444,12 +445,12 @@ mod tests {
             unstake_amount: 0,
         };
 
-        // After 1 year, should have ~10% rewards
+        // After 1 year, should have ~5% rewards (reduced from 10%)
         let one_year = 365 * 24 * 60 * 60;
         let rewards = calculate_pending_rewards(&stake, one_year);
         
-        // 1M CGT * 10% = 100K CGT (approximately)
-        let expected = 100_000_00_000_000u128;
+        // 1M CGT * 5% = 50K CGT (approximately)
+        let expected = 50_000_00_000_000u128;
         let tolerance = expected / 10; // 10% tolerance for rounding
         
         assert!(

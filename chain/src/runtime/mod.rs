@@ -21,7 +21,9 @@ pub mod fabric_manager;
 pub mod nft_dgen;
 pub mod developer_registry;
 pub mod dev_capsules;
+pub mod premium;
 pub mod recursion_registry;
+pub mod treasury;
 pub mod work_claim;
 
 pub use abyss_registry::{get_all_active_listings, get_listing, AbyssRegistryModule, ListingId};
@@ -51,6 +53,19 @@ pub use recursion_registry::{
 pub use work_claim::WorkClaimModule;
 pub use activity_log::ActivityLogModule;
 pub use cgt_staking::CgtStakingModule;
+pub use treasury::{
+    calculate_fee, calculate_fee_distribution, distribute_fees, get_treasury_balance,
+    get_treasury_stats, TreasuryModule, TreasuryStats, FeeDistribution,
+    TREASURY_ADDRESS, BURN_ADDRESS, FEE_RATE_BPS, MIN_FEE, MAX_FEE,
+    TREASURY_SHARE_BPS, BURN_SHARE_BPS, VALIDATOR_SHARE_BPS,
+};
+pub use premium::{
+    get_effective_tier, get_premium_status, get_stake_tier, get_subscription,
+    can_use_storage, PremiumModule, PremiumTier, PremiumFeature, PremiumStatus,
+    FREE_STORAGE, ARCHON_STORAGE, GENESIS_STORAGE,
+    ARCHON_MONTHLY_COST, GENESIS_MONTHLY_COST,
+    ARCHON_STAKE_REQUIREMENT, GENESIS_STAKE_REQUIREMENT,
+};
 
 /// Trait that all runtime modules must implement.
 ///
@@ -114,7 +129,9 @@ impl Runtime {
             .with_module(Box::new(RecursionRegistryModule::new()))
             .with_module(Box::new(WorkClaimModule::new()))
             .with_module(Box::new(ActivityLogModule::new()))
-            .with_module(Box::new(CgtStakingModule::new()));
+            .with_module(Box::new(CgtStakingModule::new()))
+            .with_module(Box::new(TreasuryModule::new()))
+            .with_module(Box::new(PremiumModule::new()));
         
         // PHASE OMEGA: Verify integrity in debug builds
         // In debug builds, fail fast if integrity check fails
@@ -170,7 +187,7 @@ mod tests {
     #[test]
     fn test_runtime_with_default_modules() {
         let runtime = Runtime::with_default_modules();
-        assert_eq!(runtime.modules.len(), 11);
+        assert_eq!(runtime.modules.len(), 13); // Including treasury and premium
     }
 
     #[test]

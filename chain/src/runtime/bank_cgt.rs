@@ -249,6 +249,8 @@ impl RuntimeModule for BankCgtModule {
 }
 
 fn handle_transfer(tx: &Transaction, state: &mut State) -> Result<(), String> {
+    use super::treasury::distribute_fees;
+    
     let params: TransferParams = bincode::deserialize(&tx.payload).map_err(|e| e.to_string())?;
 
     // Simple nonce check
@@ -281,7 +283,12 @@ fn handle_transfer(tx: &Transaction, state: &mut State) -> Result<(), String> {
     // Increment nonce
     set_nonce(state, &tx.from, current_nonce + 1)?;
 
-    // TODO: handle fee routing (burn or pool); for now, fee is effectively burned.
+    // Fee distribution: 70% treasury, 20% burn, 10% validator
+    // For now, use the sender as the "validator" until block producer tracking is added
+    // In production, the actual block producer address should be passed
+    if fee > 0 {
+        distribute_fees(state, fee, &tx.from)?;
+    }
 
     Ok(())
 }

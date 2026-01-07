@@ -33,6 +33,41 @@ interface StakingStats {
   lock_period_days: number;
 }
 
+interface PremiumStatus {
+  effective_tier: string;
+  effective_tier_id: number;
+  subscription_tier: string;
+  stake_tier: string;
+  subscription_expires_at: number;
+  staked_amount: string;
+  storage_limit: number;
+  storage_limit_gb: number;
+  storage_used: number;
+  storage_used_gb: number;
+  storage_available: number;
+}
+
+interface PremiumTier {
+  id: number;
+  name: string;
+  monthly_cost: string;
+  stake_requirement: string;
+  storage_limit: number;
+  storage_limit_gb: number;
+  features: string[];
+}
+
+interface TreasuryStats {
+  balance: string;
+  total_fees_collected: string;
+  total_burned: string;
+  total_validator_rewards: string;
+  fee_rate_percent: number;
+  treasury_share_percent: number;
+  burn_share_percent: number;
+  validator_share_percent: number;
+}
+
 export function AbyssWalletApp() {
   const { identity, isAuthenticated } = useAbyssIDIdentity();
   const { balance: userBalance, sync: syncUserData, isSyncing } = useAbyssIDUserData();
@@ -53,7 +88,7 @@ export function AbyssWalletApp() {
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
   const [showSendForm, setShowSendForm] = useState(false);
-  const [activeTab, setActiveTab] = useState<'cgt' | 'staking' | 'nft-swap'>('cgt');
+  const [activeTab, setActiveTab] = useState<'cgt' | 'staking' | 'nft-swap' | 'premium'>('cgt');
   
   // Staking state
   const [stakeInfo, setStakeInfo] = useState<StakeInfo | null>(null);
@@ -63,6 +98,12 @@ export function AbyssWalletApp() {
   const [isStaking, setIsStaking] = useState(false);
   const [stakingError, setStakingError] = useState<string | null>(null);
   const [showQR, setShowQR] = useState(false);
+  
+  // Premium state
+  const [premiumStatus, setPremiumStatus] = useState<PremiumStatus | null>(null);
+  const [premiumTiers, setPremiumTiers] = useState<PremiumTier[]>([]);
+  const [treasuryStats, setTreasuryStats] = useState<TreasuryStats | null>(null);
+  const [isLoadingPremium, setIsLoadingPremium] = useState(false);
   
   // Use identity from unified service - automatically synced
   const demiurgePublicKey = identity?.demiurgePublicKey || null;
@@ -138,6 +179,66 @@ export function AbyssWalletApp() {
       fetchStakingInfo();
     }
   }, [activeTab, fetchStakingInfo]);
+  
+  // Fetch premium status
+  const fetchPremiumStatus = useCallback(async () => {
+    if (!demiurgePublicKey) return;
+    
+    setIsLoadingPremium(true);
+    try {
+      const [statusResponse, tiersResponse, treasuryResponse] = await Promise.all([
+        fetch(RPC_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'premium_getStatus',
+            params: { address: demiurgePublicKey },
+            id: Date.now(),
+          }),
+        }),
+        fetch(RPC_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'premium_getTiers',
+            params: {},
+            id: Date.now() + 1,
+          }),
+        }),
+        fetch(RPC_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'treasury_getStats',
+            params: {},
+            id: Date.now() + 2,
+          }),
+        }),
+      ]);
+      
+      const statusJson = await statusResponse.json();
+      const tiersJson = await tiersResponse.json();
+      const treasuryJson = await treasuryResponse.json();
+      
+      if (statusJson.result) setPremiumStatus(statusJson.result);
+      if (tiersJson.result?.tiers) setPremiumTiers(tiersJson.result.tiers);
+      if (treasuryJson.result) setTreasuryStats(treasuryJson.result);
+    } catch (error) {
+      console.error('Failed to fetch premium status:', error);
+    } finally {
+      setIsLoadingPremium(false);
+    }
+  }, [demiurgePublicKey]);
+  
+  // Fetch premium status when tab changes
+  useEffect(() => {
+    if (activeTab === 'premium') {
+      fetchPremiumStatus();
+    }
+  }, [activeTab, fetchPremiumStatus]);
   
   // Format CGT amount
   const formatCGT = (amount: string) => {
@@ -262,6 +363,16 @@ export function AbyssWalletApp() {
         >
           NFT Swap
         </button>
+        <button
+          onClick={() => setActiveTab('premium')}
+          className={`px-4 py-2 text-sm font-medium transition-colors ${
+            activeTab === 'premium'
+              ? 'text-abyss-cyan border-b-2 border-abyss-cyan'
+              : 'text-gray-400 hover:text-gray-300'
+          }`}
+        >
+          Premium
+        </button>
       </div>
 
       {activeTab === 'nft-swap' && (
@@ -271,6 +382,194 @@ export function AbyssWalletApp() {
             // TODO: Refresh NFT list or show notification
           }}
         />
+      )}
+
+      {activeTab === 'premium' && (
+        <div className="space-y-6">
+          {isLoadingPremium ? (
+            <div className="text-center text-gray-400 py-8">Loading premium status...</div>
+          ) : (
+            <>
+              {/* Current Status Banner */}
+              <div className={`border rounded-lg p-6 ${
+                premiumStatus?.effective_tier === 'Genesis' 
+                  ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-500/30'
+                  : premiumStatus?.effective_tier === 'Archon'
+                  ? 'bg-gradient-to-r from-abyss-purple/20 to-abyss-cyan/20 border-abyss-purple/30'
+                  : 'bg-abyss-navy/50 border-abyss-cyan/20'
+              }`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <div className="text-sm text-gray-400 mb-1">Your Current Tier</div>
+                    <div className={`text-3xl font-bold ${
+                      premiumStatus?.effective_tier === 'Genesis' ? 'text-yellow-400' :
+                      premiumStatus?.effective_tier === 'Archon' ? 'text-abyss-purple' :
+                      'text-gray-400'
+                    }`}>
+                      {premiumStatus?.effective_tier || 'Free'}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-sm text-gray-400 mb-1">Storage</div>
+                    <div className="text-lg font-mono text-white">
+                      {premiumStatus?.storage_used_gb?.toFixed(2) || '0.00'} / {premiumStatus?.storage_limit_gb || 2} GB
+                    </div>
+                    <div className="w-32 h-2 bg-abyss-dark rounded-full overflow-hidden mt-1">
+                      <div 
+                        className="h-full bg-abyss-cyan transition-all"
+                        style={{ width: `${Math.min(100, ((premiumStatus?.storage_used || 0) / (premiumStatus?.storage_limit || 1)) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Subscription vs Stake Status */}
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Via Subscription</div>
+                    <div className="text-sm font-medium">
+                      {premiumStatus?.subscription_tier || 'None'}
+                      {premiumStatus?.subscription_expires_at ? (
+                        <span className="text-xs text-gray-500 ml-2">
+                          (expires {new Date(premiumStatus.subscription_expires_at * 1000).toLocaleDateString()})
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-500 mb-1">Via Staking</div>
+                    <div className="text-sm font-medium">
+                      {premiumStatus?.stake_tier || 'None'}
+                      {premiumStatus?.staked_amount && Number(premiumStatus.staked_amount) > 0 ? (
+                        <span className="text-xs text-gray-500 ml-2">
+                          ({formatCGT(premiumStatus.staked_amount)} CGT staked)
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Tier Comparison */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold text-abyss-cyan">Premium Tiers</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {premiumTiers.map((tier) => (
+                    <div 
+                      key={tier.id}
+                      className={`border rounded-lg p-4 ${
+                        tier.name === premiumStatus?.effective_tier
+                          ? 'border-abyss-cyan bg-abyss-cyan/10'
+                          : 'border-abyss-cyan/20 bg-abyss-dark/50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className={`text-lg font-bold ${
+                          tier.name === 'Genesis' ? 'text-yellow-400' :
+                          tier.name === 'Archon' ? 'text-abyss-purple' :
+                          'text-gray-300'
+                        }`}>
+                          {tier.name}
+                        </h4>
+                        {tier.name === premiumStatus?.effective_tier && (
+                          <span className="px-2 py-1 text-xs bg-abyss-cyan/20 text-abyss-cyan rounded">
+                            Current
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-2 mb-4">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-400">Storage</span>
+                          <span className="text-white">{tier.storage_limit_gb} GB</span>
+                        </div>
+                        {tier.monthly_cost !== '0' && (
+                          <>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-400">Monthly</span>
+                              <span className="text-white">{formatCGT(tier.monthly_cost)} CGT</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-400">Or Stake</span>
+                              <span className="text-white">{formatCGT(tier.stake_requirement)} CGT</span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-1 border-t border-white/10 pt-3">
+                        {tier.features.map((feature) => (
+                          <div key={feature} className="flex items-center text-xs text-gray-400">
+                            <span className="text-green-400 mr-2">✓</span>
+                            {feature.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {tier.name !== 'Free' && tier.name !== premiumStatus?.effective_tier && (
+                        <Button
+                          onClick={() => {
+                            // TODO: Implement subscription
+                            alert('Subscription coming soon! For now, stake CGT in the Staking tab to unlock premium tiers.');
+                          }}
+                          className="w-full mt-4"
+                          variant="secondary"
+                        >
+                          Upgrade to {tier.name}
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Treasury Info */}
+              {treasuryStats && (
+                <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-abyss-cyan mb-3">Ecosystem Treasury</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                      <div className="text-xs text-gray-500">Treasury Balance</div>
+                      <div className="font-mono text-white">{formatCGT(treasuryStats.balance)} CGT</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500">Total Burned</div>
+                      <div className="font-mono text-red-400">{formatCGT(treasuryStats.total_burned)} CGT</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500">Fees Collected</div>
+                      <div className="font-mono text-white">{formatCGT(treasuryStats.total_fees_collected)} CGT</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500">Fee Rate</div>
+                      <div className="font-mono text-white">{treasuryStats.fee_rate_percent}%</div>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-white/10">
+                    <div className="text-xs text-gray-500 mb-2">Fee Distribution</div>
+                    <div className="flex gap-4 text-xs">
+                      <span className="text-abyss-cyan">{treasuryStats.treasury_share_percent}% Treasury</span>
+                      <span className="text-red-400">{treasuryStats.burn_share_percent}% Burn</span>
+                      <span className="text-green-400">{treasuryStats.validator_share_percent}% Validators</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Info Box */}
+              <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-abyss-cyan mb-2">How Premium Works</h4>
+                <ul className="text-xs text-gray-400 space-y-1">
+                  <li>• <strong>Pay Monthly:</strong> Subscribe with CGT for immediate access</li>
+                  <li>• <strong>Stake to Unlock:</strong> Stake CGT in the Staking tab to unlock tiers permanently while staked</li>
+                  <li>• <strong>Best of Both:</strong> Your effective tier is always the highest between subscription and stake</li>
+                  <li>• <strong>70% to Ecosystem:</strong> Premium payments fund development and infrastructure</li>
+                </ul>
+              </div>
+            </>
+          )}
+        </div>
       )}
       
       {activeTab === 'staking' && (

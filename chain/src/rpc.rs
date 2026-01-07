@@ -44,6 +44,19 @@ use crate::runtime::activity_log::{
 use crate::runtime::cgt_staking::{
     get_stake_info, get_total_staked, get_staking_stats, calculate_pending_rewards,
 };
+use crate::runtime::treasury::{
+    get_treasury_balance, get_treasury_stats, get_total_fees_collected,
+    get_total_burned, get_total_validator_rewards, get_validator_rewards,
+    calculate_fee, FEE_RATE_BPS, MIN_FEE, MAX_FEE,
+    TREASURY_SHARE_BPS, BURN_SHARE_BPS, VALIDATOR_SHARE_BPS,
+};
+use crate::runtime::premium::{
+    get_effective_tier, get_premium_status, get_stake_tier, get_subscription,
+    can_use_storage, get_storage_used, PremiumTier,
+    FREE_STORAGE, ARCHON_STORAGE, GENESIS_STORAGE,
+    ARCHON_MONTHLY_COST, GENESIS_MONTHLY_COST,
+    ARCHON_STAKE_REQUIREMENT, GENESIS_STAKE_REQUIREMENT,
+};
 
 /// JSON-RPC request envelope.
 #[derive(Debug, Deserialize)]
@@ -3556,6 +3569,323 @@ async fn handle_rpc(
                 jsonrpc: "2.0".to_string(),
                 result: Some(json!({
                     "total_staked": total.to_string(),
+                })),
+                error: None,
+                id,
+            })
+        }
+
+        // ============================================
+        // Treasury RPC Methods
+        // ============================================
+        
+        "treasury_getStats" => {
+            let stats = node.with_state(|state| get_treasury_stats(state));
+            
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "balance": stats.balance.to_string(),
+                    "total_fees_collected": stats.total_fees_collected.to_string(),
+                    "total_burned": stats.total_burned.to_string(),
+                    "total_validator_rewards": stats.total_validator_rewards.to_string(),
+                    "fee_rate_bps": stats.fee_rate_bps,
+                    "fee_rate_percent": stats.fee_rate_bps as f64 / 100.0,
+                    "treasury_share_bps": stats.treasury_share_bps,
+                    "treasury_share_percent": stats.treasury_share_bps as f64 / 100.0,
+                    "burn_share_bps": stats.burn_share_bps,
+                    "burn_share_percent": stats.burn_share_bps as f64 / 100.0,
+                    "validator_share_bps": stats.validator_share_bps,
+                    "validator_share_percent": stats.validator_share_bps as f64 / 100.0,
+                })),
+                error: None,
+                id,
+            })
+        }
+        
+        "treasury_getBalance" => {
+            let balance = node.with_state(|state| get_treasury_balance(state));
+            
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "balance": balance.to_string(),
+                })),
+                error: None,
+                id,
+            })
+        }
+        
+        "treasury_calculateFee" => {
+            #[derive(Deserialize)]
+            struct Params {
+                amount: String,
+            }
+            
+            let params: Params = match req.params.as_ref() {
+                Some(p) => match serde_json::from_value(p.clone()) {
+                    Ok(parsed) => parsed,
+                    Err(e) => {
+                        return Json(JsonRpcResponse {
+                            jsonrpc: "2.0".to_string(),
+                            result: None,
+                            error: Some(JsonRpcError {
+                                code: -32602,
+                                message: format!("Invalid params: {}", e),
+                            }),
+                            id,
+                        });
+                    }
+                },
+                None => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: "Missing params".to_string(),
+                        }),
+                        id,
+                    });
+                }
+            };
+            
+            let amount: u128 = match params.amount.parse() {
+                Ok(a) => a,
+                Err(_) => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: "Invalid amount".to_string(),
+                        }),
+                        id,
+                    });
+                }
+            };
+            
+            let fee = calculate_fee(amount);
+            
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "amount": amount.to_string(),
+                    "fee": fee.to_string(),
+                    "total": (amount + fee).to_string(),
+                })),
+                error: None,
+                id,
+            })
+        }
+        
+        // ============================================
+        // Premium Tier RPC Methods
+        // ============================================
+        
+        "premium_getStatus" => {
+            #[derive(Deserialize)]
+            struct Params {
+                address: String,
+            }
+            
+            let params: Params = match req.params.as_ref() {
+                Some(p) => match serde_json::from_value(p.clone()) {
+                    Ok(parsed) => parsed,
+                    Err(e) => {
+                        return Json(JsonRpcResponse {
+                            jsonrpc: "2.0".to_string(),
+                            result: None,
+                            error: Some(JsonRpcError {
+                                code: -32602,
+                                message: format!("Invalid params: {}", e),
+                            }),
+                            id,
+                        });
+                    }
+                },
+                None => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: "Missing params".to_string(),
+                        }),
+                        id,
+                    });
+                }
+            };
+            
+            let address: Address = match hex::decode(params.address.strip_prefix("0x").unwrap_or(&params.address)) {
+                Ok(bytes) if bytes.len() == 32 => {
+                    let mut addr = [0u8; 32];
+                    addr.copy_from_slice(&bytes);
+                    addr
+                }
+                _ => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: "Invalid address format".to_string(),
+                        }),
+                        id,
+                    });
+                }
+            };
+            
+            let current_time = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_secs())
+                .unwrap_or(0);
+            
+            let status = node.with_state(|state| get_premium_status(state, &address, current_time));
+            
+            let tier_name = match status.effective_tier {
+                PremiumTier::Free => "Free",
+                PremiumTier::Archon => "Archon",
+                PremiumTier::Genesis => "Genesis",
+            };
+            
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "effective_tier": tier_name,
+                    "effective_tier_id": status.effective_tier as u8,
+                    "subscription_tier": match status.subscription_tier {
+                        PremiumTier::Free => "Free",
+                        PremiumTier::Archon => "Archon",
+                        PremiumTier::Genesis => "Genesis",
+                    },
+                    "stake_tier": match status.stake_tier {
+                        PremiumTier::Free => "Free",
+                        PremiumTier::Archon => "Archon",
+                        PremiumTier::Genesis => "Genesis",
+                    },
+                    "subscription_expires_at": status.subscription_expires_at,
+                    "staked_amount": status.staked_amount.to_string(),
+                    "storage_limit": status.storage_limit,
+                    "storage_limit_gb": status.storage_limit / (1024 * 1024 * 1024),
+                    "storage_used": status.storage_used,
+                    "storage_used_gb": status.storage_used as f64 / (1024.0 * 1024.0 * 1024.0),
+                    "storage_available": status.storage_limit.saturating_sub(status.storage_used),
+                })),
+                error: None,
+                id,
+            })
+        }
+        
+        "premium_getTiers" => {
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "tiers": [
+                        {
+                            "id": 0,
+                            "name": "Free",
+                            "monthly_cost": "0",
+                            "stake_requirement": "0",
+                            "storage_limit": FREE_STORAGE,
+                            "storage_limit_gb": FREE_STORAGE / (1024 * 1024 * 1024),
+                            "features": ["basic_storage", "standard_processing"]
+                        },
+                        {
+                            "id": 1,
+                            "name": "Archon",
+                            "monthly_cost": ARCHON_MONTHLY_COST.to_string(),
+                            "stake_requirement": ARCHON_STAKE_REQUIREMENT.to_string(),
+                            "storage_limit": ARCHON_STORAGE,
+                            "storage_limit_gb": ARCHON_STORAGE / (1024 * 1024 * 1024),
+                            "features": ["extended_storage", "priority_processing", "profile_badge", "priority_support", "early_access"]
+                        },
+                        {
+                            "id": 2,
+                            "name": "Genesis",
+                            "monthly_cost": GENESIS_MONTHLY_COST.to_string(),
+                            "stake_requirement": GENESIS_STAKE_REQUIREMENT.to_string(),
+                            "storage_limit": GENESIS_STORAGE,
+                            "storage_limit_gb": GENESIS_STORAGE / (1024 * 1024 * 1024),
+                            "features": ["extended_storage", "priority_processing", "profile_badge", "priority_support", "early_access", "exclusive_themes", "governance_bonus", "custom_handle", "direct_support"]
+                        }
+                    ]
+                })),
+                error: None,
+                id,
+            })
+        }
+        
+        "premium_canUseStorage" => {
+            #[derive(Deserialize)]
+            struct Params {
+                address: String,
+                additional_bytes: u64,
+            }
+            
+            let params: Params = match req.params.as_ref() {
+                Some(p) => match serde_json::from_value(p.clone()) {
+                    Ok(parsed) => parsed,
+                    Err(e) => {
+                        return Json(JsonRpcResponse {
+                            jsonrpc: "2.0".to_string(),
+                            result: None,
+                            error: Some(JsonRpcError {
+                                code: -32602,
+                                message: format!("Invalid params: {}", e),
+                            }),
+                            id,
+                        });
+                    }
+                },
+                None => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: "Missing params".to_string(),
+                        }),
+                        id,
+                    });
+                }
+            };
+            
+            let address: Address = match hex::decode(params.address.strip_prefix("0x").unwrap_or(&params.address)) {
+                Ok(bytes) if bytes.len() == 32 => {
+                    let mut addr = [0u8; 32];
+                    addr.copy_from_slice(&bytes);
+                    addr
+                }
+                _ => {
+                    return Json(JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: Some(JsonRpcError {
+                            code: -32602,
+                            message: "Invalid address format".to_string(),
+                        }),
+                        id,
+                    });
+                }
+            };
+            
+            let current_time = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_secs())
+                .unwrap_or(0);
+            
+            let can_use = node.with_state(|state| can_use_storage(state, &address, params.additional_bytes, current_time));
+            let status = node.with_state(|state| get_premium_status(state, &address, current_time));
+            
+            Json(JsonRpcResponse {
+                jsonrpc: "2.0".to_string(),
+                result: Some(json!({
+                    "can_use": can_use,
+                    "current_used": status.storage_used,
+                    "limit": status.storage_limit,
+                    "requested": params.additional_bytes,
+                    "would_use": status.storage_used + params.additional_bytes,
                 })),
                 error: None,
                 id,
