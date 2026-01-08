@@ -213,10 +213,12 @@ void AppLauncher::createAppTile(const AppInfo &info)
 {
     auto *tile = new AppTile(info, this);
     connect(tile, &QPushButton::clicked, [this, tile]() {
-        setSelectedApp(tile->info().mode);
-    });
-    connect(tile, &QPushButton::doubleClicked, [this]() {
-        launch();
+        if (m_selectedApp == tile->info().mode) {
+            // Double-click behavior: second click on selected launches
+            launch();
+        } else {
+            setSelectedApp(tile->info().mode);
+        }
     });
     
     m_tiles.append(tile);
@@ -235,6 +237,18 @@ void AppLauncher::updateSelection()
     for (auto *tile : m_tiles) {
         tile->setSelected(tile->info().mode == m_selectedApp);
     }
+}
+
+void AppLauncher::show()
+{
+    QWidget::show();
+    raise();
+    activateWindow();
+}
+
+void AppLauncher::hide()
+{
+    QWidget::hide();
 }
 
 void AppLauncher::launch()

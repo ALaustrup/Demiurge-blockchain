@@ -13,16 +13,18 @@
 #include <QSharedPointer>
 #include <QString>
 
-// Forward declarations
-class LocalDatabase;
-class SecureVault;
+// Forward declarations (outside QOR namespace)
 class AbyssIDManager;
-class WalletManager;
-class ChainClient;
-class SyncManager;
 class MainWindow;
 
 namespace QOR {
+
+// Forward declarations (inside QOR namespace)
+class LocalDatabase;
+class SecureVault;
+class WalletManager;
+class ChainClient;
+class SyncManager;
 
 /**
  * Application - Main application controller

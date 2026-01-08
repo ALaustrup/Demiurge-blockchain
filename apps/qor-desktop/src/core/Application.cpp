@@ -7,6 +7,7 @@
 #include "../storage/SecureVault.h"
 #include "../AbyssIDManager.h"
 #include "../WalletBridge.h"
+#include "../wallet/WalletManager.h"
 #include "../chain/ChainClient.h"
 #include "../chain/SyncManager.h"
 #include "../MainWindow.h"
@@ -176,13 +177,9 @@ bool Application::initIdentity()
     
     // Create AbyssID manager
     m_abyssId = QSharedPointer<AbyssIDManager>::create();
-    m_abyssId->setVault(m_vault.data());
-    m_abyssId->setDatabase(m_database.data());
     
-    // Try to load existing identity
-    if (m_vault->hasCredential("abyssid_key")) {
-        m_abyssId->loadFromVault();
-    }
+    // AbyssID will load credentials from keychain automatically
+    // via loadFromKeychain() in its constructor if available
     
     // Create wallet manager
     m_wallet = QSharedPointer<WalletManager>::create(m_abyssId.data());
@@ -272,7 +269,8 @@ void Application::checkConnectivity()
     });
     
     // Try to reach the chain RPC
-    QNetworkRequest request(QUrl("https://rpc.demiurge.cloud/health"));
+    QUrl healthUrl{"https://rpc.demiurge.cloud/health"};
+    QNetworkRequest request{healthUrl};
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, 
                         QNetworkRequest::NoLessSafeRedirectPolicy);
     manager->get(request);

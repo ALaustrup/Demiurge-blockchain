@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <!-- Icons -->
+        <file alias="icons/genesis.png">icons/genesis.png</file>
+        <file alias="icons/construct.png">icons/construct.png</file>
+        <file alias="icons/abyss.png">icons/abyss.png</file>
+        
+        <!-- Textures -->
+        <file alias="textures/noise.png">textures/noise.png</file>
+        
+        <!-- Fonts -->
+        <file alias="fonts/Orbitron-Bold.ttf">fonts/Orbitron-Bold.ttf</file>
+        <file alias="fonts/Rajdhani-Medium.ttf">fonts/Rajdhani-Medium.ttf</file>
+        <file alias="fonts/JetBrainsMono-Regular.ttf">fonts/JetBrainsMono-Regular.ttf</file>
+    </qresource>
+</RCC>

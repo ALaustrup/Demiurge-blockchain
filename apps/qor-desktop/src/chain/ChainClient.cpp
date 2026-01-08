@@ -249,7 +249,8 @@ void ChainClient::rpcCall(const QString &method, const QJsonArray &params, Callb
     request["method"] = method;
     request["params"] = params;
     
-    QNetworkRequest netRequest(QUrl(m_endpoint));
+    QUrl endpointUrl{m_endpoint};
+    QNetworkRequest netRequest{endpointUrl};
     netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     
     QNetworkReply *reply = m_networkManager->post(netRequest, 

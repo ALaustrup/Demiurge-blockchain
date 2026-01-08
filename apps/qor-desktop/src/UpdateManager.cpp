@@ -25,7 +25,8 @@ UpdateManager::~UpdateManager()
 
 void UpdateManager::checkForUpdates()
 {
-    QNetworkRequest request(QUrl(m_updateUrl + "latest.json"));
+    QUrl url{m_updateUrl + "latest.json"};
+    QNetworkRequest request{url};
     
     QNetworkReply *reply = m_networkManager->get(request);
     
@@ -51,7 +52,7 @@ void UpdateManager::checkForUpdates()
         if (latest > current) {
             m_newVersion = latestVersion;
             m_updateAvailable = true;
-            emit updateAvailable(latestVersion, m_changelog);
+            emit updateFound(latestVersion, m_changelog);
         } else {
             m_updateAvailable = false;
             emit noUpdateAvailable();
@@ -66,7 +67,8 @@ void UpdateManager::downloadUpdate()
         return;
     }
     
-    QNetworkRequest request(QUrl(m_downloadUrl));
+    QUrl downloadUrl{m_downloadUrl};
+    QNetworkRequest request{downloadUrl};
     QNetworkReply *reply = m_networkManager->get(request);
     
     connect(reply, &QNetworkReply::downloadProgress,

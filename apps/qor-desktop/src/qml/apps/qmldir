@@ -3,3 +3,9 @@ module QOR.Apps
 WalletApp 1.0 WalletApp.qml
 NeonApp 1.0 NeonApp.qml
 WrytApp 1.0 WrytApp.qml
+VideoRecorderApp 1.0 VideoRecorderApp.qml
+CameraApp 1.0 CameraApp.qml
+ScreenCaptureApp 1.0 ScreenCaptureApp.qml
+AudioRecorderApp 1.0 AudioRecorderApp.qml
+AudioDevicesApp 1.0 AudioDevicesApp.qml
+RecursionApp 1.0 RecursionApp.qml

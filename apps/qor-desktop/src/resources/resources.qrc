@@ -1,6 +1,12 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
-    <qresource prefix="/">
-        <file>icons/app.png</file>
+    <qresource prefix="/resources">
+        <!-- Icons would go here -->
+        <!-- <file>icons/qor.png</file> -->
+    </qresource>
+    
+    <qresource prefix="/audio">
+        <!-- Audio resources would go here -->
+        <!-- <file>test_tone.wav</file> -->
     </qresource>
 </RCC>

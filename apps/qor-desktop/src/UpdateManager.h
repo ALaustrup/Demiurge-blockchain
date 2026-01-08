@@ -26,10 +26,10 @@ public:
     
     QString currentVersion() const { return m_currentVersion; }
     QString newVersion() const { return m_newVersion; }
-    bool updateAvailable() const { return m_updateAvailable; }
+    bool isUpdateAvailable() const { return m_updateAvailable; }
 
 signals:
-    void updateAvailable(const QString &version, const QString &changelog);
+    void updateFound(const QString &version, const QString &changelog);
     void noUpdateAvailable();
     void downloadProgress(int percent);
     void downloadComplete();

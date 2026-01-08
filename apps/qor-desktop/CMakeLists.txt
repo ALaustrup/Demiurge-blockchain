@@ -11,20 +11,41 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-# Find Qt packages
+# Find Qt packages - Core required components
 find_package(Qt6 REQUIRED COMPONENTS
     Core
     Gui
     Widgets
     Quick
     QuickControls2
-    WebEngineWidgets
-    WebChannel
     Network
     Sql
     Multimedia
-    OpenGL
+    MultimediaWidgets
 )
+
+# Optional Qt components (may not be available in all builds)
+find_package(Qt6 QUIET COMPONENTS
+    Quick3D
+    Quick3DRuntimeRender
+    WebEngineWidgets
+    WebChannel
+    OpenGL
+    ShaderTools
+)
+
+# Report optional components
+if(Qt6Quick3D_FOUND)
+    message(STATUS "Qt Quick3D found - 3D features enabled")
+else()
+    message(STATUS "Qt Quick3D not found - 3D features disabled")
+endif()
+
+if(Qt6WebEngineWidgets_FOUND)
+    message(STATUS "Qt WebEngine found - Browser features enabled")
+else()
+    message(STATUS "Qt WebEngine not found - Browser features disabled")
+endif()
 
 # Core application sources
 set(CORE_SOURCES
@@ -79,6 +100,8 @@ set(UI_SOURCES
     src/AbyssIDManager.h
     src/WalletBridge.cpp
     src/WalletBridge.h
+    src/wallet/WalletManager.cpp
+    src/wallet/WalletManager.h
     src/UpdateManager.cpp
     src/UpdateManager.h
     src/AppLauncher.cpp
@@ -103,7 +126,10 @@ set(RESOURCES
 
 # Platform-specific configurations
 if(WIN32)
-    set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/src/resources/app.rc")
+    # Windows resource file for icon (optional - only if file exists)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/resources/app.rc")
+        set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/src/resources/app.rc")
+    endif()
     add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${RESOURCES} ${APP_ICON_RESOURCE_WINDOWS})
 elseif(APPLE)
     set(MACOSX_BUNDLE_ICON_FILE qor.icns)
@@ -121,20 +147,45 @@ else()
     add_executable(${PROJECT_NAME} ${SOURCES} ${RESOURCES})
 endif()
 
-# Link Qt libraries
+# Link Qt libraries - Required
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Widgets
     Qt6::Quick
     Qt6::QuickControls2
-    Qt6::WebEngineWidgets
-    Qt6::WebChannel
     Qt6::Network
     Qt6::Sql
     Qt6::Multimedia
-    Qt6::OpenGL
+    Qt6::MultimediaWidgets
 )
+
+# Link optional Qt libraries if available
+if(Qt6Quick3D_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Quick3D)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE QOR_QUICK3D_ENABLED)
+endif()
+
+if(Qt6Quick3DRuntimeRender_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Quick3DRuntimeRender)
+endif()
+
+if(Qt6WebEngineWidgets_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::WebEngineWidgets)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE QOR_WEBENGINE_ENABLED)
+endif()
+
+if(Qt6WebChannel_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::WebChannel)
+endif()
+
+if(Qt6OpenGL_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::OpenGL)
+endif()
+
+if(Qt6ShaderTools_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::ShaderTools)
+endif()
 
 # Copy web content to build directory (for Abyss Explorer browser component)
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

@@ -37,7 +37,8 @@ void WalletBridge::connectToChain()
 
 void WalletBridge::pollChainStatus()
 {
-    QNetworkRequest request(QUrl(m_rpcUrl));
+    QUrl url{m_rpcUrl};
+    QNetworkRequest request{url};
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     
     QJsonObject payload;
@@ -92,7 +93,8 @@ QVariantMap WalletBridge::getChainStatus()
 QString WalletBridge::getBalance(const QString &address)
 {
     // Synchronous balance check - in production, make async
-    QNetworkRequest request(QUrl(m_rpcUrl));
+    QUrl rpcUrl{m_rpcUrl};
+    QNetworkRequest request{rpcUrl};
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     
     QJsonObject params;

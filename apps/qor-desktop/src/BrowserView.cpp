@@ -1,8 +1,13 @@
 /**
  * BrowserView Implementation
+ * 
+ * Only compiled when Qt WebEngine is available.
  */
 
 #include "BrowserView.h"
+
+#ifdef QOR_WEBENGINE_ENABLED
+
 #include "AbyssIDManager.h"
 #include "WalletBridge.h"
 
@@ -154,3 +159,5 @@ void BrowserView::contextMenuEvent(QContextMenuEvent *event)
     
     menu->popup(event->globalPos());
 }
+
+#endif // QOR_WEBENGINE_ENABLED

@@ -188,8 +188,8 @@ void MainWindow::saveSettings()
 void MainWindow::connectSignals()
 {
     // Update manager signals
-    connect(m_updateManager, &UpdateManager::updateAvailable,
-            [this](const QString &version, const QString &changelog) {
+    connect(m_updateManager, &UpdateManager::updateFound,
+            this, [this](const QString &version, const QString &changelog) {
         QMessageBox::information(this, tr("Update Available"),
             tr("A new version (%1) is available.\n\n%2").arg(version, changelog));
     });

@@ -13,6 +13,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QNetworkAccessManager>
+#include <QTimer>
 #include <functional>
 
 namespace QOR {
@@ -190,7 +191,7 @@ private:
     qint64 m_lastBlockHeight;
     int m_requestId;
     
-    class QTimer *m_pollTimer;
+    QTimer *m_pollTimer;
 };
 
 } // namespace QOR

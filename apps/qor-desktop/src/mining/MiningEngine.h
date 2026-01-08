@@ -23,6 +23,8 @@
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QVector>
+#include <QVariantMap>
+#include <QDebug>
 #include <atomic>
 
 namespace QOR {

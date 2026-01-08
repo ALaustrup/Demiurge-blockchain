@@ -38,6 +38,12 @@
         <file>src/qml/apps/WalletApp.qml</file>
         <file>src/qml/apps/NeonApp.qml</file>
         <file>src/qml/apps/WrytApp.qml</file>
+        <file>src/qml/apps/VideoRecorderApp.qml</file>
+        <file>src/qml/apps/CameraApp.qml</file>
+        <file>src/qml/apps/ScreenCaptureApp.qml</file>
+        <file>src/qml/apps/AudioRecorderApp.qml</file>
+        <file>src/qml/apps/AudioDevicesApp.qml</file>
+        <file>src/qml/apps/RecursionApp.qml</file>
         <file>src/qml/apps/qmldir</file>
     </qresource>
     

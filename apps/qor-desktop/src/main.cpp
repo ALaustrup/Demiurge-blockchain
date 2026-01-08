@@ -10,11 +10,14 @@
  */
 
 #include <QApplication>
-#include <QWebEngineProfile>
-#include <QWebEngineSettings>
 #include <QDir>
 #include <QStandardPaths>
 #include "MainWindow.h"
+
+#ifdef QOR_WEBENGINE_ENABLED
+#include <QWebEngineProfile>
+#include <QWebEngineSettings>
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -30,6 +33,7 @@ int main(int argc, char *argv[])
     app.setOrganizationDomain(APP_DOMAIN);
     app.setApplicationDisplayName(APP_DISPLAY_NAME);
     
+#ifdef QOR_WEBENGINE_ENABLED
     // Configure WebEngine
     QWebEngineProfile *profile = QWebEngineProfile::defaultProfile();
     
@@ -47,6 +51,7 @@ int main(int argc, char *argv[])
     settings->setAttribute(QWebEngineSettings::AllowWindowActivationFromJavaScript, true);
     settings->setAttribute(QWebEngineSettings::WebGLEnabled, true);
     settings->setAttribute(QWebEngineSettings::Accelerated2dCanvasEnabled, true);
+#endif
     
     // Create and show main window
     MainWindow mainWindow;

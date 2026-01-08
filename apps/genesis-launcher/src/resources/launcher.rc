@@ -1,0 +1,26 @@
+// Windows resource file for Genesis Launcher
+// IDI_ICON1 ICON "icons/genesis.ico"  // Uncomment when icon is available
+
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION 1,0,0,0
+    PRODUCTVERSION 1,0,0,0
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "CompanyName", "Demiurge"
+            VALUE "FileDescription", "Genesis Launcher - Demiurge Ecosystem Gateway"
+            VALUE "FileVersion", "1.0.0"
+            VALUE "InternalName", "GenesisLauncher"
+            VALUE "LegalCopyright", "Copyright 2026 Demiurge"
+            VALUE "OriginalFilename", "GenesisLauncher.exe"
+            VALUE "ProductName", "Genesis Launcher"
+            VALUE "ProductVersion", "1.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1252
+    END
+END

@@ -7,6 +7,9 @@
 #include <QRandomGenerator>
 #include <QSysInfo>
 #include <QThread>
+#include <QDateTime>
+#include <QFile>
+#include <QRegularExpression>
 #include <QtMath>
 
 namespace QOR {
@@ -405,8 +408,8 @@ void MiningEngine::onSolutionFound(quint64 nonce, const QByteArray& hash)
         
         if (hashValue < m_currentTarget / 1000) {  // Much lower than target = block
             m_stats.blocksFound++;
-            m_stats.totalRewards += 50 * 100000000;  // 50 CGT block reward
-            emit blockFound(hash.toHex(), 50 * 100000000);
+            m_stats.totalRewards += 50ULL * 100000000ULL;  // 50 CGT block reward
+            emit blockFound(hash.toHex(), 50ULL * 100000000ULL);
         }
         
         emit shareSubmitted(true);

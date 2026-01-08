@@ -414,6 +414,12 @@ Item {
             case "wryt": return "📝"
             case "files": return "📁"
             case "settings": return "⚙️"
+            case "video-recorder": return "📹"
+            case "camera": return "📷"
+            case "screen-capture": return "🖥️"
+            case "audio-recorder": return "🎙️"
+            case "audio-devices": return "🔊"
+            case "recursion": return "🎮"
             default: return "📦"
         }
     }
@@ -423,6 +429,12 @@ Item {
             case "wallet": return "../apps/WalletApp.qml"
             case "neon": return "../apps/NeonApp.qml"
             case "wryt": return "../apps/WrytApp.qml"
+            case "video-recorder": return "../apps/VideoRecorderApp.qml"
+            case "camera": return "../apps/CameraApp.qml"
+            case "screen-capture": return "../apps/ScreenCaptureApp.qml"
+            case "audio-recorder": return "../apps/AudioRecorderApp.qml"
+            case "audio-devices": return "../apps/AudioDevicesApp.qml"
+            case "recursion": return "../apps/RecursionApp.qml"
             default: return ""
         }
     }
