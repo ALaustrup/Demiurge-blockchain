@@ -83,7 +83,7 @@ Item {
             }
         }
         
-        // Status message
+        // Status bar
         Rectangle {
             Layout.fillWidth: true
             height: 40
@@ -95,26 +95,45 @@ Item {
                 anchors.margins: 10
                 spacing: 10
                 
-                // Status indicator
+                // Connection status indicator
                 Rectangle {
                     width: 8
                     height: 8
                     radius: 4
-                    color: UpdateEngine.hasUpdates ? "#FFAA00" : cipherCyan
+                    color: AuthManager.isOnline ? cipherCyan : "#FF6666"
                     
                     SequentialAnimation on opacity {
                         loops: Animation.Infinite
-                        running: true
-                        NumberAnimation { to: 0.4; duration: 1000 }
-                        NumberAnimation { to: 1.0; duration: 1000 }
+                        running: !AuthManager.isOnline
+                        NumberAnimation { to: 0.4; duration: 800 }
+                        NumberAnimation { to: 1.0; duration: 800 }
                     }
                 }
                 
                 Text {
-                    text: LauncherCore.statusMessage
+                    text: AuthManager.isOnline ? LauncherCore.statusMessage : "Offline Mode"
                     color: textSecondary
                     font.family: "JetBrains Mono"
                     font.pixelSize: 11
+                }
+                
+                // Pending sync indicator
+                Rectangle {
+                    visible: AuthManager.hasPendingSync
+                    width: syncText.implicitWidth + 16
+                    height: 22
+                    radius: 11
+                    color: Qt.rgba(1, 0.57, 0, 0.15)
+                    border.width: 1
+                    border.color: flameOrange
+                    
+                    Text {
+                        id: syncText
+                        anchors.centerIn: parent
+                        text: "⏳ Pending Sync"
+                        color: flameOrange
+                        font.pixelSize: 10
+                    }
                 }
                 
                 Item { Layout.fillWidth: true }

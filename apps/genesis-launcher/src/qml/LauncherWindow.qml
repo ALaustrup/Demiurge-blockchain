@@ -130,6 +130,21 @@ ApplicationWindow {
                 onLoginSuccess: {
                     contentStack.replace(dashboardView)
                 }
+                onCreateAccount: {
+                    contentStack.push(signUpView)
+                }
+            }
+        }
+        
+        Component {
+            id: signUpView
+            SignUpView {
+                onSignUpSuccess: {
+                    contentStack.replace(dashboardView)
+                }
+                onBackToLogin: {
+                    contentStack.pop()
+                }
             }
         }
         

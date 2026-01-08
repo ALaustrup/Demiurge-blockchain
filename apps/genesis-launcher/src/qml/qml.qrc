@@ -4,6 +4,7 @@
         
         <!-- Views -->
         <file alias="qml/views/LoginView.qml">views/LoginView.qml</file>
+        <file alias="qml/views/SignUpView.qml">views/SignUpView.qml</file>
         <file alias="qml/views/DashboardView.qml">views/DashboardView.qml</file>
         
         <!-- Components -->
