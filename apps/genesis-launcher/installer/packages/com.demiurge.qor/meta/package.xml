@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>DEMIURGE QOR Launcher</DisplayName>
+    <Description>The gateway to the Demiurge blockchain ecosystem. Includes QorID authentication, wallet, and launcher for QOR Desktop and Miner.</Description>
+    <Version>1.0.0</Version>
+    <ReleaseDate>2026-01-10</ReleaseDate>
+    
+    <!-- License -->
+    <Licenses>
+        <License name="MIT License" file="license.txt" />
+    </Licenses>
+    
+    <!-- Required component -->
+    <Default>true</Default>
+    <ForcedInstallation>true</ForcedInstallation>
+    
+    <!-- Estimated size (MB) -->
+    <DownloadableArchives>qor-launcher.7z</DownloadableArchives>
+    
+    <!-- Install script -->
+    <Script>installscript.qs</Script>
+    
+    <!-- Dependencies -->
+    <Dependencies></Dependencies>
+    
+    <!-- OS support -->
+    <SupportedPlatforms>
+        <Platform>windows</Platform>
+        <Platform>macos</Platform>
+        <Platform>linux</Platform>
+    </SupportedPlatforms>
+</Package>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>DEMIURGE QOR</Name>
+    <Version>1.0.0</Version>
+    <Title>DEMIURGE QOR Installer</Title>
+    <Publisher>Demiurge</Publisher>
+    <ProductUrl>https://demiurge.cloud</ProductUrl>
+    <Logo>logo.png</Logo>
+    <InstallerWindowIcon>icon.png</InstallerWindowIcon>
+    <InstallerApplicationIcon>icon</InstallerApplicationIcon>
+    
+    <!-- Installation directory -->
+    <TargetDir>@ApplicationsDir@/Demiurge/QOR</TargetDir>
+    
+    <!-- Start menu directory (Windows) -->
+    <StartMenuDir>DEMIURGE</StartMenuDir>
+    
+    <!-- Allow non-ASCII characters in paths -->
+    <AllowNonAsciiCharacters>true</AllowNonAsciiCharacters>
+    
+    <!-- Allow space in path -->
+    <AllowSpaceInPath>true</AllowSpaceInPath>
+    
+    <!-- Uninstaller name -->
+    <MaintenanceToolName>DemiurgeQOR-Uninstall</MaintenanceToolName>
+    
+    <!-- Control script -->
+    <ControlScript>controlscript.qs</ControlScript>
+    
+    <!-- Wizard pages -->
+    <WizardStyle>Classic</WizardStyle>
+    
+    <!-- Custom pages -->
+    <TargetConfigurationPage>target</TargetConfigurationPage>
+    <ComponentSelectionPage>component</ComponentSelectionPage>
+    <LicenseAgreementPage>license</LicenseAgreementPage>
+    <StartMenuDirectoryPage>startmenu</StartMenuDirectoryPage>
+    <ReadyForInstallationPage>ready</ReadyForInstallationPage>
+    <PerformInstallationPage>installation</PerformInstallationPage>
+    <FinishedPage>finish</FinishedPage>
+    
+    <!-- Require admin on Windows for Program Files install -->
+    <RequiresAdminRights>false</RequiresAdminRights>
+    
+    <!-- Signing (for updates) -->
+    <SupportsModify>false</SupportsModify>
+    <AllowUnstableComponents>false</AllowUnstableComponents>
+</Installer>
