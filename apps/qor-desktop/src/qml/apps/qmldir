@@ -1,0 +1,5 @@
+module QOR.Apps
+
+WalletApp 1.0 WalletApp.qml
+NeonApp 1.0 NeonApp.qml
+WrytApp 1.0 WrytApp.qml

@@ -33,6 +33,12 @@
         <!-- Effects -->
         <file>src/qml/effects/VoidBackground.qml</file>
         <file>src/qml/effects/qmldir</file>
+        
+        <!-- Apps -->
+        <file>src/qml/apps/WalletApp.qml</file>
+        <file>src/qml/apps/NeonApp.qml</file>
+        <file>src/qml/apps/WrytApp.qml</file>
+        <file>src/qml/apps/qmldir</file>
     </qresource>
     
     <qresource prefix="/fonts">

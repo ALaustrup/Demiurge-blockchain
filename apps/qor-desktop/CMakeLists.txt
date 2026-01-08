@@ -54,6 +54,18 @@ set(CHAIN_SOURCES
     src/chain/TransactionQueue.h
 )
 
+# P2P networking sources
+set(P2P_SOURCES
+    src/p2p/P2PNode.cpp
+    src/p2p/P2PNode.h
+)
+
+# Mining engine sources
+set(MINING_SOURCES
+    src/mining/MiningEngine.cpp
+    src/mining/MiningEngine.h
+)
+
 # UI sources
 set(UI_SOURCES
     src/main.cpp
@@ -78,6 +90,8 @@ set(SOURCES
     ${CORE_SOURCES}
     ${STORAGE_SOURCES}
     ${CHAIN_SOURCES}
+    ${P2P_SOURCES}
+    ${MINING_SOURCES}
     ${UI_SOURCES}
 )
 

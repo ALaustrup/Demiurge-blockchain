@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 
 import "../components"
+import "../apps"
 
 /**
  * QWindow - Custom MDI Window
@@ -418,8 +419,12 @@ Item {
     }
     
     function getAppSource(appId) {
-        // Return empty for now - apps would be loaded from separate files
-        return ""
+        switch (appId) {
+            case "wallet": return "../apps/WalletApp.qml"
+            case "neon": return "../apps/NeonApp.qml"
+            case "wryt": return "../apps/WrytApp.qml"
+            default: return ""
+        }
     }
     
     // ========================================================================
