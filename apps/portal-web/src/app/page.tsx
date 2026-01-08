@@ -8,6 +8,7 @@ import { Download, Sparkles, Rocket, Shield } from "lucide-react";
 import { LaunchCountdown } from "@/components/countdown/LaunchCountdown";
 import { DownloadModal } from "@/components/modals/DownloadModal";
 import { QorIDDialog } from "@/components/fracture/QorIDDialog";
+import { BackgroundVideo } from "@/components/video/BackgroundVideo";
 import Link from "next/link";
 
 /**
@@ -26,11 +27,16 @@ export default function HomePage() {
     <>
       <GenesisOnboarding />
       <FractureShell>
+        {/* Background Video */}
+        <BackgroundVideo className="z-0" />
+
+        {/* Content Layer */}
+        <div className="relative z-10">
         {/* Countdown Banner at Top */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-6xl mx-auto mb-8 p-4 bg-gradient-to-r from-genesis-flame-orange/10 via-genesis-cipher-cyan/10 to-genesis-void-purple/10 border border-genesis-flame-orange/30 rounded-2xl backdrop-blur-sm"
+          className="w-full max-w-6xl mx-auto mb-8 p-4 bg-gradient-to-r from-genesis-flame-orange/10 via-genesis-cipher-cyan/10 to-genesis-void-purple/10 border border-genesis-flame-orange/30 rounded-2xl backdrop-blur-md"
         >
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -224,6 +230,7 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
+        </div>
         </div>
       </FractureShell>
 
