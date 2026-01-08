@@ -5,7 +5,7 @@ Get DEMIURGE running locally in 5 minutes.
 ## Prerequisites
 
 - **Rust** (1.70+): `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
-- **Node.js** (20+) and **pnpm** (9+)
+- **Node.js** (20+) with **pnpm** (9+): `npm install -g pnpm`
 - **Git**
 
 ## 1. Clone Repository
@@ -21,49 +21,127 @@ cd DEMIURGE
 cargo build --release -p demiurge-chain
 ```
 
+This compiles the blockchain node (~5-10 minutes on first build).
+
 ## 3. Start the Chain Node
 
 ```bash
 ./target/release/demiurge-chain
 ```
 
-The RPC server starts at `http://localhost:8545/rpc`
+The node will start with:
+- **RPC Server**: `http://localhost:8545/rpc`
+- **P2P Port**: `30303`
+- **Block Time**: 3 seconds
+- **Default Data Directory**: `~/.demiurge/data`
 
-## 4. Test the Connection
+## 4. Test the RPC Connection
 
 ```bash
 curl -X POST http://localhost:8545/rpc \
   -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","method":"cgt_getChainInfo","params":{},"id":1}'
+  -d '{"jsonrpc":"2.0","method":"chain_getInfo","params":[],"id":1}'
 ```
 
 Expected response:
 ```json
-{"jsonrpc":"2.0","result":{"height":0},"id":1}
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "height": 1,
+    "network": "demiurge-devnet"
+  },
+  "id": 1
+}
 ```
 
 ## 5. Start Frontend Applications
 
+### Install Dependencies
+
 ```bash
-# Install dependencies
 pnpm install
-
-# Start AbyssID Service (port 8082)
-cd apps/abyssid-service && pnpm dev
-
-# Start Portal Web (port 3000)
-cd apps/portal-web && pnpm dev
-
-# Start AbyssOS Portal (port 5173)
-cd apps/abyssos-portal && pnpm dev
 ```
+
+### Start Applications
+
+**AbyssOS Portal** (Full desktop environment):
+```bash
+cd apps/abyssos-portal
+pnpm dev
+```
+Opens at http://localhost:5173
+
+**Portal Web** (Landing page):
+```bash
+cd apps/portal-web
+pnpm dev
+```
+Opens at http://localhost:3000
+
+**AbyssID Service** (Auth API):
+```bash
+cd apps/abyssid-service
+pnpm dev
+```
+Runs on http://localhost:8082
+
+## 6. Create Your AbyssID
+
+1. Open http://localhost:5173
+2. Click **"Create new AbyssID"**
+3. Choose a username
+4. **Save your secret code** (required for recovery)
+5. Click **"Create Account"**
+
+## 7. Explore
+
+Once logged in to AbyssOS Portal:
+
+| App | Description |
+|-----|-------------|
+| 🪙 **Wallet** | View CGT balance, send/receive |
+| 🌊 **Explorer** | Web browser with AbyssID integration |
+| 💎 **DRC369 Studio** | Create and mint NFTs |
+| 📁 **Files** | On-chain file storage |
+| ⚡ **Chain Ops** | Node monitoring and operations |
+| ⛏️ **Miner** | CPU mining interface |
 
 ## Next Steps
 
 - Read the [Architecture Overview](../architecture/OVERVIEW.md)
 - Explore the [RPC API](../api/RPC.md)
-- Check [Deployment Guide](../deployment/NODE_SETUP.md) for production
+- Check [Deployment Guide](../deployment/NODE_SETUP.md) for production setup
+
+## Troubleshooting
+
+### Chain won't start
+```bash
+# Check if port 8545 is in use
+netstat -an | grep 8545
+
+# Remove old chain data and restart
+rm -rf ~/.demiurge/data
+./target/release/demiurge-chain
+```
+
+### RPC connection fails
+1. Verify chain is running: `ps aux | grep demiurge-chain`
+2. Check RPC endpoint: `curl http://localhost:8545/rpc`
+3. See [RPC Troubleshooting](../deployment/RPC_TROUBLESHOOTING.md)
+
+### Frontend won't start
+```bash
+# Clear node modules and reinstall
+rm -rf node_modules
+pnpm install
+
+# Build from root
+pnpm build
+```
 
 ---
 
-*The flame burns eternal. The code serves the will.*
+**The flame burns eternal. The code serves the will.**
+
+*Last updated: January 8, 2026*

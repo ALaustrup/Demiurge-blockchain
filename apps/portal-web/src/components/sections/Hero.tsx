@@ -13,21 +13,22 @@ export function Hero() {
           transition={{ duration: 0.8 }}
           className="text-center"
         >
-          <h1 className="mb-6 text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
-            <span className="bg-gradient-to-r from-zinc-50 to-zinc-400 bg-clip-text text-transparent">
-              DEMIURGE
+          <h1 className="mb-6 text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl font-display">
+            <span className="bg-gradient-to-r from-[var(--genesis-flame-orange)] via-[var(--genesis-cipher-cyan)] to-[var(--genesis-flame-orange)] bg-clip-text text-transparent">
+              GENESIS
             </span>
           </h1>
-          <p className="mx-auto mb-8 max-w-2xl text-xl text-zinc-400 sm:text-2xl">
-            A sovereign L1 blockchain ecosystem for creators, gamers, musicians,
-            developers, and artists. Build, mint, trade, and earn.
+          <p className="mx-auto mb-8 max-w-2xl text-xl text-[var(--genesis-text-primary)] sm:text-2xl">
+            A sovereign Layer 1 blockchain ecosystem built for creators.
+            <br />
+            <span className="text-[var(--genesis-text-secondary)]">Build. Mint. Trade. Earn.</span>
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <a href="/urgeid">
-              <Button variant="primary">Enter My Void</Button>
+            <a href="https://demiurge.cloud">
+              <Button variant="primary">Enter the Abyss</Button>
             </a>
             <a href="/docs">
-              <Button variant="outline">Read the Docs</Button>
+              <Button variant="outline">Documentation</Button>
             </a>
           </div>
         </motion.div>

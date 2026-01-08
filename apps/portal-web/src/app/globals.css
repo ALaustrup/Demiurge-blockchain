@@ -1,13 +1,31 @@
 @import "tailwindcss";
 
+/* Genesis Launcher Theme - Unified Demiurge Ecosystem Theme */
 :root {
-  --background: #020617;
-  --foreground: #f1f5f9;
+  --background: #050505;           /* Genesis Void */
+  --foreground: #E0E0E0;           /* Genesis Text Primary */
+  
+  /* Genesis Color Palette */
+  --genesis-void: #050505;
+  --genesis-void-dark: #000000;
+  --genesis-glass: #0A0A0A;
+  --genesis-glass-light: #0D0D0D;
+  --genesis-glass-hover: #151515;
+  --genesis-text-primary: #E0E0E0;
+  --genesis-text-secondary: #7A7A7A;
+  --genesis-text-tertiary: #555555;
+  --genesis-flame-orange: #FF3D00;
+  --genesis-flame-orange-hover: #FF5722;
+  --genesis-cipher-cyan: #00FFC8;
+  --genesis-cipher-cyan-hover: #00E5B8;
+  --genesis-border-default: #252525;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--genesis-void);
+  --color-foreground: var(--genesis-text-primary);
+  --color-accent: var(--genesis-flame-orange);
+  --color-secondary: var(--genesis-cipher-cyan);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-bebas: var(--font-bebas);
