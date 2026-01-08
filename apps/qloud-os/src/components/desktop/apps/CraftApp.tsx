@@ -167,8 +167,8 @@ const TEMPLATES: Template[] = [
     icon: '🖥️',
     type: 'abyssos-app',
     files: [
-      { path: 'package.json', content: getQOR OSAppPackageJson(), type: 'file' },
-      { path: 'src/App.tsx', content: getQOR OSAppTemplate(), type: 'file' },
+      { path: 'package.json', content: getQorOSAppPackageJson(), type: 'file' },
+      { path: 'src/App.tsx', content: getQorOSAppTemplate(), type: 'file' },
       { path: 'manifest.json', content: getManifestTemplate(), type: 'file' },
       { path: 'README.md', content: '# QOR OS App\n\nBuilt with CRAFT', type: 'file' },
     ],
@@ -1362,9 +1362,9 @@ export function MintPanel() {
 }`;
 }
 
-function getQOR OSAppPackageJson(): string {
+function getQorOSAppPackageJson(): string {
   return JSON.stringify({
-    name: 'my-abyssos-app',
+    name: 'my-qor-app',
     version: '1.0.0',
     dependencies: {
       'react': '^18.0.0',
@@ -1372,10 +1372,10 @@ function getQOR OSAppPackageJson(): string {
   }, null, 2);
 }
 
-function getQOR OSAppTemplate(): string {
+function getQorOSAppTemplate(): string {
   return `import { useState } from 'react';
 
-export function MyQOR OSApp() {
+export function MyQorOSApp() {
   const [count, setCount] = useState(0);
   
   return (
