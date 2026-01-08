@@ -31,10 +31,10 @@ MainWindow::MainWindow(QWidget *parent)
     , m_walletBridge(nullptr)
     , m_updateManager(nullptr)
     , m_navToolBar(nullptr)
-    , m_settings("Demiurge", "AbyssExplorer")
+    , m_settings("Demiurge", "QOR")
 {
     // Set window properties
-    setWindowTitle(tr("Abyss Explorer - Web3 Browser"));
+    setWindowTitle(tr("QØЯ - Demiurge Desktop"));
     setMinimumSize(1024, 768);
     
     // Initialize components
@@ -149,7 +149,7 @@ void MainWindow::setupMenuBar()
     
     helpMenu->addSeparator();
     
-    QAction *aboutAction = helpMenu->addAction(tr("&About Abyss Explorer"));
+    QAction *aboutAction = helpMenu->addAction(tr("&About QØЯ"));
     connect(aboutAction, &QAction::triggered, this, &MainWindow::showAbout);
 }
 
@@ -221,10 +221,13 @@ void MainWindow::toggleDevTools()
 
 void MainWindow::showAbout()
 {
-    QMessageBox::about(this, tr("About Abyss Explorer"),
-        tr("<h2>Abyss Explorer</h2>"
+    QMessageBox::about(this, tr("About QØЯ"),
+        tr("<h2>QØЯ</h2>"
            "<p>Version %1</p>"
-           "<p>The native desktop application for the Demiurge blockchain ecosystem.</p>"
+           "<p>The complete desktop client for the Demiurge blockchain.</p>"
+           "<p>QØЯ provides native access to the entire Demiurge ecosystem "
+           "including AbyssID, Abyss Wallet, mining, P2P networking, and the "
+           "Abyss OS graphical environment.</p>"
            "<p>© 2024-2026 Demiurge</p>"
            "<p><a href='https://demiurge.cloud'>https://demiurge.cloud</a></p>")
         .arg(APP_VERSION));

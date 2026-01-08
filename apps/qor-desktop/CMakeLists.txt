@@ -1,6 +1,9 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.20)
 
-project(AbyssExplorer VERSION 1.0.0 LANGUAGES CXX)
+project(QOR VERSION 1.0.0 LANGUAGES CXX)
+
+# QØЯ - Demiurge Blockchain Desktop Client
+# The complete native desktop environment for the Demiurge ecosystem
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,10 +19,41 @@ find_package(Qt6 REQUIRED COMPONENTS
     WebEngineWidgets
     WebChannel
     Network
+    Sql
+    Multimedia
+    OpenGL
 )
 
-# Application sources
-set(SOURCES
+# Core application sources
+set(CORE_SOURCES
+    src/core/Application.cpp
+    src/core/Application.h
+    src/core/Config.cpp
+    src/core/Config.h
+    src/core/Logger.cpp
+    src/core/Logger.h
+)
+
+# Storage sources
+set(STORAGE_SOURCES
+    src/storage/LocalDatabase.cpp
+    src/storage/LocalDatabase.h
+    src/storage/SecureVault.cpp
+    src/storage/SecureVault.h
+)
+
+# Chain integration sources
+set(CHAIN_SOURCES
+    src/chain/ChainClient.cpp
+    src/chain/ChainClient.h
+    src/chain/SyncManager.cpp
+    src/chain/SyncManager.h
+    src/chain/TransactionQueue.cpp
+    src/chain/TransactionQueue.h
+)
+
+# UI sources
+set(UI_SOURCES
     src/main.cpp
     src/MainWindow.cpp
     src/MainWindow.h
@@ -37,6 +71,14 @@ set(SOURCES
     src/AppLauncher.h
 )
 
+# All sources combined
+set(SOURCES
+    ${CORE_SOURCES}
+    ${STORAGE_SOURCES}
+    ${CHAIN_SOURCES}
+    ${UI_SOURCES}
+)
+
 # Resources
 set(RESOURCES
     src/resources/resources.qrc
@@ -47,15 +89,16 @@ if(WIN32)
     set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/src/resources/app.rc")
     add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${RESOURCES} ${APP_ICON_RESOURCE_WINDOWS})
 elseif(APPLE)
-    set(MACOSX_BUNDLE_ICON_FILE app.icns)
-    set(APP_ICON_MACOSX "${CMAKE_CURRENT_SOURCE_DIR}/src/resources/icons/app.icns")
+    set(MACOSX_BUNDLE_ICON_FILE qor.icns)
+    set(APP_ICON_MACOSX "${CMAKE_CURRENT_SOURCE_DIR}/src/resources/icons/qor.icns")
     set_source_files_properties(${APP_ICON_MACOSX} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
     add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SOURCES} ${RESOURCES} ${APP_ICON_MACOSX})
     set_target_properties(${PROJECT_NAME} PROPERTIES
-        MACOSX_BUNDLE_GUI_IDENTIFIER "cloud.demiurge.abyssexplorer"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.demiurge.qor"
         MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/src/resources/Info.plist.in"
+        MACOSX_BUNDLE_BUNDLE_NAME "QOR"
     )
 else()
     add_executable(${PROJECT_NAME} ${SOURCES} ${RESOURCES})
@@ -69,21 +112,27 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::WebEngineWidgets
     Qt6::WebChannel
     Qt6::Network
+    Qt6::Sql
+    Qt6::Multimedia
+    Qt6::OpenGL
 )
 
-# Copy web content to build directory
+# Copy web content to build directory (for Abyss Explorer browser component)
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_CURRENT_SOURCE_DIR}/web"
     "$<TARGET_FILE_DIR:${PROJECT_NAME}>/web"
-    COMMENT "Copying web content..."
+    COMMENT "Copying Abyss OS web content..."
 )
 
-# Version info
+# Version info and branding
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     APP_VERSION="${PROJECT_VERSION}"
-    APP_NAME="Abyss Explorer"
+    APP_NAME="QOR"
+    APP_DISPLAY_NAME="QOR - Demiurge Desktop"
     APP_ORGANIZATION="Demiurge"
+    APP_DOMAIN="demiurge.cloud"
+    APP_IDENTIFIER="com.demiurge.qor"
 )
 
 # Install rules
@@ -92,3 +141,11 @@ install(TARGETS ${PROJECT_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+# CPack configuration for installers
+set(CPACK_PACKAGE_NAME "QOR")
+set(CPACK_PACKAGE_VENDOR "Demiurge")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "QOR - Demiurge Blockchain Desktop Client")
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "QOR")
+include(CPack)

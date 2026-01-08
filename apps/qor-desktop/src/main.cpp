@@ -1,8 +1,12 @@
 /**
- * Abyss Explorer Desktop - Main Entry Point
+ * QØЯ - Demiurge Blockchain Desktop Client
  * 
- * Qt6-based desktop application for the Demiurge blockchain ecosystem.
- * Provides full AbyssOS functionality without browser restrictions.
+ * The complete native desktop environment for the Demiurge ecosystem.
+ * Provides full chain access, AbyssOS GUI, and native performance.
+ * 
+ * QØЯ (pronounced "core") represents the heart of Demiurge - 
+ * a desktop client that facilitates all blockchain operations while
+ * providing the Abyss OS graphical environment.
  */
 
 #include <QApplication>
@@ -14,16 +18,17 @@
 
 int main(int argc, char *argv[])
 {
-    // Enable high DPI scaling
+    // Enable high DPI scaling for crisp display on modern monitors
     QApplication::setHighDpiScaleFactorRoundingPolicy(
         Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
     
-    // Initialize application
+    // Initialize QØЯ application
     QApplication app(argc, argv);
     app.setApplicationName(APP_NAME);
     app.setApplicationVersion(APP_VERSION);
     app.setOrganizationName(APP_ORGANIZATION);
-    app.setOrganizationDomain("demiurge.cloud");
+    app.setOrganizationDomain(APP_DOMAIN);
+    app.setApplicationDisplayName(APP_DISPLAY_NAME);
     
     // Configure WebEngine
     QWebEngineProfile *profile = QWebEngineProfile::defaultProfile();
