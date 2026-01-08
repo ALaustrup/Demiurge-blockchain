@@ -30,19 +30,7 @@
     <!-- Wizard pages -->
     <WizardStyle>Classic</WizardStyle>
     
-    <!-- Custom pages -->
-    <TargetConfigurationPage>target</TargetConfigurationPage>
-    <ComponentSelectionPage>component</ComponentSelectionPage>
-    <LicenseAgreementPage>license</LicenseAgreementPage>
-    <StartMenuDirectoryPage>startmenu</StartMenuDirectoryPage>
-    <ReadyForInstallationPage>ready</ReadyForInstallationPage>
-    <PerformInstallationPage>installation</PerformInstallationPage>
-    <FinishedPage>finish</FinishedPage>
-    
-    <!-- Require admin on Windows for Program Files install -->
-    <RequiresAdminRights>false</RequiresAdminRights>
-    
-    <!-- Signing (for updates) -->
-    <SupportsModify>false</SupportsModify>
-    <AllowUnstableComponents>false</AllowUnstableComponents>
+    <!-- Wizard dimensions -->
+    <WizardDefaultWidth>800</WizardDefaultWidth>
+    <WizardDefaultHeight>600</WizardDefaultHeight>
 </Installer>
