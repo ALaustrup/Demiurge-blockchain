@@ -12,5 +12,12 @@
         <file alias="fonts/Orbitron-Bold.ttf">fonts/Orbitron-Bold.ttf</file>
         <file alias="fonts/Rajdhani-Medium.ttf">fonts/Rajdhani-Medium.ttf</file>
         <file alias="fonts/JetBrainsMono-Regular.ttf">fonts/JetBrainsMono-Regular.ttf</file>
+        
+        <!-- Intro Videos (place your videos in src/resources/videos/) -->
+        <!-- These are optional - the launcher will show animated text fallback if missing -->
+        <!-- Uncomment when you have the actual video files: -->
+        <!-- <file alias="videos/01_genesis_intro.mp4">videos/01_genesis_intro.mp4</file> -->
+        <!-- <file alias="videos/02_abyssos_intro.mp4">videos/02_abyssos_intro.mp4</file> -->
+        <!-- <file alias="videos/03_demiurge_intro.mp4">videos/03_demiurge_intro.mp4</file> -->
     </qresource>
 </RCC>

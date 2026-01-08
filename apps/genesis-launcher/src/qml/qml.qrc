@@ -6,6 +6,7 @@
         <file alias="qml/views/LoginView.qml">views/LoginView.qml</file>
         <file alias="qml/views/SignUpView.qml">views/SignUpView.qml</file>
         <file alias="qml/views/DashboardView.qml">views/DashboardView.qml</file>
+        <file alias="qml/views/IntroSequence.qml">views/IntroSequence.qml</file>
         
         <!-- Components -->
         <file alias="qml/components/LaunchCard.qml">components/LaunchCard.qml</file>

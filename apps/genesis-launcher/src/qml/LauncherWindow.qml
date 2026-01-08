@@ -2,6 +2,11 @@
  * LauncherWindow.qml - Genesis Launcher Main Window
  * 
  * Style: "Obsidian Monolith" - Frameless, dark glass, floating construct
+ * 
+ * Features:
+ * - Cinematic intro video sequence on first launch
+ * - Minimize to system tray on close
+ * - State machine for login/signup/dashboard
  */
 import QtQuick
 import QtQuick.Controls
@@ -20,13 +25,29 @@ ApplicationWindow {
     
     width: 800
     height: 600
-    visible: true
+    visible: !startMinimized  // From C++ context
     title: "Genesis Launcher"
+    
+    // State machine
+    property string appState: skipIntro ? "main" : "intro"  // intro, main
+    property bool introComplete: skipIntro || false
+    property bool hasPlayedIntro: false
     
     // Center on screen
     Component.onCompleted: {
         x = (Screen.width - width) / 2
         y = (Screen.height - height) / 2
+        
+        // Check if intro should be skipped
+        checkIntroState()
+    }
+    
+    function checkIntroState() {
+        // Check if intro has been played before in this session
+        if (skipIntro || hasPlayedIntro) {
+            appState = "main"
+            introComplete = true
+        }
     }
     
     // Theme colors
@@ -63,6 +84,7 @@ ApplicationWindow {
             source: "qrc:/textures/noise.png"
             opacity: 0.03
             fillMode: Image.Tile
+            visible: appState === "main"
         }
         
         // Border glow
@@ -72,115 +94,152 @@ ApplicationWindow {
             color: "transparent"
             border.color: Qt.rgba(1, 1, 1, 0.05)
             border.width: 1
+            visible: appState === "main"
         }
         
-        // Draggable title bar area
-        MouseArea {
-            id: dragArea
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            height: 50
-            
-            property point clickPos
-            
-            onPressed: (mouse) => {
-                clickPos = Qt.point(mouse.x, mouse.y)
-            }
-            
-            onPositionChanged: (mouse) => {
-                if (pressed) {
-                    var delta = Qt.point(mouse.x - clickPos.x, mouse.y - clickPos.y)
-                    root.x += delta.x
-                    root.y += delta.y
-                }
-            }
-        }
-        
-        // Close button
-        CloseButton {
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.margins: 16
-            onClicked: Qt.quit()
-        }
-        
-        // Minimize button
-        MinimizeButton {
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.rightMargin: 50
-            anchors.topMargin: 16
-            onClicked: root.showMinimized()
-        }
-        
-        // Content area
-        StackView {
-            id: contentStack
+        // ==================== INTRO SEQUENCE ====================
+        IntroSequence {
+            id: introSequence
             anchors.fill: parent
-            anchors.margins: 20
+            visible: appState === "intro"
             
-            initialItem: AuthManager.isAuthenticated ? dashboardView : loginView
-        }
-        
-        // View components
-        Component {
-            id: loginView
-            LoginView {
-                onLoginSuccess: {
-                    contentStack.replace(dashboardView)
-                }
-                onCreateAccount: {
-                    contentStack.push(signUpView)
-                }
+            onSequenceComplete: {
+                hasPlayedIntro = true
+                introComplete = true
+                appState = "main"
+            }
+            
+            onSkipRequested: {
+                hasPlayedIntro = true
             }
         }
         
-        Component {
-            id: signUpView
-            SignUpView {
-                onSignUpSuccess: {
-                    contentStack.replace(dashboardView)
-                }
-                onBackToLogin: {
-                    contentStack.pop()
-                }
-            }
-        }
-        
-        Component {
-            id: dashboardView
-            DashboardView {
-                onLogout: {
-                    contentStack.replace(loginView)
-                }
-            }
-        }
-        
-        // Update overlay
-        UpdateOverlay {
-            id: updateOverlay
+        // ==================== MAIN CONTENT ====================
+        Item {
+            id: mainContent
             anchors.fill: parent
-            visible: UpdateEngine.isDownloading
-        }
-        
-        // Version label
-        Text {
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            anchors.margins: 12
+            visible: appState === "main"
+            opacity: appState === "main" ? 1.0 : 0.0
             
-            text: "Genesis v" + LauncherCore.version
-            color: textSecondary
-            font.family: "JetBrains Mono"
-            font.pixelSize: 10
+            Behavior on opacity {
+                NumberAnimation { duration: 500; easing.type: Easing.OutQuad }
+            }
+            
+            // Draggable title bar area
+            MouseArea {
+                id: dragArea
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: 50
+                
+                property point clickPos
+                
+                onPressed: (mouse) => {
+                    clickPos = Qt.point(mouse.x, mouse.y)
+                }
+                
+                onPositionChanged: (mouse) => {
+                    if (pressed) {
+                        var delta = Qt.point(mouse.x - clickPos.x, mouse.y - clickPos.y)
+                        root.x += delta.x
+                        root.y += delta.y
+                    }
+                }
+            }
+            
+            // Close button - minimizes to tray
+            CloseButton {
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: 16
+                onClicked: {
+                    if (TrayManager.minimizeToTray && TrayManager.isSystemTrayAvailable()) {
+                        root.hide()
+                        TrayManager.hideToTray()
+                    } else {
+                        Qt.quit()
+                    }
+                }
+            }
+            
+            // Minimize button
+            MinimizeButton {
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.rightMargin: 50
+                anchors.topMargin: 16
+                onClicked: root.showMinimized()
+            }
+            
+            // Content area
+            StackView {
+                id: contentStack
+                anchors.fill: parent
+                anchors.margins: 20
+                
+                initialItem: AuthManager.isAuthenticated ? dashboardView : loginView
+            }
+            
+            // View components
+            Component {
+                id: loginView
+                LoginView {
+                    onLoginSuccess: {
+                        contentStack.replace(dashboardView)
+                    }
+                    onCreateAccount: {
+                        contentStack.push(signUpView)
+                    }
+                }
+            }
+            
+            Component {
+                id: signUpView
+                SignUpView {
+                    onSignUpSuccess: {
+                        contentStack.replace(dashboardView)
+                    }
+                    onBackToLogin: {
+                        contentStack.pop()
+                    }
+                }
+            }
+            
+            Component {
+                id: dashboardView
+                DashboardView {
+                    onLogout: {
+                        contentStack.replace(loginView)
+                    }
+                }
+            }
+            
+            // Update overlay
+            UpdateOverlay {
+                id: updateOverlay
+                anchors.fill: parent
+                visible: UpdateEngine.isDownloading
+            }
+            
+            // Version label
+            Text {
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                anchors.margins: 12
+                
+                text: "Genesis v" + LauncherCore.version
+                color: textSecondary
+                font.family: "JetBrains Mono"
+                font.pixelSize: 10
+            }
         }
     }
     
-    // Breathing glow animation on the border
+    // Breathing glow animation on the border (only in main state)
     SequentialAnimation on opacity {
         loops: Animation.Infinite
-        running: true
+        running: appState === "main"
         
         NumberAnimation {
             from: 1.0
@@ -193,6 +252,35 @@ ApplicationWindow {
             to: 1.0
             duration: 2000
             easing.type: Easing.InOutSine
+        }
+    }
+    
+    // Keyboard shortcuts
+    Shortcut {
+        sequence: "Escape"
+        onActivated: {
+            if (appState === "intro" && introSequence.canSkip) {
+                introSequence.sequenceComplete()
+            }
+        }
+    }
+    
+    // Listen for tray manager signals
+    Connections {
+        target: TrayManager
+        
+        function onShowWindowRequested() {
+            root.show()
+            root.raise()
+            root.requestActivate()
+        }
+    }
+    
+    // Handle window visibility changes
+    onVisibleChanged: {
+        if (visible && !introComplete && !hasPlayedIntro) {
+            // Window is showing for first time, play intro
+            appState = "intro"
         }
     }
 }

@@ -17,6 +17,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Network
     Concurrent
     Widgets
+    Multimedia
 )
 
 # Optional: RemoteObjects for advanced IPC
@@ -53,6 +54,8 @@ set(LAUNCHER_SOURCES
     src/core/LauncherCore.h
     src/core/ProcessManager.cpp
     src/core/ProcessManager.h
+    src/core/SystemTrayManager.cpp
+    src/core/SystemTrayManager.h
     src/auth/AuthManager.cpp
     src/auth/AuthManager.h
     src/auth/KeyVault.cpp
@@ -106,6 +109,7 @@ target_link_libraries(${APP_NAME} PRIVATE
     Qt6::Network
     Qt6::Concurrent
     Qt6::Widgets
+    Qt6::Multimedia
 )
 
 if(Qt6RemoteObjects_FOUND)
