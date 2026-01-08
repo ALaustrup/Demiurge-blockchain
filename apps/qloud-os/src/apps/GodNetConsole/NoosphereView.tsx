@@ -26,7 +26,7 @@ export const NoosphereView: React.FC = () => {
       
       <div className="metrics space-y-3">
         <div>
-          <div className="text-sm text-gray-400">Field Intensity</div>
+          <div className="text-sm text-genesis-text-tertiary">Field Intensity</div>
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-800 rounded h-4">
               <div 
@@ -39,17 +39,17 @@ export const NoosphereView: React.FC = () => {
         </div>
 
         <div>
-          <div className="text-sm text-gray-400">Resonance Level</div>
+          <div className="text-sm text-genesis-text-tertiary">Resonance Level</div>
           <div className="text-2xl font-bold text-yellow-400">{(noosphere.resonanceLevel * 100).toFixed(0)}%</div>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <div className="text-sm text-gray-400">Active Concepts</div>
+            <div className="text-sm text-genesis-text-tertiary">Active Concepts</div>
             <div className="text-lg font-semibold text-green-400">{noosphere.activeConcepts}</div>
           </div>
           <div>
-            <div className="text-sm text-gray-400">Node Participation</div>
+            <div className="text-sm text-genesis-text-tertiary">Node Participation</div>
             <div className="text-lg font-semibold text-blue-400">{noosphere.nodeParticipation}</div>
           </div>
         </div>

@@ -108,7 +108,7 @@ export function StartButton({ onClick, isOpen }: StartButtonProps) {
 
       {/* Center icon/symbol */}
       <motion.div
-        className="relative z-10 text-abyss-cyan text-lg font-bold"
+        className="relative z-10 text-genesis-cipher-cyan text-lg font-bold"
         animate={{
           scale: isHovered ? 1.2 : 1,
           filter: isHovered ? 'brightness(1.5)' : 'brightness(1)',

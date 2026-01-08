@@ -36,7 +36,7 @@ export const ArchonAvatar: React.FC = () => {
       </div>
       
       <div className="mt-4 text-center">
-        <div className="text-sm text-gray-400">Resonance</div>
+        <div className="text-sm text-genesis-text-tertiary">Resonance</div>
         <div className="text-2xl font-bold text-purple-400">{(resonance * 100).toFixed(0)}%</div>
       </div>
     </div>

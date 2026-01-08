@@ -27,12 +27,12 @@ export const SpiritCollectiveView: React.FC = () => {
       
       <div className="metrics space-y-3">
         <div>
-          <div className="text-sm text-gray-400">Spirit Count</div>
+          <div className="text-sm text-genesis-text-tertiary">Spirit Count</div>
           <div className="text-2xl font-bold text-pink-400">{collective.spiritCount}</div>
         </div>
 
         <div>
-          <div className="text-sm text-gray-400">Alignment Score</div>
+          <div className="text-sm text-genesis-text-tertiary">Alignment Score</div>
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-800 rounded h-4">
               <div 
@@ -45,12 +45,12 @@ export const SpiritCollectiveView: React.FC = () => {
         </div>
 
         <div>
-          <div className="text-sm text-gray-400">Resonance</div>
+          <div className="text-sm text-genesis-text-tertiary">Resonance</div>
           <div className="text-lg font-semibold text-cyan-400">{collective.resonance}</div>
         </div>
 
         <div>
-          <div className="text-sm text-gray-400">Active Reasoning</div>
+          <div className="text-sm text-genesis-text-tertiary">Active Reasoning</div>
           <div className="text-lg font-semibold text-yellow-400">{collective.activeReasoning}</div>
         </div>
       </div>

@@ -25,7 +25,7 @@ function NavButton({ onClick, disabled, title, children }: NavButtonProps) {
         p-1.5 rounded transition-colors
         ${disabled 
           ? 'text-gray-600 cursor-not-allowed' 
-          : 'text-gray-400 hover:text-white hover:bg-abyss-cyan/20'
+          : 'text-genesis-text-tertiary hover:text-white hover:bg-abyss-cyan/20'
         }
       `}
     >
@@ -186,7 +186,7 @@ export function ExplorerNavigation({ onRefresh }: ExplorerNavigationProps) {
   const isSecure = activeTab?.url.startsWith('https://') || activeTab?.url.startsWith('abyss://');
 
   return (
-    <div className="flex items-center gap-2 p-2 bg-abyss-dark/50 border-b border-abyss-cyan/20">
+    <div className="flex items-center gap-2 p-2 bg-genesis-glass-light/50 border-b border-genesis-border-default/20">
       {/* Navigation buttons */}
       <div className="flex items-center gap-1">
         <NavButton
@@ -224,7 +224,7 @@ export function ExplorerNavigation({ onRefresh }: ExplorerNavigationProps) {
       
       {/* Address bar */}
       <div className="flex-1 relative">
-        <div className="flex items-center bg-abyss-navy border border-abyss-cyan/30 rounded-lg overflow-hidden focus-within:border-abyss-cyan focus-within:ring-2 focus-within:ring-abyss-cyan/30">
+        <div className="flex items-center bg-abyss-navy border border-genesis-border-default/30 rounded-lg overflow-hidden focus-within:border-genesis-border-default focus-within:ring-2 focus-within:ring-abyss-cyan/30">
           {/* Security indicator */}
           <div className={`px-2 ${isSecure ? 'text-green-400' : 'text-gray-500'}`}>
             {isSecure ? <LockIcon /> : '⚠️'}
@@ -266,7 +266,7 @@ export function ExplorerNavigation({ onRefresh }: ExplorerNavigationProps) {
         
         {/* Suggestions dropdown */}
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-abyss-navy border border-abyss-cyan/30 rounded-lg shadow-xl z-50 overflow-hidden">
+          <div className="absolute top-full left-0 right-0 mt-1 bg-abyss-navy border border-genesis-border-default/30 rounded-lg shadow-xl z-50 overflow-hidden">
             {suggestions.map((suggestion, index) => (
               <div
                 key={suggestion.url}
@@ -275,7 +275,7 @@ export function ExplorerNavigation({ onRefresh }: ExplorerNavigationProps) {
                   px-3 py-2 flex items-center gap-2 cursor-pointer
                   ${index === selectedSuggestion 
                     ? 'bg-abyss-cyan/20' 
-                    : 'hover:bg-abyss-dark/50'
+                    : 'hover:bg-genesis-glass-light/50'
                   }
                 `}
               >

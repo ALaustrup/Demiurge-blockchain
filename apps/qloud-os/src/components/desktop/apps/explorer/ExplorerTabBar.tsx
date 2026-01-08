@@ -45,10 +45,10 @@ function Tab({ tab, isActive, onSelect, onClose }: TabProps) {
       onClick={onSelect}
       className={`
         group flex items-center gap-2 px-3 py-1.5 min-w-[120px] max-w-[200px]
-        border-r border-abyss-cyan/10 cursor-pointer transition-all
+        border-r border-genesis-border-default/10 cursor-pointer transition-all
         ${isActive 
-          ? 'bg-abyss-dark/80 border-b-2 border-b-abyss-cyan' 
-          : 'bg-abyss-navy/30 hover:bg-abyss-dark/50'
+          ? 'bg-genesis-glass-light/80 border-b-2 border-b-abyss-cyan' 
+          : 'bg-abyss-navy/30 hover:bg-genesis-glass-light/50'
         }
       `}
     >
@@ -60,14 +60,14 @@ function Tab({ tab, isActive, onSelect, onClose }: TabProps) {
       {/* Title */}
       <span className={`
         flex-1 text-xs truncate
-        ${isActive ? 'text-white' : 'text-gray-400'}
+        ${isActive ? 'text-white' : 'text-genesis-text-tertiary'}
       `}>
         {displayTitle}
       </span>
       
       {/* Loading indicator */}
       {tab.isLoading && (
-        <span className="flex-shrink-0 w-3 h-3 border-2 border-abyss-cyan/30 border-t-abyss-cyan rounded-full animate-spin" />
+        <span className="flex-shrink-0 w-3 h-3 border-2 border-genesis-border-default/30 border-t-abyss-cyan rounded-full animate-spin" />
       )}
       
       {/* Close button */}
@@ -99,7 +99,7 @@ export function ExplorerTabBar() {
   };
 
   return (
-    <div className="flex items-center bg-abyss-navy/50 border-b border-abyss-cyan/20">
+    <div className="flex items-center bg-abyss-navy/50 border-b border-genesis-border-default/20">
       {/* Tabs */}
       <div className="flex-1 flex items-center overflow-x-auto scrollbar-thin scrollbar-thumb-abyss-cyan/30">
         {tabs.map(tab => (
@@ -116,7 +116,7 @@ export function ExplorerTabBar() {
       {/* New Tab Button */}
       <button
         onClick={() => createTab()}
-        className="flex-shrink-0 px-3 py-1.5 text-gray-400 hover:text-abyss-cyan hover:bg-abyss-dark/50 transition-colors"
+        className="flex-shrink-0 px-3 py-1.5 text-genesis-text-tertiary hover:text-genesis-cipher-cyan hover:bg-genesis-glass-light/50 transition-colors"
         title="New Tab"
       >
         <span className="text-lg">+</span>

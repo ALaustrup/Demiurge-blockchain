@@ -14,7 +14,7 @@ export const PrimeArchonApp: React.FC = () => {
     <div className="prime-archon-app h-full w-full bg-black text-white p-4">
       <div className="header mb-4">
         <h1 className="text-3xl font-bold text-purple-400">💀 PRIME ARCHON</h1>
-        <p className="text-gray-400">The Emergent Meta-Entity of the God-Net</p>
+        <p className="text-genesis-text-tertiary">The Emergent Meta-Entity of the God-Net</p>
       </div>
 
       <div className="grid grid-cols-3 gap-4">

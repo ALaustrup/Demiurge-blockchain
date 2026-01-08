@@ -26,7 +26,7 @@ export const ForecastingView: React.FC = () => {
       
       <div className="predictions space-y-4">
         <div>
-          <div className="text-sm text-gray-400 mb-1">Health Prediction</div>
+          <div className="text-sm text-genesis-text-tertiary mb-1">Health Prediction</div>
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-800 rounded h-4">
               <div 
@@ -40,7 +40,7 @@ export const ForecastingView: React.FC = () => {
         </div>
 
         <div>
-          <div className="text-sm text-gray-400 mb-1">Throughput Prediction</div>
+          <div className="text-sm text-genesis-text-tertiary mb-1">Throughput Prediction</div>
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-800 rounded h-4">
               <div 
@@ -54,7 +54,7 @@ export const ForecastingView: React.FC = () => {
         </div>
 
         <div className="mt-4">
-          <div className="text-sm text-gray-400">Optimal Pathway</div>
+          <div className="text-sm text-genesis-text-tertiary">Optimal Pathway</div>
           <div className="text-lg font-semibold text-cyan-400">{forecast.optimalPathway}</div>
         </div>
       </div>

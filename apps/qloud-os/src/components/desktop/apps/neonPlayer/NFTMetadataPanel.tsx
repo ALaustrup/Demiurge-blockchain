@@ -20,10 +20,10 @@ export function NFTMetadataPanel({ track }: NFTMetadataPanelProps) {
   };
 
   return (
-    <div className="bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-3">
+    <div className="bg-genesis-glass-light/60 border border-genesis-border-default/20 rounded-lg p-3">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full text-left flex items-center justify-between text-sm text-gray-300 hover:text-abyss-cyan"
+        className="w-full text-left flex items-center justify-between text-sm text-genesis-text-secondary hover:text-genesis-cipher-cyan"
       >
         <span>Track Info</span>
         <span>{isExpanded ? '▼' : '▶'}</span>
@@ -41,38 +41,38 @@ export function NFTMetadataPanel({ track }: NFTMetadataPanelProps) {
               {track.music && (
                 <>
                   <div>
-                    <span className="text-gray-400">Track:</span>{' '}
-                    <span className="text-abyss-cyan">{track.music.trackName}</span>
+                    <span className="text-genesis-text-tertiary">Track:</span>{' '}
+                    <span className="text-genesis-cipher-cyan">{track.music.trackName}</span>
                   </div>
                   {track.music.trackNumber && (
                     <div>
-                      <span className="text-gray-400">Track #:</span>{' '}
-                      <span className="text-gray-300">{track.music.trackNumber}</span>
+                      <span className="text-genesis-text-tertiary">Track #:</span>{' '}
+                      <span className="text-genesis-text-secondary">{track.music.trackNumber}</span>
                     </div>
                   )}
                   <div>
-                    <span className="text-gray-400">Album:</span>{' '}
-                    <span className="text-gray-300">{track.music.albumName || 'Single'}</span>
+                    <span className="text-genesis-text-tertiary">Album:</span>{' '}
+                    <span className="text-genesis-text-secondary">{track.music.albumName || 'Single'}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400">Artist:</span>{' '}
-                    <span className="text-abyss-cyan">{track.music.artistName}</span>
+                    <span className="text-genesis-text-tertiary">Artist:</span>{' '}
+                    <span className="text-genesis-cipher-cyan">{track.music.artistName}</span>
                   </div>
                   {track.music.genre && (
                     <div>
-                      <span className="text-gray-400">Genre:</span>{' '}
-                      <span className="text-gray-300">{track.music.genre}</span>
+                      <span className="text-genesis-text-tertiary">Genre:</span>{' '}
+                      <span className="text-genesis-text-secondary">{track.music.genre}</span>
                     </div>
                   )}
                   {track.music.releaseDate && (
                     <div>
-                      <span className="text-gray-400">Release:</span>{' '}
-                      <span className="text-gray-300">{track.music.releaseDate}</span>
+                      <span className="text-genesis-text-tertiary">Release:</span>{' '}
+                      <span className="text-genesis-text-secondary">{track.music.releaseDate}</span>
                     </div>
                   )}
                   <div>
-                    <span className="text-gray-400">Duration:</span>{' '}
-                    <span className="text-gray-300">
+                    <span className="text-genesis-text-tertiary">Duration:</span>{' '}
+                    <span className="text-genesis-text-secondary">
                       {Math.floor(track.music.duration / 60)}:
                       {Math.floor(track.music.duration % 60).toString().padStart(2, '0')}
                     </span>
@@ -80,12 +80,12 @@ export function NFTMetadataPanel({ track }: NFTMetadataPanelProps) {
                 </>
               )}
 
-              <div className="pt-2 border-t border-abyss-cyan/10">
+              <div className="pt-2 border-t border-genesis-border-default/10">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400">Owner:</span>
+                  <span className="text-genesis-text-tertiary">Owner:</span>
                   <button
                     onClick={() => copyToClipboard(track.owner)}
-                    className="text-abyss-cyan hover:text-abyss-cyan/80 text-xs"
+                    className="text-genesis-cipher-cyan hover:text-genesis-cipher-cyan/80 text-xs"
                   >
                     {track.owner.substring(0, 8)}...{track.owner.substring(track.owner.length - 6)} 📋
                   </button>
@@ -94,14 +94,14 @@ export function NFTMetadataPanel({ track }: NFTMetadataPanelProps) {
 
               {track.royalties !== undefined && (
                 <div>
-                  <span className="text-gray-400">Royalties:</span>{' '}
-                  <span className="text-gray-300">{track.royalties}%</span>
+                  <span className="text-genesis-text-tertiary">Royalties:</span>{' '}
+                  <span className="text-genesis-text-secondary">{track.royalties}%</span>
                 </div>
               )}
 
               {track.provenance && track.provenance.length > 0 && (
-                <div className="pt-2 border-t border-abyss-cyan/10">
-                  <div className="text-gray-400 mb-1">Provenance:</div>
+                <div className="pt-2 border-t border-genesis-border-default/10">
+                  <div className="text-genesis-text-tertiary mb-1">Provenance:</div>
                   <div className="space-y-1 max-h-32 overflow-y-auto">
                     {track.provenance.map((entry, idx) => (
                       <div key={idx} className="text-xs text-gray-500">
@@ -113,12 +113,12 @@ export function NFTMetadataPanel({ track }: NFTMetadataPanelProps) {
               )}
 
               {track.uri && (
-                <div className="pt-2 border-t border-abyss-cyan/10">
+                <div className="pt-2 border-t border-genesis-border-default/10">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400">URI:</span>
+                    <span className="text-genesis-text-tertiary">URI:</span>
                     <button
                       onClick={() => copyToClipboard(track.uri)}
-                      className="text-abyss-cyan hover:text-abyss-cyan/80 text-xs"
+                      className="text-genesis-cipher-cyan hover:text-genesis-cipher-cyan/80 text-xs"
                     >
                       Copy 📋
                     </button>

@@ -106,7 +106,7 @@ export function DocumentEditorApp({ fileId, fileUrl, fileName }: DocumentEditorA
     return (
       <div className="h-full flex items-center justify-center p-8">
         <div className="text-center">
-          <p className="text-gray-400 mb-4">Please log in with QorID to use the document editor</p>
+          <p className="text-genesis-text-tertiary mb-4">Please log in with QorID to use the document editor</p>
         </div>
       </div>
     );
@@ -116,8 +116,8 @@ export function DocumentEditorApp({ fileId, fileUrl, fileName }: DocumentEditorA
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin text-abyss-cyan text-4xl mb-4">⏳</div>
-          <p className="text-gray-400">Loading document...</p>
+          <div className="animate-spin text-genesis-cipher-cyan text-4xl mb-4">⏳</div>
+          <p className="text-genesis-text-tertiary">Loading document...</p>
         </div>
       </div>
     );
@@ -126,9 +126,9 @@ export function DocumentEditorApp({ fileId, fileUrl, fileName }: DocumentEditorA
   return (
     <div className="h-full flex flex-col min-h-0">
       {/* Toolbar */}
-      <div className="bg-abyss-navy/50 border-b border-abyss-cyan/20 p-2 flex items-center justify-between">
+      <div className="bg-abyss-navy/50 border-b border-genesis-border-default/20 p-2 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-400">{fileName || 'Untitled Document'}</span>
+          <span className="text-sm text-genesis-text-tertiary">{fileName || 'Untitled Document'}</span>
           <span className="px-2 py-1 bg-abyss-purple/20 text-abyss-purple border border-abyss-purple/30 rounded text-xs">
             {documentType.toUpperCase()}
           </span>
@@ -141,7 +141,7 @@ export function DocumentEditorApp({ fileId, fileUrl, fileName }: DocumentEditorA
       </div>
 
       {/* Document Viewer/Editor */}
-      <div className="flex-1 overflow-auto bg-abyss-dark">
+      <div className="flex-1 overflow-auto bg-genesis-glass-light">
         {documentType === 'pdf' && (
           <iframe
             ref={pdfViewerRef}
@@ -156,7 +156,7 @@ export function DocumentEditorApp({ fileId, fileUrl, fileName }: DocumentEditorA
             ref={textEditorRef}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full h-full p-4 bg-abyss-dark text-white font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-abyss-cyan/50"
+            className="w-full h-full p-4 bg-genesis-glass-light text-white font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-abyss-cyan/50"
             placeholder="Document content..."
             spellCheck={false}
           />
@@ -174,14 +174,14 @@ export function DocumentEditorApp({ fileId, fileUrl, fileName }: DocumentEditorA
 
         {documentType === 'other' && (
           <div className="h-full flex items-center justify-center">
-            <div className="text-center text-gray-400">
+            <div className="text-center text-genesis-text-tertiary">
               <p className="text-lg mb-2">Unsupported file type</p>
               <p className="text-sm">This file type cannot be edited in the document editor</p>
               {fileUrl && (
                 <a
                   href={fileUrl}
                   download={fileName}
-                  className="mt-4 inline-block px-4 py-2 bg-abyss-cyan/20 text-abyss-cyan border border-abyss-cyan/30 rounded hover:bg-abyss-cyan/30 transition-colors"
+                  className="mt-4 inline-block px-4 py-2 bg-abyss-cyan/20 text-genesis-cipher-cyan border border-genesis-border-default/30 rounded hover:bg-abyss-cyan/30 transition-colors"
                 >
                   Download File
                 </a>

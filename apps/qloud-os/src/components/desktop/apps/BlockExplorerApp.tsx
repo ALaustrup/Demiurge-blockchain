@@ -207,12 +207,12 @@ export function BlockExplorerApp() {
   return (
     <div className="h-full flex flex-col min-h-0 p-6 space-y-6 overflow-auto">
       <div>
-        <h2 className="text-2xl font-bold text-abyss-cyan mb-2">Block Explorer</h2>
-        <p className="text-sm text-gray-400">Explore the Demiurge blockchain</p>
+        <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">Block Explorer</h2>
+        <p className="text-sm text-genesis-text-tertiary">Explore the Demiurge blockchain</p>
       </div>
       
       {/* Search */}
-      <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
+      <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
         <div className="flex space-x-2">
           <input
             type="text"
@@ -220,7 +220,7 @@ export function BlockExplorerApp() {
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             placeholder="Search by block height, tx hash, or address..."
-            className="flex-1 px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-white text-sm focus:outline-none focus:border-abyss-cyan"
+            className="flex-1 px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white text-sm focus:outline-none focus:border-genesis-border-default"
           />
           <Button onClick={handleSearch} disabled={isLoading}>
             Search
@@ -228,26 +228,26 @@ export function BlockExplorerApp() {
         </div>
         
         {searchResult && (
-          <div className="mt-4 p-3 bg-abyss-navy/50 border border-abyss-cyan/20 rounded">
+          <div className="mt-4 p-3 bg-abyss-navy/50 border border-genesis-border-default/20 rounded">
             {searchResult.type === 'block' && (
               <div>
-                <p className="text-abyss-cyan font-medium">Block #{searchResult.data.height}</p>
-                <p className="text-xs text-gray-400 mt-1">Hash: <code>{searchResult.data.hash}</code></p>
+                <p className="text-genesis-cipher-cyan font-medium">Block #{searchResult.data.height}</p>
+                <p className="text-xs text-genesis-text-tertiary mt-1">Hash: <code>{searchResult.data.hash}</code></p>
               </div>
             )}
             {searchResult.type === 'transaction' && (
               <div>
-                <p className="text-abyss-cyan font-medium">Transaction</p>
-                <p className="text-xs text-gray-400 mt-1">Hash: <code>{searchResult.data.hash}</code></p>
+                <p className="text-genesis-cipher-cyan font-medium">Transaction</p>
+                <p className="text-xs text-genesis-text-tertiary mt-1">Hash: <code>{searchResult.data.hash}</code></p>
               </div>
             )}
             {searchResult.type === 'address' && (
               <div>
-                <p className="text-abyss-cyan font-medium">Address</p>
+                <p className="text-genesis-cipher-cyan font-medium">Address</p>
                 <div className="mt-1">
                   <AddressWithUsername address={searchResult.data.address} layout="horizontal" />
                 </div>
-                <p className="text-xs text-gray-400 mt-1">Balance: {typeof searchResult.data.balance === 'number' ? searchResult.data.balance.toFixed(8) : String(searchResult.data.balance)} CGT</p>
+                <p className="text-xs text-genesis-text-tertiary mt-1">Balance: {typeof searchResult.data.balance === 'number' ? searchResult.data.balance.toFixed(8) : String(searchResult.data.balance)} CGT</p>
               </div>
             )}
             {searchResult.type === 'not_found' && (
@@ -260,37 +260,37 @@ export function BlockExplorerApp() {
       {/* Blocks List */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-abyss-cyan">Recent Blocks</h3>
+          <h3 className="text-lg font-bold text-genesis-cipher-cyan">Recent Blocks</h3>
           <Button onClick={loadRecentBlocks} disabled={isLoading} variant="secondary" className="text-xs">
             Refresh
           </Button>
         </div>
         
         {isLoading && blocks.length === 0 ? (
-          <div className="text-center text-gray-400 py-8">Loading blocks...</div>
+          <div className="text-center text-genesis-text-tertiary py-8">Loading blocks...</div>
         ) : blocks.length === 0 ? (
-          <div className="text-center text-gray-400 py-8">No blocks found</div>
+          <div className="text-center text-genesis-text-tertiary py-8">No blocks found</div>
         ) : (
           <div className="space-y-2">
             {blocks.map((block) => (
               <div
                 key={block.height}
                 onClick={() => loadBlockTransactions(block)}
-                className={`bg-abyss-dark/50 border rounded-lg p-4 cursor-pointer transition-colors ${
+                className={`bg-genesis-glass-light/50 border rounded-lg p-4 cursor-pointer transition-colors ${
                   selectedBlock?.height === block.height
-                    ? 'border-abyss-cyan bg-abyss-cyan/10'
-                    : 'border-abyss-cyan/20 hover:border-abyss-cyan/50'
+                    ? 'border-genesis-border-default bg-abyss-cyan/10'
+                    : 'border-genesis-border-default/20 hover:border-genesis-border-default/50'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-abyss-cyan font-medium">Block #{block.height}</div>
-                    <div className="text-xs text-gray-400 mt-1">
+                    <div className="text-genesis-cipher-cyan font-medium">Block #{block.height}</div>
+                    <div className="text-xs text-genesis-text-tertiary mt-1">
                       Hash: <code className="text-gray-500">{block.hash.slice(0, 16)}...</code>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-gray-400">{block.txCount} txs</div>
+                    <div className="text-sm text-genesis-text-tertiary">{block.txCount} txs</div>
                     <div className="text-xs text-gray-500">
                       {new Date(block.timestamp).toLocaleTimeString()}
                     </div>
@@ -305,24 +305,24 @@ export function BlockExplorerApp() {
       {/* Transactions */}
       {selectedBlock && (
         <div>
-          <h3 className="text-lg font-bold text-abyss-cyan mb-4">
+          <h3 className="text-lg font-bold text-genesis-cipher-cyan mb-4">
             Transactions in Block #{selectedBlock.height}
           </h3>
           
           {isLoading ? (
-            <div className="text-center text-gray-400 py-8">Loading transactions...</div>
+            <div className="text-center text-genesis-text-tertiary py-8">Loading transactions...</div>
           ) : transactions.length === 0 ? (
-            <div className="text-center text-gray-400 py-8">No transactions in this block</div>
+            <div className="text-center text-genesis-text-tertiary py-8">No transactions in this block</div>
           ) : (
             <div className="space-y-2">
               {transactions.map((tx) => (
                 <div
                   key={tx.hash}
-                  className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4"
+                  className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <code className="text-xs text-abyss-cyan">{tx.hash.slice(0, 16)}...</code>
-                    <div className="text-sm font-mono text-abyss-cyan">{tx.amount.toFixed(8)} CGT</div>
+                    <code className="text-xs text-genesis-cipher-cyan">{tx.hash.slice(0, 16)}...</code>
+                    <div className="text-sm font-mono text-genesis-cipher-cyan">{tx.amount.toFixed(8)} CGT</div>
                   </div>
                   <div className="text-xs space-y-1">
                     <div className="flex items-center gap-2">

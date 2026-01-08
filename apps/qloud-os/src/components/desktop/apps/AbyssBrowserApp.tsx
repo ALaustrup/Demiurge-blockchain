@@ -29,11 +29,11 @@ function InternalPage({ path }: { path: string }) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center">
         <div className="text-6xl mb-4">🌊</div>
-        <h2 className="text-2xl font-bold text-abyss-cyan mb-2">QOR OS Browser</h2>
-        <p className="text-gray-400 mb-4">Navigate the depths of the Demiurge Network</p>
+        <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">QOR OS Browser</h2>
+        <p className="text-genesis-text-tertiary mb-4">Navigate the depths of the Demiurge Network</p>
         <div className="text-sm text-gray-500 space-y-1">
           <p>• Type a URL to browse the web</p>
-          <p>• Use <code className="text-abyss-cyan">abyss://</code> for internal pages</p>
+          <p>• Use <code className="text-genesis-cipher-cyan">abyss://</code> for internal pages</p>
           <p>• DRC-369 assets are ready for Web3 integration</p>
         </div>
       </div>
@@ -44,16 +44,16 @@ function InternalPage({ path }: { path: string }) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center">
         <div className="text-6xl mb-4">🔷</div>
-        <h2 className="text-2xl font-bold text-abyss-cyan mb-2">DRC-369 Assets</h2>
-        <p className="text-gray-400 mb-4">Browse DRC-369 assets in the Files app</p>
+        <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">DRC-369 Assets</h2>
+        <p className="text-genesis-text-tertiary mb-4">Browse DRC-369 assets in the Files app</p>
         <p className="text-sm text-gray-500">Open the Files app from the dock to view your assets</p>
       </div>
     );
   }
   
   return (
-    <div className="w-full h-full flex items-center justify-center text-gray-400">
-      <p>Unknown internal page: <code className="text-abyss-cyan">abyss://{path}</code></p>
+    <div className="w-full h-full flex items-center justify-center text-genesis-text-tertiary">
+      <p>Unknown internal page: <code className="text-genesis-cipher-cyan">abyss://{path}</code></p>
     </div>
   );
 }
@@ -148,13 +148,13 @@ export function AbyssBrowserApp() {
   return (
     <div className="h-full flex flex-col min-h-0">
       {/* Top bar */}
-      <div className="flex items-center space-x-2 pb-2 border-b border-abyss-cyan/20">
+      <div className="flex items-center space-x-2 pb-2 border-b border-genesis-border-default/20">
         <input
           type="text"
           value={inputUrl}
           onChange={(e) => setInputUrl(e.target.value)}
           onKeyPress={handleKeyPress}
-          className="flex-1 px-3 py-1.5 bg-abyss-dark border border-abyss-cyan/30 rounded-lg text-white text-sm focus:outline-none focus:border-abyss-cyan focus:ring-2 focus:ring-abyss-cyan/50"
+          className="flex-1 px-3 py-1.5 bg-genesis-glass-light border border-genesis-border-default/30 rounded-lg text-white text-sm focus:outline-none focus:border-genesis-border-default focus:ring-2 focus:ring-abyss-cyan/50"
           placeholder="Enter URL or abyss://..."
         />
         <Button onClick={handleNavigate} className="px-4">
@@ -163,11 +163,11 @@ export function AbyssBrowserApp() {
       </div>
 
       {/* Identity bar */}
-      <div className="flex items-center justify-between text-xs py-2 border-b border-abyss-cyan/10">
+      <div className="flex items-center justify-between text-xs py-2 border-b border-genesis-border-default/10">
         <div className="flex items-center space-x-2">
-          <span className="text-gray-400">Browsing as:</span>
+          <span className="text-genesis-text-tertiary">Browsing as:</span>
           {session ? (
-            <span className="text-abyss-cyan font-medium">{session.username}</span>
+            <span className="text-genesis-cipher-cyan font-medium">{session.username}</span>
           ) : (
             <>
               <span className="text-gray-500">Guest</span>
@@ -188,7 +188,7 @@ export function AbyssBrowserApp() {
           )}
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-gray-400">Chain:</span>
+          <span className="text-genesis-text-tertiary">Chain:</span>
           <span className={status.state === 'connected' ? 'text-green-400' : 'text-red-400'}>
             {status.state === 'connected' ? 'Connected to Demiurge' : 'Offline'}
           </span>
@@ -196,9 +196,9 @@ export function AbyssBrowserApp() {
       </div>
 
       {/* Content area */}
-      <div className="flex-1 border border-abyss-cyan/20 rounded-lg overflow-hidden bg-abyss-dark min-h-0 relative">
+      <div className="flex-1 border border-genesis-border-default/20 rounded-lg overflow-hidden bg-genesis-glass-light min-h-0 relative">
         {!currentUrl ? (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
+          <div className="w-full h-full flex items-center justify-center text-genesis-text-tertiary">
             Enter a URL and click Go to browse
           </div>
         ) : isInternalPage ? (
@@ -206,11 +206,11 @@ export function AbyssBrowserApp() {
         ) : (
           <>
             {lastError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-abyss-dark/95 backdrop-blur-sm z-10 p-8">
+              <div className="absolute inset-0 flex items-center justify-center bg-genesis-glass-light/95 backdrop-blur-sm z-10 p-8">
                 <div className="text-center max-w-md">
                   <div className="text-red-400 text-4xl mb-4">⚠️</div>
                   <p className="text-red-400 mb-2 text-lg font-medium">This site can't be shown inside AbyssBrowser</p>
-                  <p className="text-gray-400 text-sm mb-4">The site is likely blocking iframe embeds (X-Frame-Options/CSP)</p>
+                  <p className="text-genesis-text-tertiary text-sm mb-4">The site is likely blocking iframe embeds (X-Frame-Options/CSP)</p>
                   <Button onClick={() => window.open(currentUrl, '_blank')} className="mt-4" variant="secondary">
                     Open in New Tab
                   </Button>
@@ -246,8 +246,8 @@ export function AbyssBrowserApp() {
       </div>
 
       {session && (
-        <div className="text-xs text-gray-500 pt-2 border-t border-abyss-cyan/10">
-          Public Key: <span className="font-mono text-gray-400">{session.publicKey.slice(0, 16)}...</span>
+        <div className="text-xs text-gray-500 pt-2 border-t border-genesis-border-default/10">
+          Public Key: <span className="font-mono text-genesis-text-tertiary">{session.publicKey.slice(0, 16)}...</span>
         </div>
       )}
     </div>

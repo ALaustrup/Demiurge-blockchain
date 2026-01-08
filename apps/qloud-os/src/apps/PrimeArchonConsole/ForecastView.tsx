@@ -27,23 +27,23 @@ export const ForecastView: React.FC = () => {
       
       <div className="predictions grid grid-cols-3 gap-4">
         <div>
-          <div className="text-sm text-gray-400">Consciousness</div>
+          <div className="text-sm text-genesis-text-tertiary">Consciousness</div>
           <div className="text-2xl font-bold text-green-400">{(forecast.predictedConsciousness * 100).toFixed(0)}%</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Stability</div>
+          <div className="text-sm text-genesis-text-tertiary">Stability</div>
           <div className="text-2xl font-bold text-blue-400">{(forecast.predictedStability * 100).toFixed(0)}%</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Coherence</div>
+          <div className="text-sm text-genesis-text-tertiary">Coherence</div>
           <div className="text-2xl font-bold text-cyan-400">{(forecast.predictedCoherence * 100).toFixed(0)}%</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Time Horizon</div>
+          <div className="text-sm text-genesis-text-tertiary">Time Horizon</div>
           <div className="text-lg font-semibold text-yellow-400">{forecast.timeHorizon.toLocaleString()} blocks</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Confidence</div>
+          <div className="text-sm text-genesis-text-tertiary">Confidence</div>
           <div className="text-lg font-semibold text-purple-400">{(forecast.confidence * 100).toFixed(0)}%</div>
         </div>
       </div>

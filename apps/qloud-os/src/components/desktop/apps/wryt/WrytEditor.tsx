@@ -63,7 +63,7 @@ const createExtensions = (placeholder: string) => [
   Link.configure({
     openOnClick: false,
     HTMLAttributes: {
-      class: 'text-abyss-cyan hover:underline cursor-pointer',
+      class: 'text-genesis-cipher-cyan hover:underline cursor-pointer',
     },
   }),
   Image.configure({

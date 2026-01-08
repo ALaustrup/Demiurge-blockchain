@@ -25,8 +25,8 @@ function TemplateCard({ template, selected, onClick }: TemplateCardProps) {
       className={`
         text-left p-4 rounded-lg border-2 transition-all
         ${selected 
-          ? 'border-abyss-cyan bg-abyss-cyan/10' 
-          : 'border-abyss-cyan/20 hover:border-abyss-cyan/40 hover:bg-abyss-dark/40'
+          ? 'border-genesis-border-default bg-abyss-cyan/10' 
+          : 'border-genesis-border-default/20 hover:border-genesis-border-default/40 hover:bg-genesis-glass-light/40'
         }
       `}
     >
@@ -37,7 +37,7 @@ function TemplateCard({ template, selected, onClick }: TemplateCardProps) {
           <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{template.description}</p>
         </div>
         {selected && (
-          <span className="text-abyss-cyan">✓</span>
+          <span className="text-genesis-cipher-cyan">✓</span>
         )}
       </div>
     </button>
@@ -62,7 +62,7 @@ function CategoryTab({ category, active, onClick }: CategoryTabProps) {
         px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap
         ${active 
           ? 'bg-abyss-cyan text-abyss-dark' 
-          : 'text-gray-400 hover:text-white hover:bg-abyss-dark/40'
+          : 'text-genesis-text-tertiary hover:text-white hover:bg-genesis-glass-light/40'
         }
       `}
     >
@@ -87,7 +87,7 @@ function ConfigPanel({ template, projectName, setProjectName }: ConfigPanelProps
     <div className="space-y-6">
       {/* Project Name */}
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-genesis-text-tertiary mb-2">
           Project Name
         </label>
         <input
@@ -95,17 +95,17 @@ function ConfigPanel({ template, projectName, setProjectName }: ConfigPanelProps
           value={projectName}
           onChange={(e) => setProjectName(e.target.value)}
           placeholder="My New Project"
-          className="w-full px-4 py-3 bg-abyss-dark border border-abyss-cyan/30 rounded-lg
-                   text-white placeholder-gray-600 focus:outline-none focus:border-abyss-cyan"
+          className="w-full px-4 py-3 bg-genesis-glass-light border border-genesis-border-default/30 rounded-lg
+                   text-white placeholder-gray-600 focus:outline-none focus:border-genesis-border-default"
         />
       </div>
       
       {/* Template Preview */}
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-genesis-text-tertiary mb-2">
           Template Settings
         </label>
-        <div className="bg-abyss-dark/40 border border-abyss-cyan/20 rounded-lg p-4 space-y-3">
+        <div className="bg-genesis-glass-light/40 border border-genesis-border-default/20 rounded-lg p-4 space-y-3">
           <div className="flex justify-between text-sm">
             <span className="text-gray-500">Page Size</span>
             <span className="text-white">{template.pageSize.name}</span>
@@ -128,7 +128,7 @@ function ConfigPanel({ template, projectName, setProjectName }: ConfigPanelProps
       {/* Features */}
       {template.features.length > 0 && (
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">
+          <label className="block text-sm font-medium text-genesis-text-tertiary mb-2">
             Included Features
           </label>
           <div className="space-y-2">
@@ -140,10 +140,10 @@ function ConfigPanel({ template, projectName, setProjectName }: ConfigPanelProps
                 <input 
                   type="checkbox" 
                   checked={feature.enabled}
-                  className="rounded border-abyss-cyan/30 bg-abyss-dark text-abyss-cyan focus:ring-abyss-cyan"
+                  className="rounded border-genesis-border-default/30 bg-genesis-glass-light text-genesis-cipher-cyan focus:ring-abyss-cyan"
                   readOnly
                 />
-                <span className="text-gray-300">{feature.name}</span>
+                <span className="text-genesis-text-secondary">{feature.name}</span>
               </label>
             ))}
           </div>
@@ -177,9 +177,9 @@ export function WrytTemplateSelector({ onSelect, onCancel }: WrytTemplateSelecto
   
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-abyss-navy border border-abyss-cyan/30 rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col">
+      <div className="bg-abyss-navy border border-genesis-border-default/30 rounded-xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-abyss-cyan/20">
+        <div className="px-6 py-4 border-b border-genesis-border-default/20">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-white">Create New Project</h2>
             <button 
@@ -193,7 +193,7 @@ export function WrytTemplateSelector({ onSelect, onCancel }: WrytTemplateSelecto
         </div>
         
         {/* Category tabs */}
-        <div className="px-6 py-3 border-b border-abyss-cyan/10 overflow-x-auto">
+        <div className="px-6 py-3 border-b border-genesis-border-default/10 overflow-x-auto">
           <div className="flex gap-2">
             {TEMPLATE_CATEGORIES.map((category) => (
               <CategoryTab
@@ -209,7 +209,7 @@ export function WrytTemplateSelector({ onSelect, onCancel }: WrytTemplateSelecto
         {/* Content */}
         <div className="flex-1 flex min-h-0 overflow-hidden">
           {/* Template list */}
-          <div className="flex-1 p-6 overflow-y-auto border-r border-abyss-cyan/10">
+          <div className="flex-1 p-6 overflow-y-auto border-r border-genesis-border-default/10">
             <div className="grid grid-cols-2 gap-3">
               {templates.map((template) => (
                 <TemplateCard
@@ -223,7 +223,7 @@ export function WrytTemplateSelector({ onSelect, onCancel }: WrytTemplateSelecto
           </div>
           
           {/* Configuration panel */}
-          <div className="w-80 p-6 overflow-y-auto bg-abyss-dark/20">
+          <div className="w-80 p-6 overflow-y-auto bg-genesis-glass-light/20">
             <div className="mb-4">
               <span className="text-3xl">{selectedTemplate.icon}</span>
               <h3 className="text-lg font-bold text-white mt-2">{selectedTemplate.name}</h3>
@@ -239,10 +239,10 @@ export function WrytTemplateSelector({ onSelect, onCancel }: WrytTemplateSelecto
         </div>
         
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-abyss-cyan/20 flex justify-end gap-3">
+        <div className="px-6 py-4 border-t border-genesis-border-default/20 flex justify-end gap-3">
           <button
             onClick={onCancel}
-            className="px-6 py-2 text-gray-400 hover:text-white transition-colors"
+            className="px-6 py-2 text-genesis-text-tertiary hover:text-white transition-colors"
           >
             Cancel
           </button>

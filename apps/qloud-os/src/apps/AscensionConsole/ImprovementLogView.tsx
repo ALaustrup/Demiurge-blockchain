@@ -34,7 +34,7 @@ export const ImprovementLogView: React.FC = () => {
                 {improvement.status}
               </span>
             </div>
-            <div className="text-sm text-gray-400 mt-1">
+            <div className="text-sm text-genesis-text-tertiary mt-1">
               {new Date(improvement.timestamp).toLocaleString()}
             </div>
           </div>

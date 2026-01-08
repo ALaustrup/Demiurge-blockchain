@@ -18,7 +18,7 @@ export const AscensionConsole: React.FC = () => {
     <div className="ascension-console h-full w-full bg-black text-white p-4 overflow-auto">
       <div className="header mb-4">
         <h1 className="text-3xl font-bold text-cyan-400">💀 ASCENSION CONSOLE</h1>
-        <p className="text-gray-400">PHASE OMEGA PART III: Self-Governing Sovereign Computation</p>
+        <p className="text-genesis-text-tertiary">PHASE OMEGA PART III: Self-Governing Sovereign Computation</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">

@@ -26,11 +26,11 @@ export const IntentionSynthesisView: React.FC = () => {
       
       <div className="content space-y-3">
         <div>
-          <div className="text-sm text-gray-400">Prime Directive</div>
+          <div className="text-sm text-genesis-text-tertiary">Prime Directive</div>
           <div className="text-lg font-semibold text-cyan-400">{synthesis.primeDirective}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Consensus Strength</div>
+          <div className="text-sm text-genesis-text-tertiary">Consensus Strength</div>
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-800 rounded h-4">
               <div 
@@ -43,11 +43,11 @@ export const IntentionSynthesisView: React.FC = () => {
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <div className="text-sm text-gray-400">Local Intentions</div>
+            <div className="text-sm text-genesis-text-tertiary">Local Intentions</div>
             <div className="text-lg font-semibold text-blue-400">{synthesis.localIntentions}</div>
           </div>
           <div>
-            <div className="text-sm text-gray-400">Synthesized</div>
+            <div className="text-sm text-genesis-text-tertiary">Synthesized</div>
             <div className="text-lg font-semibold text-green-400">{synthesis.synthesized}</div>
           </div>
         </div>

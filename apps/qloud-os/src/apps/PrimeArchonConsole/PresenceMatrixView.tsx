@@ -34,7 +34,7 @@ export const PresenceMatrixView: React.FC = () => {
               <span className="font-semibold">{node.id}</span>
               <span className="text-cyan-400">Presence: {(node.presence * 100).toFixed(0)}%</span>
             </div>
-            <div className="text-sm text-gray-400 mt-1">
+            <div className="text-sm text-genesis-text-tertiary mt-1">
               Resonance: {(node.resonance * 100).toFixed(0)}%
             </div>
           </div>

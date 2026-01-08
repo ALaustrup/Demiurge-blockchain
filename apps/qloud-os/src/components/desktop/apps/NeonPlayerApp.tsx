@@ -354,7 +354,7 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
 
   return (
     <div 
-      className="w-full h-full bg-abyss-dark/90 backdrop-blur-sm flex flex-col relative"
+      className="w-full h-full bg-genesis-glass-light/90 backdrop-blur-sm flex flex-col relative"
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
@@ -367,7 +367,7 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 bg-abyss-dark/90 backdrop-blur-md flex flex-col items-center justify-center border-4 border-dashed border-abyss-cyan rounded-lg"
+            className="absolute inset-0 z-50 bg-genesis-glass-light/90 backdrop-blur-md flex flex-col items-center justify-center border-4 border-dashed border-genesis-border-default rounded-lg"
           >
             <motion.div
               initial={{ scale: 0.8 }}
@@ -375,8 +375,8 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
               className="text-center"
             >
               <div className="text-8xl mb-6">🎵</div>
-              <h2 className="text-3xl font-bold text-abyss-cyan mb-2">Drop Media Here</h2>
-              <p className="text-gray-400 text-lg">
+              <h2 className="text-3xl font-bold text-genesis-cipher-cyan mb-2">Drop Media Here</h2>
+              <p className="text-genesis-text-tertiary text-lg">
                 Audio, Video, or Images
               </p>
               <div className="mt-4 flex gap-4 justify-center text-sm text-gray-500">
@@ -389,14 +389,14 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
         )}
       </AnimatePresence>
       
-      <div className="px-4 py-3 border-b border-abyss-cyan/20 flex items-center justify-between">
+      <div className="px-4 py-3 border-b border-genesis-border-default/20 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {(['music', 'video', 'image'] as Array<'music' | 'video' | 'image'>).map((mode) => (
             <button
               key={mode}
               onClick={() => setActiveMode(mode)}
               className={`px-3 py-1 rounded text-sm ${
-                activeMode === mode ? 'bg-abyss-cyan text-black font-semibold' : 'bg-abyss-dark text-gray-300 border border-abyss-cyan/30'
+                activeMode === mode ? 'bg-abyss-cyan text-black font-semibold' : 'bg-genesis-glass-light text-genesis-text-secondary border border-genesis-border-default/30'
               }`}
             >
               {mode === 'music' && 'Music'}
@@ -405,7 +405,7 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
             </button>
           ))}
         </div>
-        <div className="text-xs text-gray-400">
+        <div className="text-xs text-genesis-text-tertiary">
           Modes auto-detect media type; manual switching lets you prep playlists/slideshows.
         </div>
       </div>
@@ -413,7 +413,7 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
       {/* Visualizer / Video / Image */}
       <div className="flex-1 relative overflow-hidden">
         {activeMode === 'image' ? (
-          <div className="h-full w-full flex items-center justify-center text-gray-400 bg-abyss-dark/60 border-b border-abyss-cyan/20">
+          <div className="h-full w-full flex items-center justify-center text-genesis-text-tertiary bg-genesis-glass-light/60 border-b border-genesis-border-default/20">
             Image slideshow mode — drop media to begin. Interval {slideshowInterval}s.
           </div>
         ) : isVideo && currentTrack?.uri ? (
@@ -445,10 +445,10 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
             {currentTrack && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="text-center">
-                  <h2 className="text-2xl font-bold text-abyss-cyan mb-2">
+                  <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">
                     {currentTrack.music?.trackName || currentTrack.name}
                   </h2>
-                  <p className="text-gray-300">
+                  <p className="text-genesis-text-secondary">
                     {currentTrack.music?.artistName || 'Unknown Artist'}
                   </p>
                 </div>
@@ -480,7 +480,7 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
       </div>
 
       {/* Controls + Settings */}
-      <div className="bg-abyss-dark/80 border-t border-abyss-cyan/30 p-4 space-y-4">
+      <div className="bg-genesis-glass-light/80 border-t border-genesis-border-default/30 p-4 space-y-4">
         {/* Scrubber */}
         <div>
           <input
@@ -489,9 +489,9 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
             max={duration}
             value={currentTime}
             onChange={(e) => handleSeek(Number(e.target.value))}
-            className="w-full h-2 bg-abyss-dark rounded-lg appearance-none cursor-pointer accent-abyss-cyan"
+            className="w-full h-2 bg-genesis-glass-light rounded-lg appearance-none cursor-pointer accent-abyss-cyan"
           />
-          <div className="flex justify-between text-xs text-gray-400 mt-1">
+          <div className="flex justify-between text-xs text-genesis-text-tertiary mt-1">
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
@@ -501,11 +501,11 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
         <div className="flex items-center justify-center gap-4">
           <button
             onClick={() => setShuffle(!shuffle)}
-            className={`px-3 py-1 rounded ${shuffle ? 'bg-abyss-cyan text-black' : 'bg-abyss-dark text-gray-300'}`}
+            className={`px-3 py-1 rounded ${shuffle ? 'bg-abyss-cyan text-black' : 'bg-genesis-glass-light text-genesis-text-secondary'}`}
           >
             🔀
           </button>
-          <button className="px-3 py-1 rounded bg-abyss-dark text-gray-300">
+          <button className="px-3 py-1 rounded bg-genesis-glass-light text-genesis-text-secondary">
             ⏮
           </button>
           <button
@@ -514,7 +514,7 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
           >
             {isPlaying ? '⏸' : '▶'}
           </button>
-          <button className="px-3 py-1 rounded bg-abyss-dark text-gray-300">
+          <button className="px-3 py-1 rounded bg-genesis-glass-light text-genesis-text-secondary">
             ⏭
           </button>
           <button
@@ -523,7 +523,7 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
               else if (repeat === 'all') setRepeat('one');
               else setRepeat('off');
             }}
-            className={`px-3 py-1 rounded ${repeat !== 'off' ? 'bg-abyss-cyan text-black' : 'bg-abyss-dark text-gray-300'}`}
+            className={`px-3 py-1 rounded ${repeat !== 'off' ? 'bg-abyss-cyan text-black' : 'bg-genesis-glass-light text-genesis-text-secondary'}`}
           >
             {repeat === 'all' ? '🔁' : repeat === 'one' ? '🔂' : '↩'}
           </button>
@@ -531,12 +531,12 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
 
         {/* Settings grid */}
         <div className="grid grid-cols-3 gap-4 text-sm">
-          <div className="bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-3 space-y-2">
-            <div className="font-semibold text-abyss-cyan">Playback</div>
-            <label className="flex items-center justify-between text-gray-300">
+          <div className="bg-genesis-glass-light/60 border border-genesis-border-default/20 rounded-lg p-3 space-y-2">
+            <div className="font-semibold text-genesis-cipher-cyan">Playback</div>
+            <label className="flex items-center justify-between text-genesis-text-secondary">
               Speed
               <select
-                className="bg-abyss-dark border border-abyss-cyan/30 rounded px-2 py-1 text-xs"
+                className="bg-genesis-glass-light border border-genesis-border-default/30 rounded px-2 py-1 text-xs"
                 value={playbackSpeed}
                 onChange={(e) => setPlaybackSpeed(Number(e.target.value))}
               >
@@ -547,22 +547,22 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
                 <option value={2}>2.0x</option>
               </select>
             </label>
-            <label className="flex items-center justify-between text-gray-300">
+            <label className="flex items-center justify-between text-genesis-text-secondary">
               Crossfade
               <input type="checkbox" checked={crossfade} onChange={(e) => setCrossfade(e.target.checked)} />
             </label>
-            <label className="flex items-center justify-between text-gray-300">
+            <label className="flex items-center justify-between text-genesis-text-secondary">
               Spatial audio
               <input type="checkbox" checked={spatialAudio} onChange={(e) => setSpatialAudio(e.target.checked)} />
             </label>
           </div>
 
-          <div className="bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-3 space-y-2">
-            <div className="font-semibold text-abyss-cyan">Sound shaping</div>
-            <label className="text-gray-300 flex items-center justify-between">
+          <div className="bg-genesis-glass-light/60 border border-genesis-border-default/20 rounded-lg p-3 space-y-2">
+            <div className="font-semibold text-genesis-cipher-cyan">Sound shaping</div>
+            <label className="text-genesis-text-secondary flex items-center justify-between">
               EQ preset
               <select
-                className="bg-abyss-dark border border-abyss-cyan/30 rounded px-2 py-1 text-xs"
+                className="bg-genesis-glass-light border border-genesis-border-default/30 rounded px-2 py-1 text-xs"
                 value={eqPreset}
                 onChange={(e) => setEqPreset(e.target.value as typeof eqPreset)}
               >
@@ -575,9 +575,9 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
             <div className="text-xs text-gray-500">Custom EQ bands coming; presets are UI-only today.</div>
           </div>
 
-          <div className="bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-3 space-y-2">
-            <div className="font-semibold text-abyss-cyan">Library / Slideshow</div>
-            <label className="flex items-center justify-between text-gray-300">
+          <div className="bg-genesis-glass-light/60 border border-genesis-border-default/20 rounded-lg p-3 space-y-2">
+            <div className="font-semibold text-genesis-cipher-cyan">Library / Slideshow</div>
+            <label className="flex items-center justify-between text-genesis-text-secondary">
               Slideshow interval (s)
               <input
                 type="number"
@@ -585,7 +585,7 @@ export function NeonPlayerApp({ assetId }: NeonPlayerAppProps) {
                 max={60}
                 value={slideshowInterval}
                 onChange={(e) => setSlideshowInterval(Number(e.target.value))}
-                className="w-16 bg-abyss-dark border border-abyss-cyan/30 rounded px-2 py-1 text-xs"
+                className="w-16 bg-genesis-glass-light border border-genesis-border-default/30 rounded px-2 py-1 text-xs"
               />
             </label>
             <div className="text-xs text-gray-500">

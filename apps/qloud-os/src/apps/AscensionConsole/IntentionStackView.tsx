@@ -35,7 +35,7 @@ export const IntentionStackView: React.FC = () => {
                 {intention.priority}
               </span>
             </div>
-            <div className="text-sm text-gray-400 mt-1">Status: {intention.status}</div>
+            <div className="text-sm text-genesis-text-tertiary mt-1">Status: {intention.status}</div>
           </div>
         ))}
       </div>

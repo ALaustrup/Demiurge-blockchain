@@ -157,9 +157,9 @@ function NavigatorPanel({ title, content }: NavigatorPanelProps) {
   const headings = extractHeadings(content);
   
   return (
-    <div className="w-48 border-r border-abyss-cyan/20 p-3 overflow-y-auto flex-shrink-0">
+    <div className="w-48 border-r border-genesis-border-default/20 p-3 overflow-y-auto flex-shrink-0">
       <h3 className="text-xs font-medium text-gray-500 mb-2">📄 Outline</h3>
-      <div className="text-sm text-gray-400">
+      <div className="text-sm text-genesis-text-tertiary">
         {headings.length > 0 ? (
           headings.map((h) => (
             <div 
@@ -206,7 +206,7 @@ function InfoPanel({
   };
   
   return (
-    <div className="w-48 border-l border-abyss-cyan/20 p-3 overflow-y-auto flex-shrink-0">
+    <div className="w-48 border-l border-genesis-border-default/20 p-3 overflow-y-auto flex-shrink-0">
       <h3 className="text-xs font-medium text-gray-500 mb-3">📊 Document Info</h3>
       
       <div className="space-y-2 text-sm">
@@ -224,7 +224,7 @@ function InfoPanel({
         </div>
       </div>
       
-      <div className="mt-4 pt-4 border-t border-abyss-cyan/20">
+      <div className="mt-4 pt-4 border-t border-genesis-border-default/20">
         <div className="flex items-center gap-2 text-sm">
           {hasUnsavedChanges ? (
             <span className="text-yellow-400">● Modified</span>
@@ -253,7 +253,7 @@ function InfoPanel({
           <button 
             key={format}
             onClick={() => onExport(format)} 
-            className="w-full text-left text-sm text-gray-400 hover:text-white py-1"
+            className="w-full text-left text-sm text-genesis-text-tertiary hover:text-white py-1"
           >
             • {format.toUpperCase()}
           </button>
@@ -422,27 +422,27 @@ export function WrytApp() {
       
       {/* Menu Bar */}
       {!focusMode && (
-        <div className="flex items-center gap-4 px-4 py-2 bg-abyss-dark/50 border-b border-abyss-cyan/20 text-sm">
+        <div className="flex items-center gap-4 px-4 py-2 bg-genesis-glass-light/50 border-b border-genesis-border-default/20 text-sm">
           <button 
             onClick={() => setView('welcome')}
-            className="text-gray-400 hover:text-white"
+            className="text-genesis-text-tertiary hover:text-white"
           >
             ← Projects
           </button>
           <div className="text-gray-600">|</div>
-          <button className="text-gray-400 hover:text-white">File</button>
-          <button className="text-gray-400 hover:text-white">Edit</button>
-          <button className="text-gray-400 hover:text-white">View</button>
-          <button className="text-gray-400 hover:text-white">Insert</button>
-          <button className="text-gray-400 hover:text-white">Format</button>
-          <button className="text-gray-400 hover:text-white">Tools</button>
-          <button className="text-gray-400 hover:text-white">Help</button>
+          <button className="text-genesis-text-tertiary hover:text-white">File</button>
+          <button className="text-genesis-text-tertiary hover:text-white">Edit</button>
+          <button className="text-genesis-text-tertiary hover:text-white">View</button>
+          <button className="text-genesis-text-tertiary hover:text-white">Insert</button>
+          <button className="text-genesis-text-tertiary hover:text-white">Format</button>
+          <button className="text-genesis-text-tertiary hover:text-white">Tools</button>
+          <button className="text-genesis-text-tertiary hover:text-white">Help</button>
           
           <div className="flex-1" />
           
           {identity && (
             <span className="text-xs text-gray-500">
-              Signed in as <span className="text-abyss-cyan">{identity.username}</span>
+              Signed in as <span className="text-genesis-cipher-cyan">{identity.username}</span>
             </span>
           )}
         </div>
@@ -459,16 +459,16 @@ export function WrytApp() {
       
       {/* Extra toolbar row for view toggles */}
       {!focusMode && (
-        <div className="flex items-center gap-2 px-4 py-1.5 bg-abyss-dark/20 border-b border-abyss-cyan/10 text-xs">
+        <div className="flex items-center gap-2 px-4 py-1.5 bg-genesis-glass-light/20 border-b border-genesis-border-default/10 text-xs">
           <button 
             onClick={() => togglePanel('navigator')}
-            className={`px-2 py-1 rounded ${panels.navigator ? 'text-abyss-cyan bg-abyss-cyan/10' : 'text-gray-500 hover:text-white'}`}
+            className={`px-2 py-1 rounded ${panels.navigator ? 'text-genesis-cipher-cyan bg-abyss-cyan/10' : 'text-gray-500 hover:text-white'}`}
           >
             📋 Outline
           </button>
           <button 
             onClick={() => togglePanel('info')}
-            className={`px-2 py-1 rounded ${panels.info ? 'text-abyss-cyan bg-abyss-cyan/10' : 'text-gray-500 hover:text-white'}`}
+            className={`px-2 py-1 rounded ${panels.info ? 'text-genesis-cipher-cyan bg-abyss-cyan/10' : 'text-gray-500 hover:text-white'}`}
           >
             ℹ️ Info
           </button>
@@ -495,7 +495,7 @@ export function WrytApp() {
         {/* Editor Area */}
         <div className={`flex-1 flex flex-col min-w-0 ${focusMode ? 'max-w-3xl mx-auto' : ''}`}>
           {/* Title */}
-          <div className="p-4 border-b border-abyss-cyan/10">
+          <div className="p-4 border-b border-genesis-border-default/10">
             <input
               type="text"
               value={documentTitle}
@@ -540,7 +540,7 @@ export function WrytApp() {
       
       {/* Status Bar */}
       {!focusMode && (
-        <div className="flex items-center justify-between px-4 py-1 bg-abyss-dark/50 border-t border-abyss-cyan/20 text-xs text-gray-500">
+        <div className="flex items-center justify-between px-4 py-1 bg-genesis-glass-light/50 border-t border-genesis-border-default/20 text-xs text-gray-500">
           <div className="flex items-center gap-4">
             <span>Page 1 of 1</span>
             <span>100%</span>

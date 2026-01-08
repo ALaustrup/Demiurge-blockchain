@@ -33,7 +33,7 @@ export const DirectiveView: React.FC = () => {
               </span>
             </div>
             <div className="text-sm mt-1">{dir.directive}</div>
-            <div className="text-xs text-gray-400 mt-1">Priority: {dir.priority.toFixed(2)}</div>
+            <div className="text-xs text-genesis-text-tertiary mt-1">Priority: {dir.priority.toFixed(2)}</div>
           </div>
         ))}
       </div>

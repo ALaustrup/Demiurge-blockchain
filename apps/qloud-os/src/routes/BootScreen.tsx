@@ -44,7 +44,7 @@ export function BootScreen({ onComplete }: BootScreenProps) {
               transition={{ duration: 0.8 }}
             >
               <motion.div
-                className="text-7xl font-bold text-abyss-cyan"
+                className="text-7xl font-bold text-genesis-cipher-cyan"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.8 }}
@@ -52,7 +52,7 @@ export function BootScreen({ onComplete }: BootScreenProps) {
                 ABYSS OS
               </motion.div>
               <motion.div
-                className="text-xl text-gray-400"
+                className="text-xl text-genesis-text-tertiary"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.8 }}

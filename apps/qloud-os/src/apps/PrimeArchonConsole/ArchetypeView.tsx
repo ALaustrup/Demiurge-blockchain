@@ -27,7 +27,7 @@ export const ArchetypeView: React.FC = () => {
               <span className="font-semibold text-pink-400">{arch.name}</span>
               <span className="text-green-400">{(arch.alignment * 100).toFixed(0)}%</span>
             </div>
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-genesis-text-tertiary">
               {arch.traits.join(', ')}
             </div>
           </div>

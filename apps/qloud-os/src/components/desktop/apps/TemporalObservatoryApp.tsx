@@ -51,17 +51,17 @@ export function TemporalObservatoryApp() {
   return (
     <div className="h-full flex flex-col min-h-0 p-6 space-y-6 overflow-auto">
       <div>
-        <h2 className="text-2xl font-bold text-abyss-cyan mb-2">Temporal Observatory</h2>
-        <p className="text-sm text-gray-400">The visualization of time itself</p>
+        <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">Temporal Observatory</h2>
+        <p className="text-sm text-genesis-text-tertiary">The visualization of time itself</p>
       </div>
       
       {/* Timeline Visualization */}
-      <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-6">
-        <h3 className="text-lg font-bold text-abyss-cyan mb-4">Timeline</h3>
+      <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-6">
+        <h3 className="text-lg font-bold text-genesis-cipher-cyan mb-4">Timeline</h3>
         <div className="flex items-center space-x-4 overflow-x-auto pb-4">
           {/* Past */}
           <div className="flex-shrink-0">
-            <div className="text-xs text-gray-400 mb-2">Past</div>
+            <div className="text-xs text-genesis-text-tertiary mb-2">Past</div>
             <div className="space-y-1">
               {temporalState?.past.slice(-5).map((slice: TimeSlice, i: number) => (
                 <motion.div
@@ -69,7 +69,7 @@ export function TemporalObservatoryApp() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.1 }}
-                  className="w-16 h-16 bg-abyss-navy/50 border border-abyss-cyan/20 rounded flex items-center justify-center text-xs text-abyss-cyan"
+                  className="w-16 h-16 bg-abyss-navy/50 border border-genesis-border-default/20 rounded flex items-center justify-center text-xs text-genesis-cipher-cyan"
                 >
                   {new Date(slice.timestamp).getHours()}:{new Date(slice.timestamp).getMinutes()}
                 </motion.div>
@@ -79,11 +79,11 @@ export function TemporalObservatoryApp() {
           
           {/* Now */}
           <div className="flex-shrink-0">
-            <div className="text-xs text-gray-400 mb-2">Now</div>
+            <div className="text-xs text-genesis-text-tertiary mb-2">Now</div>
             <motion.div
               animate={{ scale: [1, 1.1, 1] }}
               transition={{ repeat: Infinity, duration: 2 }}
-              className="w-20 h-20 bg-abyss-cyan/20 border-2 border-abyss-cyan rounded flex items-center justify-center text-sm font-bold text-abyss-cyan"
+              className="w-20 h-20 bg-abyss-cyan/20 border-2 border-genesis-border-default rounded flex items-center justify-center text-sm font-bold text-genesis-cipher-cyan"
             >
               NOW
             </motion.div>
@@ -91,7 +91,7 @@ export function TemporalObservatoryApp() {
           
           {/* Future */}
           <div className="flex-shrink-0">
-            <div className="text-xs text-gray-400 mb-2">Future</div>
+            <div className="text-xs text-genesis-text-tertiary mb-2">Future</div>
             <div className="space-y-1">
               {futurePredictions.map((pred, i) => (
                 <motion.div
@@ -110,15 +110,15 @@ export function TemporalObservatoryApp() {
       </div>
       
       {/* Causal Graph */}
-      <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-6">
-        <h3 className="text-lg font-bold text-abyss-cyan mb-4">Causal Graph</h3>
+      <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-6">
+        <h3 className="text-lg font-bold text-genesis-cipher-cyan mb-4">Causal Graph</h3>
         <div className="space-y-2 max-h-64 overflow-auto">
           {causalLinks.length > 0 ? (
             causalLinks.slice(0, 10).map((link, i) => (
               <div key={i} className="flex items-center space-x-2 text-sm">
-                <span className="text-gray-400 font-mono text-xs">{link.from.slice(0, 8)}...</span>
-                <span className="text-abyss-cyan">→</span>
-                <span className="text-gray-400 font-mono text-xs">{link.to.slice(0, 8)}...</span>
+                <span className="text-genesis-text-tertiary font-mono text-xs">{link.from.slice(0, 8)}...</span>
+                <span className="text-genesis-cipher-cyan">→</span>
+                <span className="text-genesis-text-tertiary font-mono text-xs">{link.to.slice(0, 8)}...</span>
                 <span className="text-gray-500 text-xs">({(link.strength * 100).toFixed(0)}%)</span>
               </div>
             ))
@@ -130,18 +130,18 @@ export function TemporalObservatoryApp() {
       
       {/* Branch Evaluator */}
       {branches.length > 0 && (
-        <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-6">
-          <h3 className="text-lg font-bold text-abyss-cyan mb-4">Multiverse Branches</h3>
+        <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-6">
+          <h3 className="text-lg font-bold text-genesis-cipher-cyan mb-4">Multiverse Branches</h3>
           <div className="space-y-3">
             {branches.map((branch, i) => {
               const evaluation = branchEvaluator.evaluateBranch(branch);
               return (
                 <div
                   key={branch.id}
-                  className="p-4 bg-abyss-navy/30 rounded border border-abyss-cyan/20"
+                  className="p-4 bg-abyss-navy/30 rounded border border-genesis-border-default/20"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <div className="font-mono text-sm text-abyss-cyan">
+                    <div className="font-mono text-sm text-genesis-cipher-cyan">
                       Branch {i + 1} · Depth: {branch.depth}
                     </div>
                     <span className={`text-xs px-2 py-1 rounded ${
@@ -152,7 +152,7 @@ export function TemporalObservatoryApp() {
                       {evaluation.recommendation}
                     </span>
                   </div>
-                  <div className="text-xs text-gray-400 space-y-1">
+                  <div className="text-xs text-genesis-text-tertiary space-y-1">
                     <div>Score: {evaluation.score.toFixed(1)}/100</div>
                     <div>Stability: {(evaluation.metrics.stability * 100).toFixed(0)}%</div>
                     <div>Efficiency: {(evaluation.metrics.efficiency * 100).toFixed(0)}%</div>
@@ -167,23 +167,23 @@ export function TemporalObservatoryApp() {
       {/* Temporal State Stats */}
       {temporalState && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-4">
-            <div className="text-sm text-gray-400 mb-1">Past Slices</div>
-            <div className="text-2xl font-mono text-abyss-cyan">{temporalState.past.length}</div>
+          <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-4">
+            <div className="text-sm text-genesis-text-tertiary mb-1">Past Slices</div>
+            <div className="text-2xl font-mono text-genesis-cipher-cyan">{temporalState.past.length}</div>
           </div>
           
-          <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-4">
-            <div className="text-sm text-gray-400 mb-1">Future Slices</div>
+          <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-4">
+            <div className="text-sm text-genesis-text-tertiary mb-1">Future Slices</div>
             <div className="text-2xl font-mono text-abyss-purple">{temporalState.future.length}</div>
           </div>
           
-          <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-4">
-            <div className="text-sm text-gray-400 mb-1">Branches</div>
-            <div className="text-2xl font-mono text-abyss-cyan">{temporalState.branches.length}</div>
+          <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-4">
+            <div className="text-sm text-genesis-text-tertiary mb-1">Branches</div>
+            <div className="text-2xl font-mono text-genesis-cipher-cyan">{temporalState.branches.length}</div>
           </div>
           
-          <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-4">
-            <div className="text-sm text-gray-400 mb-1">Causal Links</div>
+          <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-4">
+            <div className="text-sm text-genesis-text-tertiary mb-1">Causal Links</div>
             <div className="text-2xl font-mono text-abyss-purple">{causalLinks.length}</div>
           </div>
         </div>

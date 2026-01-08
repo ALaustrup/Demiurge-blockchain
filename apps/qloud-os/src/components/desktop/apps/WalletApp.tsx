@@ -10,28 +10,28 @@ export function WalletApp() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-abyss-cyan mb-4">Accounts / Wallet</h2>
-        <p className="text-gray-300 text-sm mb-4">
+        <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-4">Accounts / Wallet</h2>
+        <p className="text-genesis-text-secondary text-sm mb-4">
           Manage your QorID account and CGT balance.
         </p>
       </div>
 
       {account ? (
         <div className="space-y-4">
-          <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-            <div className="text-sm text-gray-400 mb-1">Username</div>
-            <div className="text-abyss-cyan font-medium">{account.username}</div>
+          <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+            <div className="text-sm text-genesis-text-tertiary mb-1">Username</div>
+            <div className="text-genesis-cipher-cyan font-medium">{account.username}</div>
           </div>
 
-          <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-            <div className="text-sm text-gray-400 mb-1">Public Key</div>
-            <div className="text-xs font-mono text-gray-300 break-all">{account.publicKey}</div>
+          <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+            <div className="text-sm text-genesis-text-tertiary mb-1">Public Key</div>
+            <div className="text-xs font-mono text-genesis-text-secondary break-all">{account.publicKey}</div>
           </div>
 
-          <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-            <div className="text-sm text-gray-400 mb-1">CGT Balance</div>
-            <div className="text-2xl font-mono text-abyss-cyan">
-              {cgtBalance.toFixed(4)} <span className="text-sm text-gray-400">CGT</span>
+          <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+            <div className="text-sm text-genesis-text-tertiary mb-1">CGT Balance</div>
+            <div className="text-2xl font-mono text-genesis-cipher-cyan">
+              {cgtBalance.toFixed(4)} <span className="text-sm text-genesis-text-tertiary">CGT</span>
             </div>
           </div>
 
@@ -45,7 +45,7 @@ export function WalletApp() {
           </div>
         </div>
       ) : (
-        <div className="text-gray-400">No account found. Please log in.</div>
+        <div className="text-genesis-text-tertiary">No account found. Please log in.</div>
       )}
     </div>
   );

@@ -26,20 +26,20 @@ export const GodNetForecastView: React.FC = () => {
       
       <div className="predictions space-y-3">
         <div>
-          <div className="text-sm text-gray-400">Predicted Health</div>
+          <div className="text-sm text-genesis-text-tertiary">Predicted Health</div>
           <div className="text-2xl font-bold text-green-400">{(forecast.predictedHealth * 100).toFixed(0)}%</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Predicted Throughput</div>
+          <div className="text-sm text-genesis-text-tertiary">Predicted Throughput</div>
           <div className="text-2xl font-bold text-blue-400">{(forecast.predictedThroughput * 100).toFixed(0)}%</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Blocks Simulated</div>
+          <div className="text-sm text-genesis-text-tertiary">Blocks Simulated</div>
           <div className="text-lg font-semibold text-cyan-400">{forecast.blocksSimulated.toLocaleString()}</div>
         </div>
         {forecast.risks.length > 0 && (
           <div>
-            <div className="text-sm text-gray-400">Risks</div>
+            <div className="text-sm text-genesis-text-tertiary">Risks</div>
             <div className="text-red-400 text-sm">{forecast.risks.join(', ')}</div>
           </div>
         )}

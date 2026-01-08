@@ -58,13 +58,13 @@ export function ExplorerBookmarks({ onNavigate, onClose }: ExplorerBookmarksProp
   };
 
   return (
-    <div className="w-64 h-full bg-abyss-navy/80 border-r border-abyss-cyan/20 flex flex-col">
+    <div className="w-64 h-full bg-abyss-navy/80 border-r border-genesis-border-default/20 flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-3 border-b border-abyss-cyan/20">
+      <div className="flex items-center justify-between p-3 border-b border-genesis-border-default/20">
         <h3 className="text-sm font-medium text-white">Bookmarks</h3>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-white p-1"
+          className="text-genesis-text-tertiary hover:text-white p-1"
         >
           ×
         </button>
@@ -90,7 +90,7 @@ export function ExplorerBookmarks({ onNavigate, onClose }: ExplorerBookmarksProp
             {/* Folder header */}
             <button
               onClick={() => toggleFolder(folder.id)}
-              className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-300 hover:bg-abyss-dark/50 rounded transition-colors"
+              className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-genesis-text-secondary hover:bg-genesis-glass-light/50 rounded transition-colors"
             >
               <span className="text-xs">
                 {expandedFolders.has(folder.id) ? '📂' : '📁'}
@@ -133,18 +133,18 @@ export function ExplorerBookmarks({ onNavigate, onClose }: ExplorerBookmarksProp
               onChange={(e) => setNewFolderName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleCreateFolder()}
               placeholder="Folder name..."
-              className="flex-1 px-2 py-1 text-xs bg-abyss-dark border border-abyss-cyan/30 rounded text-white"
+              className="flex-1 px-2 py-1 text-xs bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white"
               autoFocus
             />
             <button
               onClick={handleCreateFolder}
-              className="px-2 py-1 text-xs text-abyss-cyan hover:bg-abyss-cyan/20 rounded"
+              className="px-2 py-1 text-xs text-genesis-cipher-cyan hover:bg-abyss-cyan/20 rounded"
             >
               Add
             </button>
             <button
               onClick={() => setShowNewFolder(false)}
-              className="px-2 py-1 text-xs text-gray-400 hover:bg-abyss-dark/50 rounded"
+              className="px-2 py-1 text-xs text-genesis-text-tertiary hover:bg-genesis-glass-light/50 rounded"
             >
               ×
             </button>
@@ -152,7 +152,7 @@ export function ExplorerBookmarks({ onNavigate, onClose }: ExplorerBookmarksProp
         ) : (
           <button
             onClick={() => setShowNewFolder(true)}
-            className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-500 hover:text-gray-300 hover:bg-abyss-dark/50 rounded transition-colors"
+            className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-500 hover:text-genesis-text-secondary hover:bg-genesis-glass-light/50 rounded transition-colors"
           >
             <span>+</span>
             <span>New Folder</span>
@@ -161,7 +161,7 @@ export function ExplorerBookmarks({ onNavigate, onClose }: ExplorerBookmarksProp
       </div>
       
       {/* Footer with stats */}
-      <div className="p-2 border-t border-abyss-cyan/20 text-xs text-gray-500">
+      <div className="p-2 border-t border-genesis-border-default/20 text-xs text-gray-500">
         {bookmarks.length} bookmark{bookmarks.length !== 1 ? 's' : ''} in {folders.length} folder{folders.length !== 1 ? 's' : ''}
       </div>
     </div>
@@ -184,7 +184,7 @@ function BookmarkItem({ bookmark, favicon, isActive, onNavigate, onRemove }: Boo
     <div
       className={`
         group flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors
-        ${isActive ? 'bg-abyss-cyan/20 text-white' : 'text-gray-400 hover:bg-abyss-dark/50 hover:text-white'}
+        ${isActive ? 'bg-abyss-cyan/20 text-white' : 'text-genesis-text-tertiary hover:bg-genesis-glass-light/50 hover:text-white'}
       `}
       onClick={() => onNavigate(bookmark.url)}
       onContextMenu={(e) => {

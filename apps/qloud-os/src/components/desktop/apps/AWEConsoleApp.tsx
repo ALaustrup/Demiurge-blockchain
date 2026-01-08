@@ -207,7 +207,7 @@ export function AWEConsoleApp() {
   if (!worldState || !engine) {
     return (
       <div className="h-full flex items-center justify-center">
-        <div className="text-gray-400">Initializing world...</div>
+        <div className="text-genesis-text-tertiary">Initializing world...</div>
       </div>
     );
   }
@@ -215,8 +215,8 @@ export function AWEConsoleApp() {
   return (
     <div className="h-full flex flex-col min-h-0 p-6 space-y-4 overflow-auto">
       <div>
-        <h2 className="text-2xl font-bold text-abyss-cyan mb-2">AWE Console</h2>
-        <p className="text-sm text-gray-400">Autonomous World Engine</p>
+        <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">AWE Console</h2>
+        <p className="text-sm text-genesis-text-tertiary">Autonomous World Engine</p>
       </div>
       
       {/* Controls */}
@@ -236,7 +236,7 @@ export function AWEConsoleApp() {
         
         {/* Speed control */}
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-400">Speed:</span>
+          <span className="text-sm text-genesis-text-tertiary">Speed:</span>
           <input
             type="range"
             min="0.25"
@@ -246,19 +246,19 @@ export function AWEConsoleApp() {
             onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
             className="w-32"
           />
-          <span className="text-sm text-abyss-cyan">{speed}x</span>
+          <span className="text-sm text-genesis-cipher-cyan">{speed}x</span>
         </div>
       </div>
       
       {/* Tabs */}
-      <div className="flex space-x-2 border-b border-abyss-cyan/20">
+      <div className="flex space-x-2 border-b border-genesis-border-default/20">
         {(['view', 'state', 'agents', 'physics', 'social', 'evolution', 'rules'] as const).map(tab => (
           <button
             key={tab}
             className={`px-4 py-2 text-sm font-medium transition-colors ${
               selectedTab === tab
-                ? 'text-abyss-cyan border-b-2 border-abyss-cyan'
-                : 'text-gray-400 hover:text-abyss-cyan'
+                ? 'text-genesis-cipher-cyan border-b-2 border-genesis-border-default'
+                : 'text-genesis-text-tertiary hover:text-genesis-cipher-cyan'
             }`}
             onClick={() => setSelectedTab(tab)}
           >
@@ -271,36 +271,36 @@ export function AWEConsoleApp() {
       <div className="flex-1 overflow-auto">
         {selectedTab === 'view' && (
           <div className="space-y-4">
-            <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
+            <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
               <canvas
                 ref={canvasRef}
                 width={800}
                 height={600}
-                className="w-full h-auto border border-abyss-cyan/20 rounded"
+                className="w-full h-auto border border-genesis-border-default/20 rounded"
                 style={{ maxHeight: '600px' }}
               />
             </div>
             
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-                <div className="text-sm text-gray-400 mb-1">Tick</div>
-                <div className="text-2xl font-mono text-abyss-cyan">{worldState.tick}</div>
+              <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+                <div className="text-sm text-genesis-text-tertiary mb-1">Tick</div>
+                <div className="text-2xl font-mono text-genesis-cipher-cyan">{worldState.tick}</div>
               </div>
-              <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-                <div className="text-sm text-gray-400 mb-1">Entities</div>
-                <div className="text-2xl font-mono text-abyss-cyan">{worldState.entities.size}</div>
+              <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+                <div className="text-sm text-genesis-text-tertiary mb-1">Entities</div>
+                <div className="text-2xl font-mono text-genesis-cipher-cyan">{worldState.entities.size}</div>
               </div>
-              <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-                <div className="text-sm text-gray-400 mb-1">Species</div>
-                <div className="text-2xl font-mono text-abyss-cyan">{worldState.species.size}</div>
+              <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+                <div className="text-sm text-genesis-text-tertiary mb-1">Species</div>
+                <div className="text-2xl font-mono text-genesis-cipher-cyan">{worldState.species.size}</div>
               </div>
             </div>
           </div>
         )}
         
         {selectedTab === 'state' && (
-          <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-            <div className="font-mono text-xs text-gray-300 whitespace-pre-wrap overflow-auto max-h-96">
+          <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+            <div className="font-mono text-xs text-genesis-text-secondary whitespace-pre-wrap overflow-auto max-h-96">
               {JSON.stringify({
                 id: worldState.id,
                 seed: worldState.seed,
@@ -315,9 +315,9 @@ export function AWEConsoleApp() {
         {selectedTab === 'agents' && (
           <div className="space-y-2">
             {Array.from(worldState.entities.values()).slice(0, 20).map(entity => (
-              <div key={entity.id} className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-3">
-                <div className="font-mono text-sm text-abyss-cyan">{entity.id.slice(0, 16)}...</div>
-                <div className="text-xs text-gray-400 mt-1">
+              <div key={entity.id} className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-3">
+                <div className="font-mono text-sm text-genesis-cipher-cyan">{entity.id.slice(0, 16)}...</div>
+                <div className="text-xs text-genesis-text-tertiary mt-1">
                   Pos: ({entity.position.x.toFixed(1)}, {entity.position.y.toFixed(1)})
                   {entity.energy !== undefined && ` | Energy: ${entity.energy.toFixed(1)}`}
                   {entity.speciesId && ` | Species: ${entity.speciesId.slice(0, 8)}...`}
@@ -328,18 +328,18 @@ export function AWEConsoleApp() {
         )}
         
         {selectedTab === 'physics' && (
-          <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4 space-y-3">
+          <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4 space-y-3">
             <div>
-              <div className="text-sm text-gray-400 mb-1">Gravity</div>
-              <div className="text-abyss-cyan">{worldState.physics.gravity}</div>
+              <div className="text-sm text-genesis-text-tertiary mb-1">Gravity</div>
+              <div className="text-genesis-cipher-cyan">{worldState.physics.gravity}</div>
             </div>
             <div>
-              <div className="text-sm text-gray-400 mb-1">Friction</div>
-              <div className="text-abyss-cyan">{worldState.physics.friction}</div>
+              <div className="text-sm text-genesis-text-tertiary mb-1">Friction</div>
+              <div className="text-genesis-cipher-cyan">{worldState.physics.friction}</div>
             </div>
             <div>
-              <div className="text-sm text-gray-400 mb-1">Bounds</div>
-              <div className="text-abyss-cyan">
+              <div className="text-sm text-genesis-text-tertiary mb-1">Bounds</div>
+              <div className="text-genesis-cipher-cyan">
                 {worldState.physics.bounds.width} × {worldState.physics.bounds.height} × {worldState.physics.bounds.depth}
               </div>
             </div>
@@ -347,17 +347,17 @@ export function AWEConsoleApp() {
         )}
         
         {selectedTab === 'social' && (
-          <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-            <div className="text-sm text-gray-400">Social graph visualization coming soon</div>
+          <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+            <div className="text-sm text-genesis-text-tertiary">Social graph visualization coming soon</div>
           </div>
         )}
         
         {selectedTab === 'evolution' && (
           <div className="space-y-2">
             {Array.from(worldState.species.values()).map(species => (
-              <div key={species.id} className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-3">
-                <div className="font-medium text-abyss-cyan">{species.name}</div>
-                <div className="text-xs text-gray-400 mt-1">
+              <div key={species.id} className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-3">
+                <div className="font-medium text-genesis-cipher-cyan">{species.name}</div>
+                <div className="text-xs text-genesis-text-tertiary mt-1">
                   Population: {species.population} | Fitness: {species.fitness.toFixed(2)}
                   {species.parentSpeciesId && ` | Parent: ${species.parentSpeciesId.slice(0, 8)}...`}
                 </div>
@@ -367,10 +367,10 @@ export function AWEConsoleApp() {
         )}
         
         {selectedTab === 'rules' && (
-          <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-            <div className="text-sm text-gray-400 mb-2">Rules Editor</div>
+          <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+            <div className="text-sm text-genesis-text-tertiary mb-2">Rules Editor</div>
             <textarea
-              className="w-full h-64 bg-abyss-navy/50 border border-abyss-cyan/20 rounded p-2 font-mono text-xs text-abyss-cyan"
+              className="w-full h-64 bg-abyss-navy/50 border border-genesis-border-default/20 rounded p-2 font-mono text-xs text-genesis-cipher-cyan"
               value={JSON.stringify(worldState.rules, null, 2)}
               readOnly
               placeholder="Rules editor coming soon"

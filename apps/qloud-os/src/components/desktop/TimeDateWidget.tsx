@@ -42,7 +42,7 @@ export function TimeDateWidget({ className = '' }: TimeDateWidgetProps) {
 
   return (
     <motion.div
-      className={`px-4 py-2 rounded-lg border border-abyss-cyan/20 bg-abyss-dark/50 backdrop-blur-sm ${className}`}
+      className={`px-4 py-2 rounded-lg border border-genesis-border-default/20 bg-genesis-glass-light/50 backdrop-blur-sm ${className}`}
       style={{
         background: `
           linear-gradient(135deg,
@@ -60,11 +60,11 @@ export function TimeDateWidget({ className = '' }: TimeDateWidgetProps) {
     >
       <div className="flex flex-col items-center gap-1">
         {/* Time */}
-        <div className="text-abyss-cyan text-lg font-mono font-bold">
+        <div className="text-genesis-cipher-cyan text-lg font-mono font-bold">
           {formatTime(currentTime)}
         </div>
         {/* Date */}
-        <div className="text-gray-300 text-xs">
+        <div className="text-genesis-text-secondary text-xs">
           {formatDate(currentTime)}
         </div>
       </div>

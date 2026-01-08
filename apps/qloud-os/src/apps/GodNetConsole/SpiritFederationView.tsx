@@ -26,19 +26,19 @@ export const SpiritFederationView: React.FC = () => {
       
       <div className="metrics grid grid-cols-2 gap-4">
         <div>
-          <div className="text-sm text-gray-400">Total Spirits</div>
+          <div className="text-sm text-genesis-text-tertiary">Total Spirits</div>
           <div className="text-2xl font-bold text-pink-400">{federation.totalSpirits}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Active Migrations</div>
+          <div className="text-sm text-genesis-text-tertiary">Active Migrations</div>
           <div className="text-2xl font-bold text-yellow-400">{federation.activeMigrations}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Shards</div>
+          <div className="text-sm text-genesis-text-tertiary">Shards</div>
           <div className="text-lg font-semibold text-cyan-400">{federation.shards}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Nodes</div>
+          <div className="text-sm text-genesis-text-tertiary">Nodes</div>
           <div className="text-lg font-semibold text-blue-400">{federation.nodes}</div>
         </div>
       </div>

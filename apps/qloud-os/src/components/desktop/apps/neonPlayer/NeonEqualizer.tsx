@@ -34,14 +34,14 @@ function EQBand({ id, frequency, gain, onChange, disabled }: EQBandProps) {
   return (
     <div className="flex flex-col items-center gap-2">
       {/* Gain value */}
-      <span className="text-xs text-gray-400 w-10 text-center">
+      <span className="text-xs text-genesis-text-tertiary w-10 text-center">
         {gain > 0 ? '+' : ''}{gain.toFixed(1)}
       </span>
       
       {/* Slider track */}
       <div className="relative h-32 w-6 flex items-center justify-center">
         {/* Track background */}
-        <div className="absolute h-full w-1 bg-abyss-dark rounded-full">
+        <div className="absolute h-full w-1 bg-genesis-glass-light rounded-full">
           {/* Fill */}
           <motion.div
             className="absolute bottom-1/2 left-0 w-full bg-gradient-to-t from-abyss-cyan to-abyss-cyan/50 rounded-full"
@@ -110,7 +110,7 @@ function PresetButton({ preset, isActive, onClick }: PresetButtonProps) {
         px-3 py-2 rounded-lg text-sm font-medium transition-all
         ${isActive 
           ? 'bg-abyss-cyan text-abyss-dark' 
-          : 'bg-abyss-dark/60 text-gray-400 hover:text-white hover:bg-abyss-dark'
+          : 'bg-genesis-glass-light/60 text-genesis-text-tertiary hover:text-white hover:bg-genesis-glass-light'
         }
       `}
     >
@@ -144,7 +144,7 @@ export function NeonEqualizer({ onClose }: NeonEqualizerProps) {
   }, [setEqualizerBand]);
   
   return (
-    <div className="bg-abyss-navy/90 border border-abyss-cyan/30 rounded-lg p-4">
+    <div className="bg-abyss-navy/90 border border-genesis-border-default/30 rounded-lg p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -173,14 +173,14 @@ export function NeonEqualizer({ onClose }: NeonEqualizerProps) {
         <div className="flex items-center gap-2">
           <button
             onClick={resetEqualizer}
-            className="px-3 py-1 text-xs text-gray-400 hover:text-white"
+            className="px-3 py-1 text-xs text-genesis-text-tertiary hover:text-white"
           >
             Reset
           </button>
           {onClose && (
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white"
+              className="text-genesis-text-tertiary hover:text-white"
             >
               ×
             </button>
@@ -246,7 +246,7 @@ export function NeonEqualizerCompact() {
           px-2 py-1 rounded text-xs font-medium transition-colors
           ${equalizerEnabled 
             ? 'bg-abyss-cyan text-abyss-dark' 
-            : 'bg-abyss-dark/60 text-gray-400'
+            : 'bg-genesis-glass-light/60 text-genesis-text-tertiary'
           }
         `}
       >

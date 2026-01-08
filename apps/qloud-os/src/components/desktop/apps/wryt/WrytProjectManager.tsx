@@ -35,8 +35,8 @@ function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
   
   return (
     <div 
-      className="relative bg-abyss-dark/40 border border-abyss-cyan/20 rounded-lg p-4 
-                 hover:border-abyss-cyan/40 hover:bg-abyss-dark/60 transition-all cursor-pointer
+      className="relative bg-genesis-glass-light/40 border border-genesis-border-default/20 rounded-lg p-4 
+                 hover:border-genesis-border-default/40 hover:bg-genesis-glass-light/60 transition-all cursor-pointer
                  group"
       onClick={onClick}
     >
@@ -57,7 +57,7 @@ function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
       {/* Progress bar */}
       {project.progress > 0 && (
         <div className="mt-2">
-          <div className="h-1 bg-abyss-dark rounded-full overflow-hidden">
+          <div className="h-1 bg-genesis-glass-light rounded-full overflow-hidden">
             <div 
               className="h-full bg-abyss-cyan transition-all" 
               style={{ width: `${project.progress}%` }} 
@@ -81,19 +81,19 @@ function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
       {/* Dropdown menu */}
       {showMenu && (
         <div 
-          className="absolute top-8 right-2 bg-abyss-dark border border-abyss-cyan/30 rounded-lg shadow-lg py-1 z-10"
+          className="absolute top-8 right-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded-lg shadow-lg py-1 z-10"
           onClick={(e) => e.stopPropagation()}
         >
-          <button className="w-full px-4 py-1.5 text-left text-sm text-gray-300 hover:bg-abyss-cyan/20">
+          <button className="w-full px-4 py-1.5 text-left text-sm text-genesis-text-secondary hover:bg-abyss-cyan/20">
             Rename
           </button>
-          <button className="w-full px-4 py-1.5 text-left text-sm text-gray-300 hover:bg-abyss-cyan/20">
+          <button className="w-full px-4 py-1.5 text-left text-sm text-genesis-text-secondary hover:bg-abyss-cyan/20">
             Duplicate
           </button>
-          <button className="w-full px-4 py-1.5 text-left text-sm text-gray-300 hover:bg-abyss-cyan/20">
+          <button className="w-full px-4 py-1.5 text-left text-sm text-genesis-text-secondary hover:bg-abyss-cyan/20">
             Export
           </button>
-          <hr className="border-abyss-cyan/20 my-1" />
+          <hr className="border-genesis-border-default/20 my-1" />
           <button 
             className="w-full px-4 py-1.5 text-left text-sm text-red-400 hover:bg-red-500/20"
             onClick={() => {
@@ -122,13 +122,13 @@ interface NewProjectCardProps {
 function NewProjectCard({ onClick }: NewProjectCardProps) {
   return (
     <div 
-      className="bg-abyss-dark/20 border-2 border-dashed border-abyss-cyan/30 rounded-lg p-4 
-                 hover:border-abyss-cyan/60 hover:bg-abyss-dark/40 transition-all cursor-pointer
+      className="bg-genesis-glass-light/20 border-2 border-dashed border-genesis-border-default/30 rounded-lg p-4 
+                 hover:border-genesis-border-default/60 hover:bg-genesis-glass-light/40 transition-all cursor-pointer
                  flex flex-col items-center justify-center min-h-[180px]"
       onClick={onClick}
     >
-      <div className="text-4xl text-abyss-cyan/60 mb-2">+</div>
-      <div className="text-gray-400 text-sm">New Project</div>
+      <div className="text-4xl text-genesis-cipher-cyan/60 mb-2">+</div>
+      <div className="text-genesis-text-tertiary text-sm">New Project</div>
     </div>
   );
 }
@@ -148,11 +148,11 @@ function RecentFile({ name, template, time, onClick }: RecentFileProps) {
   return (
     <button 
       onClick={onClick}
-      className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-abyss-dark/40 rounded-lg transition-colors"
+      className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-genesis-glass-light/40 rounded-lg transition-colors"
     >
       <span className="text-gray-500">📄</span>
       <div className="flex-1 min-w-0">
-        <div className="text-sm text-gray-300 truncate">{name}</div>
+        <div className="text-sm text-genesis-text-secondary truncate">{name}</div>
         <div className="text-xs text-gray-500">{template} • {time}</div>
       </div>
     </button>
@@ -190,17 +190,17 @@ export function WrytProjectManager({ username, onNewProject, onOpenProject }: Wr
       {/* Header */}
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-white mb-2">
-          <span className="text-abyss-cyan">✍️</span> WRYT
+          <span className="text-genesis-cipher-cyan">✍️</span> WRYT
         </h1>
         {username && (
-          <p className="text-gray-400">
-            Welcome back, <span className="text-abyss-cyan">@{username}</span>!
+          <p className="text-genesis-text-tertiary">
+            Welcome back, <span className="text-genesis-cipher-cyan">@{username}</span>!
           </p>
         )}
       </div>
       
       {/* Main content area */}
-      <div className="w-full max-w-4xl bg-abyss-dark/30 border border-abyss-cyan/20 rounded-xl p-6">
+      <div className="w-full max-w-4xl bg-genesis-glass-light/30 border border-genesis-border-default/20 rounded-xl p-6">
         {/* Projects section */}
         <div className="mb-6">
           <h2 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
@@ -211,7 +211,7 @@ export function WrytProjectManager({ username, onNewProject, onOpenProject }: Wr
             /* Empty state */
             <div className="text-center py-8">
               <div className="text-6xl mb-4 opacity-30">📝</div>
-              <p className="text-gray-400 mb-4">No projects yet. Create your first project to get started!</p>
+              <p className="text-genesis-text-tertiary mb-4">No projects yet. Create your first project to get started!</p>
               <button
                 onClick={onNewProject}
                 className="px-6 py-2 bg-abyss-cyan text-abyss-dark font-medium rounded-lg
@@ -264,7 +264,7 @@ export function WrytProjectManager({ username, onNewProject, onOpenProject }: Wr
       
       {/* Footer tips */}
       <div className="mt-6 text-center text-xs text-gray-600">
-        💡 Tip: Press <kbd className="px-1 py-0.5 bg-abyss-dark/60 rounded">Ctrl+N</kbd> to create a new project
+        💡 Tip: Press <kbd className="px-1 py-0.5 bg-genesis-glass-light/60 rounded">Ctrl+N</kbd> to create a new project
       </div>
     </div>
   );

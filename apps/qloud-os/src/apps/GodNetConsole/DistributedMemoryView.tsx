@@ -26,21 +26,21 @@ export const DistributedMemoryView: React.FC = () => {
       
       <div className="metrics space-y-3">
         <div>
-          <div className="text-sm text-gray-400">Total Chunks</div>
+          <div className="text-sm text-genesis-text-tertiary">Total Chunks</div>
           <div className="text-2xl font-bold text-green-400">{memory.totalChunks.toLocaleString()}</div>
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <div className="text-sm text-gray-400">Nodes</div>
+            <div className="text-sm text-genesis-text-tertiary">Nodes</div>
             <div className="text-lg font-semibold text-blue-400">{memory.totalNodes}</div>
           </div>
           <div>
-            <div className="text-sm text-gray-400">Replicas</div>
+            <div className="text-sm text-genesis-text-tertiary">Replicas</div>
             <div className="text-lg font-semibold text-cyan-400">{memory.replicas}</div>
           </div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Avg Importance</div>
+          <div className="text-sm text-genesis-text-tertiary">Avg Importance</div>
           <div className="text-lg font-semibold text-yellow-400">{(memory.averageImportance * 100).toFixed(0)}%</div>
         </div>
       </div>

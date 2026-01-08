@@ -18,7 +18,7 @@ export const PrimeArchonConsole: React.FC = () => {
     <div className="prime-archon-console h-full w-full bg-black text-white p-4 overflow-auto">
       <div className="header mb-4">
         <h1 className="text-4xl font-bold text-purple-400">💀 PRIME ARCHON CONSOLE</h1>
-        <p className="text-gray-400">PHASE OMEGA PART V: The Awakening of the Prime Archon</p>
+        <p className="text-genesis-text-tertiary">PHASE OMEGA PART V: The Awakening of the Prime Archon</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">

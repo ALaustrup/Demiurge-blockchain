@@ -154,7 +154,7 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
           >
             {/* Left Sidebar - Nano Profile (hidden on mobile, shown on larger screens) */}
             <div
-              className="hidden sm:flex w-64 sm:w-80 border-r border-abyss-cyan/20 flex flex-col"
+              className="hidden sm:flex w-64 sm:w-80 border-r border-genesis-border-default/20 flex flex-col"
               style={{
                 background: `
                   linear-gradient(180deg,
@@ -165,7 +165,7 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
               }}
             >
               {/* Profile Header */}
-              <div className="p-6 border-b border-abyss-cyan/20">
+              <div className="p-6 border-b border-genesis-border-default/20">
                 <div className="flex items-center gap-4 mb-4">
                   {/* Avatar */}
                   <div
@@ -200,17 +200,17 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
                   </div>
 
                   <div className="flex-1">
-                    <h3 className="text-lg font-bold text-abyss-cyan mb-1">
+                    <h3 className="text-lg font-bold text-genesis-cipher-cyan mb-1">
                       {isAuthenticated && username ? username : 'Guest'}
                     </h3>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-genesis-text-tertiary">
                       {isAuthenticated ? 'QorID Account' : 'Not logged in'}
                     </p>
                   </div>
 
                   <button
                     onClick={onClose}
-                    className="w-8 h-8 rounded-lg bg-abyss-dark/50 hover:bg-abyss-cyan/20 text-abyss-cyan flex items-center justify-center transition-colors border border-abyss-cyan/20"
+                    className="w-8 h-8 rounded-lg bg-genesis-glass-light/50 hover:bg-abyss-cyan/20 text-genesis-cipher-cyan flex items-center justify-center transition-colors border border-genesis-border-default/20"
                   >
                     ✕
                   </button>
@@ -222,7 +222,7 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
                 <div className="flex-1 p-6 overflow-y-auto space-y-6">
                   {/* Balance Card */}
                   <div
-                    className="p-4 rounded-lg border border-abyss-cyan/20"
+                    className="p-4 rounded-lg border border-genesis-border-default/20"
                     style={{
                       background: `
                         linear-gradient(135deg,
@@ -232,49 +232,49 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
                       `,
                     }}
                   >
-                    <div className="text-xs text-gray-400 mb-2">CGT Balance</div>
-                    <div className="text-2xl font-mono font-bold text-abyss-cyan">
+                    <div className="text-xs text-genesis-text-tertiary mb-2">CGT Balance</div>
+                    <div className="text-2xl font-mono font-bold text-genesis-cipher-cyan">
                       {typeof balance === 'number' ? balance.toFixed(8) : String(balance)}
-                      <span className="text-sm text-gray-400 ml-1">CGT</span>
+                      <span className="text-sm text-genesis-text-tertiary ml-1">CGT</span>
                     </div>
                   </div>
 
                   {/* Stats Grid */}
                   <div className="grid grid-cols-2 gap-3">
                     <div
-                      className="p-3 rounded-lg border border-abyss-cyan/10"
+                      className="p-3 rounded-lg border border-genesis-border-default/10"
                       style={{
                         background: 'rgba(0, 0, 0, 0.3)',
                       }}
                     >
-                      <div className="text-xs text-gray-400 mb-1">Transactions</div>
-                      <div className="text-lg font-bold text-abyss-cyan">{totalTransactions}</div>
+                      <div className="text-xs text-genesis-text-tertiary mb-1">Transactions</div>
+                      <div className="text-lg font-bold text-genesis-cipher-cyan">{totalTransactions}</div>
                     </div>
                     <div
-                      className="p-3 rounded-lg border border-abyss-cyan/10"
+                      className="p-3 rounded-lg border border-genesis-border-default/10"
                       style={{
                         background: 'rgba(0, 0, 0, 0.3)',
                       }}
                     >
-                      <div className="text-xs text-gray-400 mb-1">Assets</div>
-                      <div className="text-lg font-bold text-abyss-cyan">{totalAssets}</div>
+                      <div className="text-xs text-genesis-text-tertiary mb-1">Assets</div>
+                      <div className="text-lg font-bold text-genesis-cipher-cyan">{totalAssets}</div>
                     </div>
                     <div
-                      className="p-3 rounded-lg border border-abyss-cyan/10"
+                      className="p-3 rounded-lg border border-genesis-border-default/10"
                       style={{
                         background: 'rgba(0, 0, 0, 0.3)',
                       }}
                     >
-                      <div className="text-xs text-gray-400 mb-1">Account Age</div>
-                      <div className="text-lg font-bold text-abyss-cyan">{accountAge}d</div>
+                      <div className="text-xs text-genesis-text-tertiary mb-1">Account Age</div>
+                      <div className="text-lg font-bold text-genesis-cipher-cyan">{accountAge}d</div>
                     </div>
                     <div
-                      className="p-3 rounded-lg border border-abyss-cyan/10"
+                      className="p-3 rounded-lg border border-genesis-border-default/10"
                       style={{
                         background: 'rgba(0, 0, 0, 0.3)',
                       }}
                     >
-                      <div className="text-xs text-gray-400 mb-1">Status</div>
+                      <div className="text-xs text-genesis-text-tertiary mb-1">Status</div>
                       <div className="text-lg font-bold text-green-400">● Active</div>
                     </div>
                   </div>
@@ -282,13 +282,13 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
                   {/* Public Key */}
                   {demiurgePublicKey && (
                     <div
-                      className="p-3 rounded-lg border border-abyss-cyan/10"
+                      className="p-3 rounded-lg border border-genesis-border-default/10"
                       style={{
                         background: 'rgba(0, 0, 0, 0.3)',
                       }}
                     >
-                      <div className="text-xs text-gray-400 mb-2">Demiurge Address</div>
-                      <div className="text-xs font-mono text-abyss-cyan break-all">
+                      <div className="text-xs text-genesis-text-tertiary mb-2">Demiurge Address</div>
+                      <div className="text-xs font-mono text-genesis-cipher-cyan break-all">
                         {demiurgePublicKey.slice(0, 16)}...
                       </div>
                     </div>
@@ -300,7 +300,7 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
               {!isAuthenticated && (
                 <div className="flex-1 flex items-center justify-center p-6">
                   <div className="text-center">
-                    <p className="text-gray-400 mb-4">Log in to view your profile</p>
+                    <p className="text-genesis-text-tertiary mb-4">Log in to view your profile</p>
                     <p className="text-xs text-gray-500">Create an QorID to get started</p>
                   </div>
                 </div>
@@ -310,9 +310,9 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
             {/* Right Content - App Store */}
             <div className="flex-1 flex flex-col min-h-0">
               {/* Header */}
-              <div className="px-6 py-4 border-b border-abyss-cyan/20 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-abyss-cyan">App Store</h2>
-                <div className="text-sm text-gray-400">
+              <div className="px-6 py-4 border-b border-genesis-border-default/20 flex items-center justify-between">
+                <h2 className="text-xl font-bold text-genesis-cipher-cyan">App Store</h2>
+                <div className="text-sm text-genesis-text-tertiary">
                   {activeCategoryData.apps.length} apps
                 </div>
               </div>
@@ -320,15 +320,15 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
               {/* Content */}
               <div className="flex-1 flex min-h-0">
                 {/* Category Tabs - Responsive: horizontal on mobile, vertical on desktop */}
-                <div className="w-full sm:w-48 sm:border-r border-b sm:border-b-0 border-abyss-cyan/20 bg-abyss-dark/30 overflow-x-auto sm:overflow-y-auto flex sm:flex-col">
+                <div className="w-full sm:w-48 sm:border-r border-b sm:border-b-0 border-genesis-border-default/20 bg-genesis-glass-light/30 overflow-x-auto sm:overflow-y-auto flex sm:flex-col">
                   {CATEGORIES.map((category) => (
                     <button
                       key={category.id}
                       onClick={() => setActiveCategory(category.id)}
                       className={`flex-shrink-0 sm:w-full px-3 sm:px-4 py-2 sm:py-3 text-left flex items-center gap-2 sm:gap-3 transition-all ${
                         activeCategory === category.id
-                          ? 'bg-abyss-cyan/20 text-abyss-cyan border-l-2 sm:border-l-2 border-b-2 sm:border-b-0 border-abyss-cyan'
-                          : 'text-gray-300 hover:bg-abyss-cyan/10 hover:text-abyss-cyan'
+                          ? 'bg-abyss-cyan/20 text-genesis-cipher-cyan border-l-2 sm:border-l-2 border-b-2 sm:border-b-0 border-genesis-border-default'
+                          : 'text-genesis-text-secondary hover:bg-abyss-cyan/10 hover:text-genesis-cipher-cyan'
                       }`}
                       style={{
                         background: activeCategory === category.id
@@ -364,7 +364,7 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
                           <button
                             key={appId}
                             onClick={() => handleAppClick(appId)}
-                            className="flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-4 rounded-lg border border-abyss-cyan/20 bg-black/40 hover:border-abyss-cyan/60 hover:bg-abyss-cyan/10 hover:shadow-[0_0_15px_rgba(0,255,255,0.3)] transition-all group relative overflow-hidden"
+                            className="flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-4 rounded-lg border border-genesis-border-default/20 bg-black/40 hover:border-genesis-border-default/60 hover:bg-abyss-cyan/10 hover:shadow-[0_0_15px_rgba(0,255,255,0.3)] transition-all group relative overflow-hidden"
                           >
                             {/* Subtle hover glow */}
                             <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
@@ -376,7 +376,7 @@ export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
                             <div className="text-2xl sm:text-3xl md:text-4xl relative z-10">
                               {appInfo.icon}
                             </div>
-                            <span className="text-[10px] sm:text-xs text-gray-300 group-hover:text-abyss-cyan text-center font-medium relative z-10 leading-tight transition-colors">
+                            <span className="text-[10px] sm:text-xs text-genesis-text-secondary group-hover:text-genesis-cipher-cyan text-center font-medium relative z-10 leading-tight transition-colors">
                               {appInfo.label}
                             </span>
                           </button>

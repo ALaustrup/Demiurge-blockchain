@@ -33,21 +33,21 @@ export const SentinelStatusView: React.FC = () => {
       
       <div className="status grid grid-cols-3 gap-4">
         <div>
-          <div className="text-sm text-gray-400">Active</div>
+          <div className="text-sm text-genesis-text-tertiary">Active</div>
           <div className={`text-2xl font-bold ${status.active ? 'text-green-400' : 'text-red-400'}`}>
             {status.active ? '✓' : '✗'}
           </div>
         </div>
 
         <div>
-          <div className="text-sm text-gray-400">Anomalies</div>
+          <div className="text-sm text-genesis-text-tertiary">Anomalies</div>
           <div className={`text-2xl font-bold ${status.anomalies === 0 ? 'text-green-400' : 'text-red-400'}`}>
             {status.anomalies}
           </div>
         </div>
 
         <div>
-          <div className="text-sm text-gray-400">Purity</div>
+          <div className="text-sm text-genesis-text-tertiary">Purity</div>
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-800 rounded h-4">
               <div 
@@ -60,7 +60,7 @@ export const SentinelStatusView: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-4 text-sm text-gray-400">
+      <div className="mt-4 text-sm text-genesis-text-tertiary">
         Last Check: {new Date(status.lastCheck).toLocaleTimeString()}
       </div>
     </div>

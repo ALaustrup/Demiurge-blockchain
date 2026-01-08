@@ -152,12 +152,12 @@ export function StatusBar() {
 
           {/* Dropdown Menu */}
           {showMenu && (
-            <div className="absolute right-0 top-full mt-2 w-48 bg-abyss-navy/95 backdrop-blur-md border border-abyss-cyan/30 rounded-lg shadow-xl z-50">
+            <div className="absolute right-0 top-full mt-2 w-48 bg-abyss-navy/95 backdrop-blur-md border border-genesis-border-default/30 rounded-lg shadow-xl z-50">
               <div className="p-2">
                 {/* Account Info */}
-                <div className="px-3 py-2 border-b border-abyss-cyan/20">
-                  <div className="text-sm font-medium text-abyss-cyan">{session?.username || 'Guest'}</div>
-                  <div className="text-xs text-gray-400 mt-1">
+                <div className="px-3 py-2 border-b border-genesis-border-default/20">
+                  <div className="text-sm font-medium text-genesis-cipher-cyan">{session?.username || 'Guest'}</div>
+                  <div className="text-xs text-genesis-text-tertiary mt-1">
                     {session?.username ? 'QorID Account' : 'Not logged in'}
                   </div>
                 </div>
@@ -169,7 +169,7 @@ export function StatusBar() {
                       setShowCustomization(true);
                       setShowMenu(false);
                     }}
-                    className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-abyss-cyan/10 hover:text-abyss-cyan rounded transition-colors"
+                    className="w-full text-left px-3 py-2 text-sm text-genesis-text-secondary hover:bg-abyss-cyan/10 hover:text-genesis-cipher-cyan rounded transition-colors"
                   >
                     🎨 Customize
                   </button>
@@ -178,14 +178,14 @@ export function StatusBar() {
                       refreshBalance();
                       setShowMenu(false);
                     }}
-                    className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-abyss-cyan/10 hover:text-abyss-cyan rounded transition-colors"
+                    className="w-full text-left px-3 py-2 text-sm text-genesis-text-secondary hover:bg-abyss-cyan/10 hover:text-genesis-cipher-cyan rounded transition-colors"
                   >
                     🔄 Refresh Balance
                   </button>
                 </div>
 
                 {/* Disengage/Logout */}
-                <div className="pt-1 border-t border-abyss-cyan/20">
+                <div className="pt-1 border-t border-genesis-border-default/20">
                   <button
                     onClick={handleDisengage}
                     className="w-full text-left px-3 py-2 text-sm text-genesis-error hover:bg-genesis-error/10 rounded transition-colors"

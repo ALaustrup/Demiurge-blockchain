@@ -54,12 +54,12 @@ export function TabbedWindow({ tabs, onTabsChange, defaultTab, className = '' }:
       content: (
         <div className="h-full flex items-center justify-center p-8">
           <div className="text-center">
-            <p className="text-gray-400 mb-4">Blank Tab Slot</p>
+            <p className="text-genesis-text-tertiary mb-4">Blank Tab Slot</p>
             <p className="text-sm text-gray-500 mb-6">
               Drag and drop a module or web page here to add content
             </p>
             <button
-              className="px-4 py-2 rounded-lg bg-abyss-cyan/20 hover:bg-abyss-cyan/30 text-abyss-cyan border border-abyss-cyan/30 transition-colors"
+              className="px-4 py-2 rounded-lg bg-abyss-cyan/20 hover:bg-abyss-cyan/30 text-genesis-cipher-cyan border border-genesis-border-default/30 transition-colors"
               onClick={() => {
                 // TODO: Open module/web page selector
                 console.log('Open content selector');
@@ -85,7 +85,7 @@ export function TabbedWindow({ tabs, onTabsChange, defaultTab, className = '' }:
   return (
     <div className={`h-full flex flex-col ${className}`}>
       {/* Tab Bar - Vertically descending angled tabs */}
-      <div className="flex items-end gap-1 px-2 pt-2 border-b border-abyss-cyan/20 bg-abyss-dark/50 overflow-x-auto">
+      <div className="flex items-end gap-1 px-2 pt-2 border-b border-genesis-border-default/20 bg-genesis-glass-light/50 overflow-x-auto">
         {tabsState.map((tab, index) => {
           const isActive = tab.id === activeTabId;
           const isLast = index === tabsState.length - 1;
@@ -147,7 +147,7 @@ export function TabbedWindow({ tabs, onTabsChange, defaultTab, className = '' }:
               {/* Label */}
               <span
                 className={`text-sm font-medium relative z-10 ${
-                  isActive ? 'text-abyss-cyan' : 'text-gray-300 group-hover:text-abyss-cyan'
+                  isActive ? 'text-genesis-cipher-cyan' : 'text-genesis-text-secondary group-hover:text-genesis-cipher-cyan'
                 }`}
               >
                 {tab.label}
@@ -157,7 +157,7 @@ export function TabbedWindow({ tabs, onTabsChange, defaultTab, className = '' }:
               {tab.closable && (
                 <button
                   onClick={(e) => handleTabClose(tab.id, e)}
-                  className="w-4 h-4 rounded-full bg-abyss-dark/50 hover:bg-red-500/30 text-gray-400 hover:text-red-400 flex items-center justify-center text-xs transition-colors relative z-10 opacity-0 group-hover:opacity-100"
+                  className="w-4 h-4 rounded-full bg-genesis-glass-light/50 hover:bg-red-500/30 text-genesis-text-tertiary hover:text-red-400 flex items-center justify-center text-xs transition-colors relative z-10 opacity-0 group-hover:opacity-100"
                 >
                   ✕
                 </button>
@@ -186,7 +186,7 @@ export function TabbedWindow({ tabs, onTabsChange, defaultTab, className = '' }:
         {/* Add Tab Button */}
         <button
           onClick={handleAddTab}
-          className="w-8 h-8 rounded-t-lg border border-abyss-cyan/20 hover:border-abyss-cyan/50 hover:bg-abyss-cyan/10 hover:shadow-[0_0_8px_rgba(0,255,255,0.3)] text-abyss-cyan flex items-center justify-center text-lg transition-all mb-0.5 bg-abyss-dark/50"
+          className="w-8 h-8 rounded-t-lg border border-genesis-border-default/20 hover:border-genesis-border-default/50 hover:bg-abyss-cyan/10 hover:shadow-[0_0_8px_rgba(0,255,255,0.3)] text-genesis-cipher-cyan flex items-center justify-center text-lg transition-all mb-0.5 bg-genesis-glass-light/50"
           title="Add new tab"
         >
           +

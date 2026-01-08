@@ -652,31 +652,31 @@ export function CraftApp() {
   if (!currentProject) {
     return (
       <div 
-        className="w-full h-full bg-abyss-dark text-white p-8 overflow-y-auto"
+        className="w-full h-full bg-genesis-glass-light text-white p-8 overflow-y-auto"
         onDragOver={handleDragOver}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-abyss-cyan mb-2">CRAFT</h2>
-          <p className="text-gray-400 mb-8">Creator's Advanced Framework & Tools - On-Chain IDE</p>
+          <h2 className="text-3xl font-bold text-genesis-cipher-cyan mb-2">CRAFT</h2>
+          <p className="text-genesis-text-tertiary mb-8">Creator's Advanced Framework & Tools - On-Chain IDE</p>
 
           {/* GitHub Import */}
-          <div className="mb-8 p-4 bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4 text-abyss-cyan">Import from GitHub</h3>
+          <div className="mb-8 p-4 bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4 text-genesis-cipher-cyan">Import from GitHub</h3>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={githubUrl}
                 onChange={(e) => setGithubUrl(e.target.value)}
                 placeholder="https://github.com/owner/repo"
-                className="flex-1 px-4 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-white"
+                className="flex-1 px-4 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white"
               />
               <button
                 onClick={loadFromGithub}
                 disabled={isLoadingGithub || !githubUrl.trim()}
-                className="px-4 py-2 bg-abyss-cyan/20 border border-abyss-cyan/40 text-abyss-cyan hover:bg-abyss-cyan/30 hover:border-abyss-cyan/60 hover:shadow-[0_0_12px_rgba(0,255,255,0.4)] rounded transition-all disabled:opacity-50"
+                className="px-4 py-2 bg-abyss-cyan/20 border border-genesis-border-default/40 text-genesis-cipher-cyan hover:bg-abyss-cyan/30 hover:border-genesis-border-default/60 hover:shadow-[0_0_12px_rgba(0,255,255,0.4)] rounded transition-all disabled:opacity-50"
               >
                 {isLoadingGithub ? 'Loading...' : 'Import'}
               </button>
@@ -684,13 +684,13 @@ export function CraftApp() {
           </div>
 
           {/* Drag and Drop Zone */}
-          <div className="mb-8 p-8 border-2 border-dashed border-abyss-cyan/30 rounded-lg text-center hover:border-abyss-cyan/60 transition-colors">
+          <div className="mb-8 p-8 border-2 border-dashed border-genesis-border-default/30 rounded-lg text-center hover:border-genesis-border-default/60 transition-colors">
             <div className="text-4xl mb-4">📁</div>
-            <h3 className="text-lg font-semibold mb-2 text-abyss-cyan">Drag & Drop Your Repository</h3>
-            <p className="text-gray-400 mb-4">Drop files or folders from your desktop to import them into CRAFT</p>
+            <h3 className="text-lg font-semibold mb-2 text-genesis-cipher-cyan">Drag & Drop Your Repository</h3>
+            <p className="text-genesis-text-tertiary mb-4">Drop files or folders from your desktop to import them into CRAFT</p>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="px-4 py-2 bg-abyss-cyan/20 border border-abyss-cyan/40 text-abyss-cyan hover:bg-abyss-cyan/30 rounded transition-all"
+              className="px-4 py-2 bg-abyss-cyan/20 border border-genesis-border-default/40 text-genesis-cipher-cyan hover:bg-abyss-cyan/30 rounded transition-all"
             >
               Or Select Files
             </button>
@@ -709,10 +709,10 @@ export function CraftApp() {
           {/* Templates */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-abyss-cyan">Project Templates</h3>
+              <h3 className="text-lg font-semibold text-genesis-cipher-cyan">Project Templates</h3>
               <button
                 onClick={() => setShowTemplates(!showTemplates)}
-                className="px-4 py-2 bg-abyss-cyan/20 border border-abyss-cyan/40 text-abyss-cyan hover:bg-abyss-cyan/30 rounded transition-all"
+                className="px-4 py-2 bg-abyss-cyan/20 border border-genesis-border-default/40 text-genesis-cipher-cyan hover:bg-abyss-cyan/30 rounded transition-all"
               >
                 {showTemplates ? 'Hide Templates' : 'Show Templates'}
               </button>
@@ -728,8 +728,8 @@ export function CraftApp() {
                       onClick={() => setActiveCategory(cat.id)}
                       className={`px-4 py-2 rounded-lg border transition-all whitespace-nowrap ${
                         activeCategory === cat.id
-                          ? 'bg-abyss-cyan/20 border-abyss-cyan/60 text-abyss-cyan'
-                          : 'bg-abyss-navy/50 border-abyss-cyan/20 text-gray-300 hover:border-abyss-cyan/40'
+                          ? 'bg-abyss-cyan/20 border-genesis-border-default/60 text-genesis-cipher-cyan'
+                          : 'bg-abyss-navy/50 border-genesis-border-default/20 text-genesis-text-secondary hover:border-genesis-border-default/40'
                       }`}
                     >
                       <span className="mr-2">{cat.icon}</span>
@@ -744,11 +744,11 @@ export function CraftApp() {
                     <button
                       key={template.id}
                       onClick={() => createProjectFromTemplate(template)}
-                      className="p-4 bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg hover:bg-abyss-cyan/10 hover:border-abyss-cyan/50 hover:shadow-[0_0_12px_rgba(0,255,255,0.3)] transition-all text-left"
+                      className="p-4 bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg hover:bg-abyss-cyan/10 hover:border-genesis-border-default/50 hover:shadow-[0_0_12px_rgba(0,255,255,0.3)] transition-all text-left"
                     >
                       <div className="text-3xl mb-2">{template.icon}</div>
-                      <div className="font-semibold text-abyss-cyan mb-1">{template.name}</div>
-                      <div className="text-sm text-gray-400">{template.description}</div>
+                      <div className="font-semibold text-genesis-cipher-cyan mb-1">{template.name}</div>
+                      <div className="text-sm text-genesis-text-tertiary">{template.description}</div>
                     </button>
                   ))}
                 </div>
@@ -759,7 +759,7 @@ export function CraftApp() {
           {/* Recent Projects */}
           {projects.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold mb-4 text-abyss-cyan">Recent Projects</h3>
+              <h3 className="text-lg font-semibold mb-4 text-genesis-cipher-cyan">Recent Projects</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {projects.map(project => (
                   <button
@@ -769,10 +769,10 @@ export function CraftApp() {
                       setSelectedFile(project.files[0]?.path || null);
                       setCode(project.files[0]?.content || '');
                     }}
-                    className="p-4 bg-abyss-navy/30 border border-abyss-cyan/20 rounded-lg hover:bg-abyss-cyan/10 transition-colors text-left"
+                    className="p-4 bg-abyss-navy/30 border border-genesis-border-default/20 rounded-lg hover:bg-abyss-cyan/10 transition-colors text-left"
                   >
-                    <div className="font-semibold text-abyss-cyan mb-1">{project.name}</div>
-                    <div className="text-sm text-gray-400 mb-2">{project.type} • {project.category}</div>
+                    <div className="font-semibold text-genesis-cipher-cyan mb-1">{project.name}</div>
+                    <div className="text-sm text-genesis-text-tertiary mb-2">{project.type} • {project.category}</div>
                     <div className="text-xs text-gray-500">
                       {project.rigHistory.length} rigs • {new Date(project.updatedAt).toLocaleDateString()}
                     </div>
@@ -788,9 +788,9 @@ export function CraftApp() {
 
   // Main IDE interface
   return (
-    <div className="w-full h-full bg-abyss-dark text-white flex flex-col">
+    <div className="w-full h-full bg-genesis-glass-light text-white flex flex-col">
       {/* Toolbar */}
-      <div className="h-12 bg-abyss-navy/50 border-b border-abyss-cyan/20 flex items-center justify-between px-4">
+      <div className="h-12 bg-abyss-navy/50 border-b border-genesis-border-default/20 flex items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <button
             onClick={() => {
@@ -798,12 +798,12 @@ export function CraftApp() {
               setSelectedFile(null);
               setCode('');
             }}
-            className="px-3 py-1 bg-abyss-cyan/20 border border-abyss-cyan/40 text-abyss-cyan hover:bg-abyss-cyan/30 rounded text-sm transition-all"
+            className="px-3 py-1 bg-abyss-cyan/20 border border-genesis-border-default/40 text-genesis-cipher-cyan hover:bg-abyss-cyan/30 rounded text-sm transition-all"
           >
             ← Back
           </button>
-          <span className="font-semibold text-abyss-cyan">{currentProject.name}</span>
-          <span className="text-xs text-gray-400">{currentProject.type}</span>
+          <span className="font-semibold text-genesis-cipher-cyan">{currentProject.name}</span>
+          <span className="text-xs text-genesis-text-tertiary">{currentProject.type}</span>
           {currentProject.rigHistory.length > 0 && (
             <span className="text-xs text-green-400">
               {currentProject.rigHistory.length} rigs
@@ -828,14 +828,14 @@ export function CraftApp() {
           <button
             onClick={handleBuild}
             disabled={isBuilding}
-            className="px-3 py-1 bg-abyss-cyan/20 border border-abyss-cyan/40 text-abyss-cyan hover:bg-abyss-cyan/30 rounded text-sm transition-all disabled:opacity-50"
+            className="px-3 py-1 bg-abyss-cyan/20 border border-genesis-border-default/40 text-genesis-cipher-cyan hover:bg-abyss-cyan/30 rounded text-sm transition-all disabled:opacity-50"
           >
             {isBuilding ? 'Building...' : 'Build'}
           </button>
           <button
             onClick={handleDeploy}
             disabled={isDeploying || !session}
-            className="px-3 py-1 bg-abyss-cyan/20 border border-abyss-cyan/40 text-abyss-cyan hover:bg-abyss-cyan/30 rounded text-sm transition-all disabled:opacity-50"
+            className="px-3 py-1 bg-abyss-cyan/20 border border-genesis-border-default/40 text-genesis-cipher-cyan hover:bg-abyss-cyan/30 rounded text-sm transition-all disabled:opacity-50"
           >
             {isDeploying ? 'Deploying...' : 'Deploy'}
           </button>
@@ -844,8 +844,8 @@ export function CraftApp() {
 
       <div className="flex-1 flex min-h-0">
         {/* File Browser */}
-        <div className="w-64 bg-abyss-navy/30 border-r border-abyss-cyan/20 overflow-y-auto p-2">
-          <div className="text-xs text-gray-400 mb-2">Files</div>
+        <div className="w-64 bg-abyss-navy/30 border-r border-genesis-border-default/20 overflow-y-auto p-2">
+          <div className="text-xs text-genesis-text-tertiary mb-2">Files</div>
           {renderFileTree(currentProject.files, '')}
         </div>
 
@@ -853,7 +853,7 @@ export function CraftApp() {
         <div className="flex-1 flex flex-col min-h-0">
           {selectedFile && (
             <>
-              <div className="h-8 bg-abyss-navy/40 border-b border-abyss-cyan/20 px-4 flex items-center text-sm">
+              <div className="h-8 bg-abyss-navy/40 border-b border-genesis-border-default/20 px-4 flex items-center text-sm">
                 {selectedFile}
               </div>
               <div className="flex-1 min-h-0">
@@ -881,8 +881,8 @@ export function CraftApp() {
 
         {/* AI Panel */}
         {showAIPanel && (
-          <div className="w-80 bg-abyss-navy/50 border-l border-abyss-cyan/20 flex flex-col">
-            <div className="h-8 bg-abyss-navy/60 border-b border-abyss-cyan/20 px-4 flex items-center text-sm font-semibold text-abyss-cyan">
+          <div className="w-80 bg-abyss-navy/50 border-l border-genesis-border-default/20 flex flex-col">
+            <div className="h-8 bg-abyss-navy/60 border-b border-genesis-border-default/20 px-4 flex items-center text-sm font-semibold text-genesis-cipher-cyan">
               🤖 ArchonAI Assistant
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -891,7 +891,7 @@ export function CraftApp() {
                   value={aiPrompt}
                   onChange={(e) => setAiPrompt(e.target.value)}
                   placeholder="Ask ArchonAI for code help..."
-                  className="w-full h-24 px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-white text-sm resize-none"
+                  className="w-full h-24 px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white text-sm resize-none"
                 />
                 <button
                   onClick={handleAIPrompt}
@@ -901,7 +901,7 @@ export function CraftApp() {
                 </button>
               </div>
               {aiSuggestions.map((suggestion, i) => (
-                <div key={i} className="p-3 bg-abyss-dark/50 rounded border border-abyss-cyan/20 text-sm">
+                <div key={i} className="p-3 bg-genesis-glass-light/50 rounded border border-genesis-border-default/20 text-sm">
                   {suggestion}
                 </div>
               ))}
@@ -911,8 +911,8 @@ export function CraftApp() {
       </div>
 
       {/* Terminal */}
-      <div className="h-48 bg-black border-t border-abyss-cyan/20 flex flex-col">
-        <div className="h-6 bg-abyss-navy/50 px-4 flex items-center text-xs text-gray-400">
+      <div className="h-48 bg-black border-t border-genesis-border-default/20 flex flex-col">
+        <div className="h-6 bg-abyss-navy/50 px-4 flex items-center text-xs text-genesis-text-tertiary">
           Terminal
         </div>
         <div className="flex-1 overflow-y-auto p-2 font-mono text-xs text-green-400">
@@ -931,8 +931,8 @@ export function CraftApp() {
           onClick={() => handleFileSelect(file.path)}
           className={`w-full text-left px-2 py-1 rounded text-sm mb-1 ${
             selectedFile === file.path
-              ? 'bg-abyss-cyan/20 text-abyss-cyan'
-              : 'hover:bg-abyss-cyan/10 text-gray-300'
+              ? 'bg-abyss-cyan/20 text-genesis-cipher-cyan'
+              : 'hover:bg-abyss-cyan/10 text-genesis-text-secondary'
           }`}
         >
           {file.type === 'directory' ? '📁' : '📄'} {file.path.split('/').pop()}
@@ -1244,7 +1244,7 @@ export default function DeFiApp() {
           value={stakeAmount}
           onChange={(e) => setStakeAmount(e.target.value)}
           placeholder="Amount to stake"
-          className="px-4 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded"
+          className="px-4 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded"
         />
         <button onClick={handleStake} className="px-4 py-2 bg-abyss-cyan text-white rounded">
           Stake CGT
@@ -1273,7 +1273,7 @@ export function Staking({ address }: { address: string }) {
   };
   
   return (
-    <div className="p-4 border border-abyss-cyan/20 rounded">
+    <div className="p-4 border border-genesis-border-default/20 rounded">
       <h3 className="font-semibold mb-2">Staking</h3>
       <p>Staked: {staked} CGT</p>
       <p>Rewards: {rewards} CGT</p>
@@ -1318,7 +1318,7 @@ export default function NFTMarketplace() {
       <h1 className="text-2xl font-bold mb-4">NFT Marketplace</h1>
       <div className="grid grid-cols-3 gap-4">
         {nfts.map(nft => (
-          <div key={nft.id} className="border border-abyss-cyan/20 rounded p-4">
+          <div key={nft.id} className="border border-genesis-border-default/20 rounded p-4">
             <p>NFT #{nft.id}</p>
           </div>
         ))}
@@ -1345,14 +1345,14 @@ export function MintPanel() {
   };
   
   return (
-    <div className="p-4 border border-abyss-cyan/20 rounded">
+    <div className="p-4 border border-genesis-border-default/20 rounded">
       <h3 className="font-semibold mb-2">Mint NFT</h3>
       <input
         type="text"
         value={fabricHash}
         onChange={(e) => setFabricHash(e.target.value)}
         placeholder="Fabric root hash"
-        className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded mb-2"
+        className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded mb-2"
       />
       <button onClick={handleMint} className="w-full px-4 py-2 bg-abyss-cyan text-white rounded">
         Mint
@@ -1379,11 +1379,11 @@ export function MyQorOSApp() {
   const [count, setCount] = useState(0);
   
   return (
-    <div className="w-full h-full bg-abyss-dark text-white p-4">
-      <h1 className="text-2xl font-bold text-abyss-cyan mb-4">My QOR OS App</h1>
+    <div className="w-full h-full bg-genesis-glass-light text-white p-4">
+      <h1 className="text-2xl font-bold text-genesis-cipher-cyan mb-4">My QOR OS App</h1>
       <button
         onClick={() => setCount(count + 1)}
-        className="px-4 py-2 bg-abyss-cyan/20 border border-abyss-cyan/40 text-abyss-cyan rounded hover:bg-abyss-cyan/30"
+        className="px-4 py-2 bg-abyss-cyan/20 border border-genesis-border-default/40 text-genesis-cipher-cyan rounded hover:bg-abyss-cyan/30"
       >
         Count: {count}
       </button>

@@ -86,8 +86,8 @@ export function AbyssSpiritConsoleApp() {
     <div className="h-full flex flex-col min-h-0 p-6 space-y-6 overflow-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-abyss-cyan mb-2">Abyss Spirit Console</h2>
-          <p className="text-sm text-gray-400">Manage resident AI agents</p>
+          <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">Abyss Spirit Console</h2>
+          <p className="text-sm text-genesis-text-tertiary">Manage resident AI agents</p>
         </div>
         <Button onClick={() => setShowCreateModal(true)}>
           + Create Spirit
@@ -104,21 +104,21 @@ export function AbyssSpiritConsoleApp() {
             onClick={() => setSelectedSpirit(spirit)}
             className={`p-4 rounded-lg border cursor-pointer transition-colors ${
               selectedSpirit?.id === spirit.id
-                ? 'bg-abyss-cyan/10 border-abyss-cyan'
-                : 'bg-abyss-dark/50 border-abyss-cyan/20 hover:border-abyss-cyan/50'
+                ? 'bg-abyss-cyan/10 border-genesis-border-default'
+                : 'bg-genesis-glass-light/50 border-genesis-border-default/20 hover:border-genesis-border-default/50'
             }`}
           >
             <div className="flex items-center justify-between mb-2">
-              <h3 className="font-bold text-abyss-cyan">{spirit.name}</h3>
+              <h3 className="font-bold text-genesis-cipher-cyan">{spirit.name}</h3>
               <span className={`text-xs px-2 py-1 rounded ${
                 spirit.status === 'active' ? 'bg-green-400/20 text-green-400' :
                 spirit.status === 'sleeping' ? 'bg-yellow-400/20 text-yellow-400' :
-                'bg-gray-400/20 text-gray-400'
+                'bg-gray-400/20 text-genesis-text-tertiary'
               }`}>
                 {spirit.status}
               </span>
             </div>
-            <p className="text-sm text-gray-400 mb-2">{spirit.personality.description}</p>
+            <p className="text-sm text-genesis-text-tertiary mb-2">{spirit.personality.description}</p>
             <div className="flex flex-wrap gap-2">
               {spirit.personality.traits.slice(0, 3).map(trait => (
                 <span key={trait} className="text-xs px-2 py-0.5 bg-abyss-purple/20 text-abyss-purple border border-abyss-purple/30 rounded">
@@ -133,7 +133,7 @@ export function AbyssSpiritConsoleApp() {
         ))}
         
         {spirits.length === 0 && (
-          <div className="col-span-2 text-center py-12 text-gray-400">
+          <div className="col-span-2 text-center py-12 text-genesis-text-tertiary">
             <div className="text-4xl mb-4">👻</div>
             <div>No spirits created yet</div>
             <Button onClick={() => setShowCreateModal(true)} className="mt-4">
@@ -148,13 +148,13 @@ export function AbyssSpiritConsoleApp() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-6 space-y-4"
+          className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-6 space-y-4"
         >
           <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-abyss-cyan">{selectedSpirit.name}</h3>
+            <h3 className="text-xl font-bold text-genesis-cipher-cyan">{selectedSpirit.name}</h3>
             <button
               onClick={() => setSelectedSpirit(null)}
-              className="text-gray-400 hover:text-white"
+              className="text-genesis-text-tertiary hover:text-white"
             >
               ✕
             </button>
@@ -162,11 +162,11 @@ export function AbyssSpiritConsoleApp() {
           
           {/* Personality */}
           <div>
-            <h4 className="text-sm font-bold text-gray-400 mb-2">Personality</h4>
-            <p className="text-sm text-gray-300 mb-2">{selectedSpirit.personality.description}</p>
+            <h4 className="text-sm font-bold text-genesis-text-tertiary mb-2">Personality</h4>
+            <p className="text-sm text-genesis-text-secondary mb-2">{selectedSpirit.personality.description}</p>
             <div className="flex flex-wrap gap-2">
               <div>
-                <span className="text-xs text-gray-400">Traits: </span>
+                <span className="text-xs text-genesis-text-tertiary">Traits: </span>
                 {selectedSpirit.personality.traits.map(trait => (
                   <span key={trait} className="text-xs px-2 py-0.5 bg-abyss-purple/20 text-abyss-purple border border-abyss-purple/30 rounded mr-1">
                     {trait}
@@ -179,16 +179,16 @@ export function AbyssSpiritConsoleApp() {
           {/* Tasks */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <h4 className="text-sm font-bold text-gray-400">Tasks</h4>
+              <h4 className="text-sm font-bold text-genesis-text-tertiary">Tasks</h4>
               <div className="flex gap-2">
                 <button
-                  className="px-3 py-1 text-xs bg-abyss-dark border border-abyss-cyan/20 rounded hover:border-abyss-cyan/50 text-abyss-cyan"
+                  className="px-3 py-1 text-xs bg-genesis-glass-light border border-genesis-border-default/20 rounded hover:border-genesis-border-default/50 text-genesis-cipher-cyan"
                   onClick={() => handleAddTask('index', 'Index DRC-369 assets')}
                 >
                   + Index
                 </button>
                 <button
-                  className="px-3 py-1 text-xs bg-abyss-dark border border-abyss-cyan/20 rounded hover:border-abyss-cyan/50 text-abyss-cyan"
+                  className="px-3 py-1 text-xs bg-genesis-glass-light border border-genesis-border-default/20 rounded hover:border-genesis-border-default/50 text-genesis-cipher-cyan"
                   onClick={() => handleAddTask('monitor', 'Monitor chain events')}
                 >
                   + Monitor
@@ -199,15 +199,15 @@ export function AbyssSpiritConsoleApp() {
               {tasks.map(task => (
                 <div
                   key={task.id}
-                  className="p-2 bg-abyss-dark/50 rounded text-sm"
+                  className="p-2 bg-genesis-glass-light/50 rounded text-sm"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-300">{task.description}</span>
+                    <span className="text-genesis-text-secondary">{task.description}</span>
                     <span className={`text-xs px-2 py-0.5 rounded ${
                       task.status === 'completed' ? 'bg-green-400/20 text-green-400' :
                       task.status === 'running' ? 'bg-yellow-400/20 text-yellow-400' :
                       task.status === 'failed' ? 'bg-red-400/20 text-red-400' :
-                      'bg-gray-400/20 text-gray-400'
+                      'bg-gray-400/20 text-genesis-text-tertiary'
                     }`}>
                       {task.status}
                     </span>
@@ -222,11 +222,11 @@ export function AbyssSpiritConsoleApp() {
           
           {/* Memories */}
           <div>
-            <h4 className="text-sm font-bold text-gray-400 mb-2">Recent Memories</h4>
+            <h4 className="text-sm font-bold text-genesis-text-tertiary mb-2">Recent Memories</h4>
             <div className="space-y-2 max-h-40 overflow-auto">
               {memories.slice(0, 5).map(memory => (
-                <div key={memory.id} className="p-2 bg-abyss-dark/50 rounded text-sm">
-                  <div className="text-gray-300">{memory.content}</div>
+                <div key={memory.id} className="p-2 bg-genesis-glass-light/50 rounded text-sm">
+                  <div className="text-genesis-text-secondary">{memory.content}</div>
                   <div className="text-xs text-gray-500 mt-1">
                     {new Date(memory.timestamp).toLocaleString()}
                   </div>
@@ -246,28 +246,28 @@ export function AbyssSpiritConsoleApp() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-abyss-navy border border-abyss-cyan/20 rounded-lg p-6 w-full max-w-md"
+            className="bg-abyss-navy border border-genesis-border-default/20 rounded-lg p-6 w-full max-w-md"
           >
-            <h3 className="text-xl font-bold text-abyss-cyan mb-4">Create New Spirit</h3>
+            <h3 className="text-xl font-bold text-genesis-cipher-cyan mb-4">Create New Spirit</h3>
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Name</label>
+                <label className="block text-sm text-genesis-text-tertiary mb-2">Name</label>
                 <input
                   type="text"
                   value={newSpiritName}
                   onChange={(e) => setNewSpiritName(e.target.value)}
-                  className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/20 rounded text-white"
+                  className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/20 rounded text-white"
                   placeholder="Enter spirit name"
                 />
               </div>
               
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Personality Template</label>
+                <label className="block text-sm text-genesis-text-tertiary mb-2">Personality Template</label>
                 <select
                   value={selectedTemplate}
                   onChange={(e) => setSelectedTemplate(e.target.value)}
-                  className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/20 rounded text-white"
+                  className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/20 rounded text-white"
                 >
                   {Object.entries(PERSONALITY_TEMPLATES).map(([key, template]) => (
                     <option key={key} value={key}>

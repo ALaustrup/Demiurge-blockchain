@@ -177,12 +177,12 @@ export function AbyssRuntimeApp() {
   return (
     <div className="h-full flex flex-col min-h-0 p-6 space-y-6 overflow-auto">
       <div>
-        <h2 className="text-2xl font-bold text-abyss-cyan mb-2">Abyss Runtime</h2>
-        <p className="text-sm text-gray-400">Upload and execute WASM modules</p>
+        <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">Abyss Runtime</h2>
+        <p className="text-sm text-genesis-text-tertiary">Upload and execute WASM modules</p>
       </div>
       
       {/* Upload Section */}
-      <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
+      <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
         <div className="flex items-center space-x-4">
           <input
             ref={fileInputRef}
@@ -197,7 +197,7 @@ export function AbyssRuntimeApp() {
           >
             Upload WASM Module
           </Button>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-genesis-text-tertiary">
             {modules.length} module{modules.length !== 1 ? 's' : ''} loaded
           </span>
         </div>
@@ -206,7 +206,7 @@ export function AbyssRuntimeApp() {
       {/* Module List */}
       {modules.length > 0 && (
         <div>
-          <h3 className="text-lg font-bold text-abyss-cyan mb-4">Loaded Modules</h3>
+          <h3 className="text-lg font-bold text-genesis-cipher-cyan mb-4">Loaded Modules</h3>
           <div className="space-y-2">
             {modules.map((module) => (
               <div
@@ -214,14 +214,14 @@ export function AbyssRuntimeApp() {
                 onClick={() => setSelectedModule(module.id)}
                 className={`p-4 rounded-lg border cursor-pointer transition-colors ${
                   selectedModule === module.id
-                    ? 'bg-abyss-cyan/10 border-abyss-cyan'
-                    : 'bg-abyss-dark/50 border-abyss-cyan/20 hover:border-abyss-cyan/50'
+                    ? 'bg-abyss-cyan/10 border-genesis-border-default'
+                    : 'bg-genesis-glass-light/50 border-genesis-border-default/20 hover:border-genesis-border-default/50'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-medium text-abyss-cyan">{module.name}</div>
-                    <div className="text-xs text-gray-400 mt-1">ID: {module.id.slice(0, 16)}...</div>
+                    <div className="font-medium text-genesis-cipher-cyan">{module.name}</div>
+                    <div className="text-xs text-genesis-text-tertiary mt-1">ID: {module.id.slice(0, 16)}...</div>
                   </div>
                   <div className="text-xs text-gray-500">
                     {wasmVM.isRunning(module.id) ? (
@@ -239,16 +239,16 @@ export function AbyssRuntimeApp() {
       
       {/* Execution Controls */}
       {selectedModule && (
-        <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-4 space-y-3">
+        <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-4 space-y-3">
           <div className="flex items-center space-x-2">
             <label className="flex items-center space-x-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={executeOnGrid}
                 onChange={(e) => setExecuteOnGrid(e.target.checked)}
-                className="w-4 h-4 text-abyss-cyan bg-abyss-dark border-abyss-cyan/30 rounded focus:ring-abyss-cyan"
+                className="w-4 h-4 text-genesis-cipher-cyan bg-genesis-glass-light border-genesis-border-default/30 rounded focus:ring-abyss-cyan"
               />
-              <span className="text-sm text-gray-300">
+              <span className="text-sm text-genesis-text-secondary">
                 Execute on Grid {availablePeers > 0 && `(${availablePeers} peers)`}
               </span>
             </label>
@@ -275,8 +275,8 @@ export function AbyssRuntimeApp() {
       
       {/* Execution Results */}
       {executionResult && (
-        <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-          <h3 className="text-lg font-bold text-abyss-cyan mb-2">Execution Result</h3>
+        <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+          <h3 className="text-lg font-bold text-genesis-cipher-cyan mb-2">Execution Result</h3>
           <div className={`mb-2 ${executionResult.success ? 'text-green-400' : 'text-red-400'}`}>
             {executionResult.success ? '✓ Success' : '✗ Failed'}
           </div>
@@ -284,25 +284,25 @@ export function AbyssRuntimeApp() {
             <div className="text-red-400 text-sm mb-2">Error: {executionResult.error}</div>
           )}
           {executionResult.output && (
-            <div className="text-gray-300 text-sm mb-2">{executionResult.output}</div>
+            <div className="text-genesis-text-secondary text-sm mb-2">{executionResult.output}</div>
           )}
           {executionResult.logs.length > 0 && (
             <div className="mt-4">
-              <div className="text-xs text-gray-400 mb-2">Logs:</div>
-              <div className="bg-abyss-dark rounded p-2 font-mono text-xs max-h-40 overflow-auto">
+              <div className="text-xs text-genesis-text-tertiary mb-2">Logs:</div>
+              <div className="bg-genesis-glass-light rounded p-2 font-mono text-xs max-h-40 overflow-auto">
                 {executionResult.logs.map((log, i) => (
-                  <div key={i} className="text-gray-300">{log}</div>
+                  <div key={i} className="text-genesis-text-secondary">{log}</div>
                 ))}
               </div>
             </div>
           )}
           {executionResult.receipt && (
             <div className="mt-4 p-3 bg-abyss-purple/10 border border-abyss-purple/30 rounded">
-              <div className="text-xs text-gray-400 mb-1">Execution Receipt</div>
-              <div className="text-xs font-mono text-abyss-cyan">
+              <div className="text-xs text-genesis-text-tertiary mb-1">Execution Receipt</div>
+              <div className="text-xs font-mono text-genesis-cipher-cyan">
                 {executionResult.receipt.receiptId.slice(0, 32)}...
               </div>
-              <div className="text-xs text-gray-400 mt-1">
+              <div className="text-xs text-genesis-text-tertiary mt-1">
                 Executed on: {executionResult.peerId} • {executionResult.executionTime}ms
               </div>
             </div>
@@ -311,7 +311,7 @@ export function AbyssRuntimeApp() {
       )}
       
       {!session && (
-        <div className="bg-abyss-purple/10 border border-abyss-purple/30 rounded-lg p-4 text-sm text-gray-300">
+        <div className="bg-abyss-purple/10 border border-abyss-purple/30 rounded-lg p-4 text-sm text-genesis-text-secondary">
           Please log in with QorID to execute WASM modules.
         </div>
       )}

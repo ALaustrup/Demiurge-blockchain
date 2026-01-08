@@ -151,29 +151,29 @@ export function FileDropZone({ onUploadComplete, onUploadError }: FileDropZonePr
         onDrop={handleDrop}
       >
         {isDragging && (
-          <div className="absolute inset-0 bg-abyss-cyan/20 backdrop-blur-sm flex items-center justify-center border-4 border-dashed border-abyss-cyan">
+          <div className="absolute inset-0 bg-abyss-cyan/20 backdrop-blur-sm flex items-center justify-center border-4 border-dashed border-genesis-border-default">
             <div className="text-center">
               <div className="text-6xl mb-4">📁</div>
-              <div className="text-2xl font-bold text-abyss-cyan mb-2">Drop files here</div>
-              <div className="text-gray-300">Files will be uploaded and minted as DRC-369 NFTs</div>
+              <div className="text-2xl font-bold text-genesis-cipher-cyan mb-2">Drop files here</div>
+              <div className="text-genesis-text-secondary">Files will be uploaded and minted as DRC-369 NFTs</div>
             </div>
           </div>
         )}
       </div>
 
       {uploading && (
-        <div className="fixed bottom-20 right-4 z-50 bg-abyss-navy/95 border border-abyss-cyan/30 rounded-lg p-4 shadow-xl min-w-[300px]">
+        <div className="fixed bottom-20 right-4 z-50 bg-abyss-navy/95 border border-genesis-border-default/30 rounded-lg p-4 shadow-xl min-w-[300px]">
           <div className="flex items-center gap-3 mb-2">
-            <div className="animate-spin text-abyss-cyan">⏳</div>
-            <div className="text-abyss-cyan font-medium">Uploading...</div>
+            <div className="animate-spin text-genesis-cipher-cyan">⏳</div>
+            <div className="text-genesis-cipher-cyan font-medium">Uploading...</div>
           </div>
-          <div className="w-full bg-abyss-dark rounded-full h-2 mb-2">
+          <div className="w-full bg-genesis-glass-light rounded-full h-2 mb-2">
             <div
               className="bg-abyss-cyan h-2 rounded-full transition-all duration-300"
               style={{ width: `${uploadProgress}%` }}
             />
           </div>
-          <div className="text-xs text-gray-400">{Math.round(uploadProgress)}%</div>
+          <div className="text-xs text-genesis-text-tertiary">{Math.round(uploadProgress)}%</div>
         </div>
       )}
 

@@ -52,38 +52,38 @@ export function GenesisConsoleApp() {
   return (
     <div className="h-full flex flex-col min-h-0 p-6 space-y-6 overflow-auto">
       <div>
-        <h2 className="text-2xl font-bold text-abyss-cyan mb-2">Genesis Console</h2>
-        <p className="text-sm text-gray-400">The birth of digital civilization</p>
+        <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">Genesis Console</h2>
+        <p className="text-sm text-genesis-text-tertiary">The birth of digital civilization</p>
       </div>
       
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-4">
-          <div className="text-sm text-gray-400 mb-1">Total Instances</div>
-          <div className="text-2xl font-mono text-abyss-cyan">{lineageNodes.length}</div>
+        <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-4">
+          <div className="text-sm text-genesis-text-tertiary mb-1">Total Instances</div>
+          <div className="text-2xl font-mono text-genesis-cipher-cyan">{lineageNodes.length}</div>
         </div>
         
-        <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-4">
-          <div className="text-sm text-gray-400 mb-1">Active Lineages</div>
+        <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-4">
+          <div className="text-sm text-genesis-text-tertiary mb-1">Active Lineages</div>
           <div className="text-2xl font-mono text-abyss-purple">
             {new Set(lineageNodes.map(n => n.lineage)).size}
           </div>
         </div>
         
-        <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-4">
-          <div className="text-sm text-gray-400 mb-1">Active Treaties</div>
-          <div className="text-2xl font-mono text-abyss-cyan">{treaties.length}</div>
+        <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-4">
+          <div className="text-sm text-genesis-text-tertiary mb-1">Active Treaties</div>
+          <div className="text-2xl font-mono text-genesis-cipher-cyan">{treaties.length}</div>
         </div>
         
-        <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-4">
-          <div className="text-sm text-gray-400 mb-1">Shared Intents</div>
+        <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-4">
+          <div className="text-sm text-genesis-text-tertiary mb-1">Shared Intents</div>
           <div className="text-2xl font-mono text-abyss-purple">{sharedIntents.length}</div>
         </div>
       </div>
       
       {/* Lineage Tree */}
-      <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-6">
-        <h3 className="text-lg font-bold text-abyss-cyan mb-4">Lineage Tree</h3>
+      <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-6">
+        <h3 className="text-lg font-bold text-genesis-cipher-cyan mb-4">Lineage Tree</h3>
         <div className="space-y-2 max-h-64 overflow-auto">
           {lineageNodes.length > 0 ? (
             lineageNodes.map((node, i) => (
@@ -95,17 +95,17 @@ export function GenesisConsoleApp() {
                 className="flex items-center justify-between p-3 bg-abyss-navy/30 rounded"
               >
                 <div>
-                  <div className="font-mono text-sm text-abyss-cyan">
+                  <div className="font-mono text-sm text-genesis-cipher-cyan">
                     Gen {node.generation} · {node.instanceId.slice(0, 16)}...
                   </div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-xs text-genesis-text-tertiary">
                     Lineage: {node.lineage} · Fitness: {node.fitness.toFixed(1)}
                   </div>
                 </div>
                 <div className={`text-xs px-2 py-1 rounded ${
                   node.status === 'active' ? 'bg-green-500/20 text-green-400' :
                   node.status === 'extinct' ? 'bg-red-500/20 text-red-400' :
-                  'bg-gray-500/20 text-gray-400'
+                  'bg-gray-500/20 text-genesis-text-tertiary'
                 }`}>
                   {node.status}
                 </div>
@@ -119,22 +119,22 @@ export function GenesisConsoleApp() {
       
       {/* Proliferation Candidates */}
       {proliferationCandidates.length > 0 && (
-        <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-6">
-          <h3 className="text-lg font-bold text-abyss-cyan mb-4">Reproduction Candidates</h3>
+        <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-6">
+          <h3 className="text-lg font-bold text-genesis-cipher-cyan mb-4">Reproduction Candidates</h3>
           <div className="space-y-2">
             {proliferationCandidates.map((instanceId, i) => {
               const node = lineageGraph.getNode(instanceId);
               return node ? (
                 <div
                   key={instanceId}
-                  className="flex items-center justify-between p-3 bg-abyss-dark/50 rounded border border-abyss-cyan/20"
+                  className="flex items-center justify-between p-3 bg-genesis-glass-light/50 rounded border border-genesis-border-default/20"
                 >
                   <div>
-                    <div className="font-mono text-sm text-abyss-cyan">{instanceId.slice(0, 24)}...</div>
-                    <div className="text-xs text-gray-400">Fitness: {node.fitness.toFixed(1)}</div>
+                    <div className="font-mono text-sm text-genesis-cipher-cyan">{instanceId.slice(0, 24)}...</div>
+                    <div className="text-xs text-genesis-text-tertiary">Fitness: {node.fitness.toFixed(1)}</div>
                   </div>
                   <button
-                    className="px-3 py-1 text-xs bg-abyss-dark border border-abyss-cyan/20 rounded hover:border-abyss-cyan/50 text-abyss-cyan"
+                    className="px-3 py-1 text-xs bg-genesis-glass-light border border-genesis-border-default/20 rounded hover:border-genesis-border-default/50 text-genesis-cipher-cyan"
                     onClick={() => handleReproduce(instanceId)}
                   >
                     Reproduce
@@ -148,13 +148,13 @@ export function GenesisConsoleApp() {
       
       {/* Shared Intents */}
       {sharedIntents.length > 0 && (
-        <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-4">
-          <h3 className="text-lg font-bold text-abyss-cyan mb-4">Shared Intents</h3>
+        <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-4">
+          <h3 className="text-lg font-bold text-genesis-cipher-cyan mb-4">Shared Intents</h3>
           <div className="space-y-2">
             {sharedIntents.map((intent) => (
-              <div key={intent.id} className="p-3 bg-abyss-dark/50 rounded">
-                <div className="font-bold text-abyss-cyan mb-1">{intent.goal}</div>
-                <div className="text-xs text-gray-400">
+              <div key={intent.id} className="p-3 bg-genesis-glass-light/50 rounded">
+                <div className="font-bold text-genesis-cipher-cyan mb-1">{intent.goal}</div>
+                <div className="text-xs text-genesis-text-tertiary">
                   Priority: {intent.priority} · Consensus: {(intent.consensus * 100).toFixed(0)}% · 
                   Instances: {intent.instanceIds.length}
                 </div>
@@ -166,13 +166,13 @@ export function GenesisConsoleApp() {
       
       {/* Active Treaties */}
       {treaties.length > 0 && (
-        <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-          <h3 className="text-lg font-bold text-abyss-cyan mb-4">Active Treaties</h3>
+        <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+          <h3 className="text-lg font-bold text-genesis-cipher-cyan mb-4">Active Treaties</h3>
           <div className="space-y-2">
             {treaties.map((treaty) => (
               <div key={treaty.id} className="p-3 bg-abyss-navy/30 rounded">
-                <div className="font-mono text-sm text-abyss-cyan mb-1">{treaty.id.slice(0, 24)}...</div>
-                <div className="text-xs text-gray-400 mb-2">{treaty.terms}</div>
+                <div className="font-mono text-sm text-genesis-cipher-cyan mb-1">{treaty.id.slice(0, 24)}...</div>
+                <div className="text-xs text-genesis-text-tertiary mb-2">{treaty.terms}</div>
                 <div className="text-xs text-gray-500">
                   Chains: {treaty.chainIds.length} · Consensus: {(treaty.consensus * 100).toFixed(0)}%
                 </div>

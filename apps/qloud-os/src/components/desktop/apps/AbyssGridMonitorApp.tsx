@@ -51,34 +51,34 @@ export function AbyssGridMonitorApp() {
   return (
     <div className="h-full flex flex-col min-h-0 p-6 space-y-6 overflow-auto">
       <div>
-        <h2 className="text-2xl font-bold text-abyss-cyan mb-2">Abyss Grid Monitor</h2>
-        <p className="text-sm text-gray-400">Networked execution grid visualization</p>
+        <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">Abyss Grid Monitor</h2>
+        <p className="text-sm text-genesis-text-tertiary">Networked execution grid visualization</p>
       </div>
       
       {/* Grid Stats */}
       <div className="grid grid-cols-3 gap-4">
-        <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-4">
-          <div className="text-sm text-gray-400 mb-1">Connected Peers</div>
-          <div className="text-2xl font-mono text-abyss-cyan">{peers.length}</div>
+        <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-4">
+          <div className="text-sm text-genesis-text-tertiary mb-1">Connected Peers</div>
+          <div className="text-2xl font-mono text-genesis-cipher-cyan">{peers.length}</div>
         </div>
         
-        <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-4">
-          <div className="text-sm text-gray-400 mb-1">Active Jobs</div>
+        <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-4">
+          <div className="text-sm text-genesis-text-tertiary mb-1">Active Jobs</div>
           <div className="text-2xl font-mono text-abyss-purple">
             {jobs.filter(j => j.status === 'running').length}
           </div>
         </div>
         
-        <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-4">
-          <div className="text-sm text-gray-400 mb-1">Total Compute</div>
-          <div className="text-2xl font-mono text-abyss-cyan">
+        <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-4">
+          <div className="text-sm text-genesis-text-tertiary mb-1">Total Compute</div>
+          <div className="text-2xl font-mono text-genesis-cipher-cyan">
             {peers.reduce((sum, p) => sum + p.computeScore, 0)}
           </div>
         </div>
       </div>
       
       {/* Orbital Visualization */}
-      <div className="flex-1 relative bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg overflow-hidden min-h-[400px]">
+      <div className="flex-1 relative bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg overflow-hidden min-h-[400px]">
         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
           {/* Grid lines */}
           <defs>
@@ -160,13 +160,13 @@ export function AbyssGridMonitorApp() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-4"
+          className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-4"
         >
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-bold text-abyss-cyan">Peer Details</h3>
+            <h3 className="text-lg font-bold text-genesis-cipher-cyan">Peer Details</h3>
             <button
               onClick={() => setSelectedPeer(null)}
-              className="text-gray-400 hover:text-white"
+              className="text-genesis-text-tertiary hover:text-white"
             >
               ✕
             </button>
@@ -174,30 +174,30 @@ export function AbyssGridMonitorApp() {
           
           <div className="space-y-2 text-sm">
             <div>
-              <span className="text-gray-400">Peer ID:</span>
-              <span className="ml-2 font-mono text-abyss-cyan">{selectedPeer.peerId}</span>
+              <span className="text-genesis-text-tertiary">Peer ID:</span>
+              <span className="ml-2 font-mono text-genesis-cipher-cyan">{selectedPeer.peerId}</span>
             </div>
             <div>
-              <span className="text-gray-400">Version:</span>
+              <span className="text-genesis-text-tertiary">Version:</span>
               <span className="ml-2 text-white">{selectedPeer.version}</span>
             </div>
             <div>
-              <span className="text-gray-400">Compute Score:</span>
-              <span className="ml-2 text-abyss-cyan">{selectedPeer.computeScore}/100</span>
+              <span className="text-genesis-text-tertiary">Compute Score:</span>
+              <span className="ml-2 text-genesis-cipher-cyan">{selectedPeer.computeScore}/100</span>
             </div>
             <div>
-              <span className="text-gray-400">Free Memory:</span>
+              <span className="text-genesis-text-tertiary">Free Memory:</span>
               <span className="ml-2 text-white">
                 {(selectedPeer.freeMemory / 1024 / 1024).toFixed(2)} MB
               </span>
             </div>
             <div>
-              <span className="text-gray-400">Features:</span>
+              <span className="text-genesis-text-tertiary">Features:</span>
               <div className="mt-1 flex flex-wrap gap-2">
                 {selectedPeer.supportedFeatures.map((feature: string) => (
                   <span
                     key={feature}
-                    className="px-2 py-0.5 bg-abyss-cyan/20 text-abyss-cyan border border-abyss-cyan/30 rounded text-xs"
+                    className="px-2 py-0.5 bg-abyss-cyan/20 text-genesis-cipher-cyan border border-genesis-border-default/30 rounded text-xs"
                   >
                     {feature}
                   </span>
@@ -205,22 +205,22 @@ export function AbyssGridMonitorApp() {
               </div>
             </div>
             <div>
-              <span className="text-gray-400">Status:</span>
+              <span className="text-genesis-text-tertiary">Status:</span>
               <span className={`ml-2 ${
-                selectedPeer.connectionStatus === 'connected' ? 'text-green-400' : 'text-gray-400'
+                selectedPeer.connectionStatus === 'connected' ? 'text-green-400' : 'text-genesis-text-tertiary'
               }`}>
                 {selectedPeer.connectionStatus}
               </span>
             </div>
             <div>
-              <span className="text-gray-400">Last Seen:</span>
+              <span className="text-genesis-text-tertiary">Last Seen:</span>
               <span className="ml-2 text-white">
                 {new Date(selectedPeer.lastSeen).toLocaleTimeString()}
               </span>
             </div>
             <div>
-              <span className="text-gray-400">ZK Capable:</span>
-              <span className="ml-2 text-abyss-cyan">
+              <span className="text-genesis-text-tertiary">ZK Capable:</span>
+              <span className="ml-2 text-genesis-cipher-cyan">
                 {selectedPeer.supportedFeatures.includes('zk') ? '✓ Yes' : '✗ No'}
               </span>
             </div>

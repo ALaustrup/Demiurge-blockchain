@@ -63,14 +63,14 @@ function MediaCard({ item, isSelected, isFavorite, onClick, onDoubleClick, onFav
         relative group rounded-lg overflow-hidden cursor-pointer transition-all
         ${isSelected 
           ? 'ring-2 ring-abyss-cyan bg-abyss-cyan/10' 
-          : 'bg-abyss-dark/40 hover:bg-abyss-dark/60'
+          : 'bg-genesis-glass-light/40 hover:bg-genesis-glass-light/60'
         }
       `}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
     >
       {/* Thumbnail */}
-      <div className="aspect-square bg-abyss-dark/60 flex items-center justify-center">
+      <div className="aspect-square bg-genesis-glass-light/60 flex items-center justify-center">
         {item.thumbnail ? (
           <img src={item.thumbnail} alt={item.name} className="w-full h-full object-cover" />
         ) : (
@@ -175,7 +175,7 @@ function DropZone({ onDrop, isDragging, setIsDragging }: DropZoneProps) {
       className={`
         absolute inset-0 flex items-center justify-center transition-all z-50
         ${isDragging 
-          ? 'bg-abyss-cyan/20 border-2 border-dashed border-abyss-cyan' 
+          ? 'bg-abyss-cyan/20 border-2 border-dashed border-genesis-border-default' 
           : 'pointer-events-none'
         }
       `}
@@ -183,8 +183,8 @@ function DropZone({ onDrop, isDragging, setIsDragging }: DropZoneProps) {
       {isDragging && (
         <div className="text-center">
           <div className="text-6xl mb-4">📁</div>
-          <p className="text-xl text-abyss-cyan font-medium">Drop media files here</p>
-          <p className="text-sm text-gray-400 mt-2">
+          <p className="text-xl text-genesis-cipher-cyan font-medium">Drop media files here</p>
+          <p className="text-sm text-genesis-text-tertiary mt-2">
             Audio, Video, or Images
           </p>
         </div>
@@ -216,9 +216,9 @@ function Sidebar({ currentView, onViewChange, playlists, onCreatePlaylist }: Sid
   ];
   
   return (
-    <div className="w-48 bg-abyss-dark/40 border-r border-abyss-cyan/20 flex flex-col">
-      <div className="p-3 border-b border-abyss-cyan/20">
-        <h3 className="text-sm font-medium text-gray-400">Library</h3>
+    <div className="w-48 bg-genesis-glass-light/40 border-r border-genesis-border-default/20 flex flex-col">
+      <div className="p-3 border-b border-genesis-border-default/20">
+        <h3 className="text-sm font-medium text-genesis-text-tertiary">Library</h3>
       </div>
       
       <div className="flex-1 overflow-y-auto p-2 space-y-1">
@@ -229,8 +229,8 @@ function Sidebar({ currentView, onViewChange, playlists, onCreatePlaylist }: Sid
             className={`
               w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors
               ${currentView === item.id 
-                ? 'bg-abyss-cyan/20 text-abyss-cyan' 
-                : 'text-gray-400 hover:text-white hover:bg-abyss-dark/50'
+                ? 'bg-abyss-cyan/20 text-genesis-cipher-cyan' 
+                : 'text-genesis-text-tertiary hover:text-white hover:bg-genesis-glass-light/50'
               }
             `}
           >
@@ -239,14 +239,14 @@ function Sidebar({ currentView, onViewChange, playlists, onCreatePlaylist }: Sid
           </button>
         ))}
         
-        <div className="pt-3 mt-3 border-t border-abyss-cyan/20">
+        <div className="pt-3 mt-3 border-t border-genesis-border-default/20">
           <button
             onClick={() => onViewChange('playlists')}
             className={`
               w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors
               ${currentView === 'playlists' 
-                ? 'bg-abyss-cyan/20 text-abyss-cyan' 
-                : 'text-gray-400 hover:text-white hover:bg-abyss-dark/50'
+                ? 'bg-abyss-cyan/20 text-genesis-cipher-cyan' 
+                : 'text-genesis-text-tertiary hover:text-white hover:bg-genesis-glass-light/50'
               }
             `}
           >
@@ -267,7 +267,7 @@ function Sidebar({ currentView, onViewChange, playlists, onCreatePlaylist }: Sid
           
           <button
             onClick={onCreatePlaylist}
-            className="w-full flex items-center gap-2 px-3 py-1.5 pl-6 text-sm text-gray-600 hover:text-abyss-cyan"
+            className="w-full flex items-center gap-2 px-3 py-1.5 pl-6 text-sm text-gray-600 hover:text-genesis-cipher-cyan"
           >
             <span>+</span>
             <span>New Playlist</span>
@@ -427,7 +427,7 @@ export function NeonMediaLibrary() {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Toolbar */}
-        <div className="flex items-center gap-4 p-3 border-b border-abyss-cyan/20">
+        <div className="flex items-center gap-4 p-3 border-b border-genesis-border-default/20">
           {/* Search */}
           <div className="flex-1 max-w-md">
             <input
@@ -435,7 +435,7 @@ export function NeonMediaLibrary() {
               placeholder="Search media..."
               value={filter.search}
               onChange={(e) => setFilter(f => ({ ...f, search: e.target.value }))}
-              className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-abyss-cyan"
+              className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-genesis-border-default"
             />
           </div>
           
@@ -446,7 +446,7 @@ export function NeonMediaLibrary() {
               const [sortBy, sortOrder] = e.target.value.split('-') as [FilterState['sortBy'], FilterState['sortOrder']];
               setFilter(f => ({ ...f, sortBy, sortOrder }));
             }}
-            className="px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded-lg text-gray-300 text-sm"
+            className="px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded-lg text-genesis-text-secondary text-sm"
           >
             <option value="date-desc">Newest First</option>
             <option value="date-asc">Oldest First</option>
@@ -511,7 +511,7 @@ export function NeonMediaLibrary() {
         </div>
         
         {/* Stats bar */}
-        <div className="px-4 py-2 border-t border-abyss-cyan/20 text-xs text-gray-500 flex items-center gap-4">
+        <div className="px-4 py-2 border-t border-genesis-border-default/20 text-xs text-gray-500 flex items-center gap-4">
           <span>{filteredItems.length} items</span>
           {selectedIds.size > 0 && (
             <span>{selectedIds.size} selected</span>
@@ -533,7 +533,7 @@ export function NeonMediaLibrary() {
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
-              className="bg-abyss-navy border border-abyss-cyan/30 rounded-lg p-6 w-80"
+              className="bg-abyss-navy border border-genesis-border-default/30 rounded-lg p-6 w-80"
               onClick={(e) => e.stopPropagation()}
             >
               <h3 className="text-lg font-medium text-white mb-4">Create Playlist</h3>
@@ -542,14 +542,14 @@ export function NeonMediaLibrary() {
                 value={newPlaylistName}
                 onChange={(e) => setNewPlaylistName(e.target.value)}
                 placeholder="Playlist name..."
-                className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-abyss-cyan mb-4"
+                className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-genesis-border-default mb-4"
                 autoFocus
                 onKeyDown={(e) => e.key === 'Enter' && handleCreatePlaylist()}
               />
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setShowCreatePlaylist(false)}
-                  className="px-4 py-2 text-gray-400 hover:text-white"
+                  className="px-4 py-2 text-genesis-text-tertiary hover:text-white"
                 >
                   Cancel
                 </button>

@@ -26,19 +26,19 @@ export const MemoryPalaceView: React.FC = () => {
       
       <div className="metrics grid grid-cols-2 gap-4">
         <div>
-          <div className="text-sm text-gray-400">Chambers</div>
+          <div className="text-sm text-genesis-text-tertiary">Chambers</div>
           <div className="text-2xl font-bold text-green-400">{palace.chambers}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Total Memories</div>
+          <div className="text-sm text-genesis-text-tertiary">Total Memories</div>
           <div className="text-2xl font-bold text-blue-400">{palace.totalMemories.toLocaleString()}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Identity Relevance</div>
+          <div className="text-sm text-genesis-text-tertiary">Identity Relevance</div>
           <div className="text-lg font-semibold text-yellow-400">{(palace.identityRelevance * 100).toFixed(0)}%</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Coherence</div>
+          <div className="text-sm text-genesis-text-tertiary">Coherence</div>
           <div className="text-lg font-semibold text-cyan-400">{(palace.coherence * 100).toFixed(0)}%</div>
         </div>
       </div>

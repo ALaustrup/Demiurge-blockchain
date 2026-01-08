@@ -37,8 +37,8 @@ export function AddressDisplay({
   showArchonBadge = true,
   copyOnClick = true,
   className = '',
-  usernameClassName = 'text-abyss-cyan font-semibold',
-  addressClassName = 'font-mono text-gray-400',
+  usernameClassName = 'text-genesis-cipher-cyan font-semibold',
+  addressClassName = 'font-mono text-genesis-text-tertiary',
   showLoading = true,
   linkTo = null,
 }: AddressDisplayProps) {
@@ -78,7 +78,7 @@ export function AddressDisplay({
             {username}
           </span>
           {showArchonBadge && isArchon && (
-            <span className="text-xs bg-abyss-cyan/20 text-abyss-cyan px-1 rounded">
+            <span className="text-xs bg-abyss-cyan/20 text-genesis-cipher-cyan px-1 rounded">
               ARCHON
             </span>
           )}
@@ -122,7 +122,7 @@ export function AddressDisplay({
 export function AddressCode({
   address,
   truncateLength = 8,
-  className = 'font-mono text-gray-400',
+  className = 'font-mono text-genesis-text-tertiary',
 }: {
   address: string;
   truncateLength?: number;
@@ -153,7 +153,7 @@ export function AddressWithUsername({
     return (
       <div className={`flex items-center gap-2 ${className}`}>
         {username && (
-          <span className="text-abyss-cyan font-semibold">
+          <span className="text-genesis-cipher-cyan font-semibold">
             {username}
             {isArchon && (
               <span className="ml-1 text-xs bg-abyss-cyan/20 px-1 rounded">
@@ -170,7 +170,7 @@ export function AddressWithUsername({
   return (
     <div className={`flex flex-col ${className}`}>
       {username && (
-        <span className="text-abyss-cyan font-semibold">
+        <span className="text-genesis-cipher-cyan font-semibold">
           {username}
           {isArchon && (
             <span className="ml-1 text-xs bg-abyss-cyan/20 px-1 rounded">

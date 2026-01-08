@@ -126,29 +126,29 @@ export function AppMarketplaceApp() {
 
   if (loading) {
     return (
-      <div className="w-full h-full bg-abyss-dark text-white flex items-center justify-center">
-        <div className="text-abyss-cyan">Loading marketplace...</div>
+      <div className="w-full h-full bg-genesis-glass-light text-white flex items-center justify-center">
+        <div className="text-genesis-cipher-cyan">Loading marketplace...</div>
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full bg-abyss-dark text-white flex flex-col">
+    <div className="w-full h-full bg-genesis-glass-light text-white flex flex-col">
       {/* Header */}
-      <div className="h-16 bg-abyss-navy/50 border-b border-abyss-cyan/20 flex items-center justify-between px-6">
-        <h2 className="text-xl font-bold text-abyss-cyan">App Marketplace</h2>
+      <div className="h-16 bg-abyss-navy/50 border-b border-genesis-border-default/20 flex items-center justify-between px-6">
+        <h2 className="text-xl font-bold text-genesis-cipher-cyan">App Marketplace</h2>
         <div className="flex items-center gap-4">
           <input
             type="text"
             placeholder="Search apps..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="px-4 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-sm w-64"
+            className="px-4 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-sm w-64"
           />
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-4 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-sm"
+            className="px-4 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-sm"
           >
             {categories.map(cat => (
               <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
@@ -164,21 +164,21 @@ export function AppMarketplaceApp() {
             {filteredApps.map(app => (
               <div
                 key={app.id}
-                className="p-4 bg-abyss-navy/30 border border-abyss-cyan/20 rounded-lg hover:border-abyss-cyan/40 transition-colors cursor-pointer"
+                className="p-4 bg-abyss-navy/30 border border-genesis-border-default/20 rounded-lg hover:border-genesis-border-default/40 transition-colors cursor-pointer"
                 onClick={() => setSelectedApp(app)}
               >
                 <div className="flex items-center gap-3 mb-3">
                   <div className="text-4xl">{app.icon}</div>
                   <div className="flex-1">
                     <div className="font-semibold">{app.name}</div>
-                    <div className="text-xs text-gray-400">v{app.version}</div>
+                    <div className="text-xs text-genesis-text-tertiary">v{app.version}</div>
                   </div>
                   {app.installed && (
                     <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded">Installed</span>
                   )}
                 </div>
-                <div className="text-sm text-gray-300 mb-3 line-clamp-2">{app.description}</div>
-                <div className="flex items-center justify-between text-xs text-gray-400">
+                <div className="text-sm text-genesis-text-secondary mb-3 line-clamp-2">{app.description}</div>
+                <div className="flex items-center justify-between text-xs text-genesis-text-tertiary">
                   <span>⭐ {app.rating}</span>
                   <span>📥 {app.installs}</span>
                 </div>
@@ -189,22 +189,22 @@ export function AppMarketplaceApp() {
 
         {/* App Details Sidebar */}
         {selectedApp && (
-          <div className="w-96 bg-abyss-navy/40 border-l border-abyss-cyan/20 p-6 overflow-y-auto">
+          <div className="w-96 bg-abyss-navy/40 border-l border-genesis-border-default/20 p-6 overflow-y-auto">
             <div className="flex items-center gap-4 mb-4">
               <div className="text-6xl">{selectedApp.icon}</div>
               <div>
                 <h3 className="text-xl font-bold">{selectedApp.name}</h3>
-                <div className="text-sm text-gray-400">by @{selectedApp.author.username}</div>
+                <div className="text-sm text-genesis-text-tertiary">by @{selectedApp.author.username}</div>
               </div>
             </div>
 
             <div className="mb-4">
-              <div className="text-sm text-gray-400 mb-1">Description</div>
+              <div className="text-sm text-genesis-text-tertiary mb-1">Description</div>
               <div className="text-sm">{selectedApp.description}</div>
             </div>
 
             <div className="mb-4">
-              <div className="text-sm text-gray-400 mb-1">Details</div>
+              <div className="text-sm text-genesis-text-tertiary mb-1">Details</div>
               <div className="text-xs space-y-1">
                 <div>Version: {selectedApp.version}</div>
                 <div>Category: {selectedApp.category}</div>
@@ -241,7 +241,7 @@ export function AppMarketplaceApp() {
             </div>
 
             {session && (
-              <div className="mt-6 pt-6 border-t border-abyss-cyan/20">
+              <div className="mt-6 pt-6 border-t border-genesis-border-default/20">
                 <button
                   onClick={() => openApp('craft')}
                   className="w-full px-4 py-2 bg-abyss-cyan/20 hover:bg-abyss-cyan/30 rounded text-sm"

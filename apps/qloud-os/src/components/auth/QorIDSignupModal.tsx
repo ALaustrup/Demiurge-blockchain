@@ -215,11 +215,11 @@ export function QorIDSignupModal({ isOpen, onClose, onSuccess }: QorIDSignupModa
             <Card className="p-8">
               {step === 'username' ? (
                 <div key="username-step">
-                  <h2 className="text-3xl font-bold mb-6 text-abyss-cyan">Create QorID</h2>
+                  <h2 className="text-3xl font-bold mb-6 text-genesis-flame-orange font-genesis-display">Create QOR ID</h2>
                   
                   <form onSubmit={handleUsernameSubmit} className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2 text-gray-300">
+                      <label className="block text-sm font-medium mb-2 text-genesis-text-primary">
                         Username
                       </label>
                       <input
@@ -230,12 +230,12 @@ export function QorIDSignupModal({ isOpen, onClose, onSuccess }: QorIDSignupModa
                           // Status will be updated by useEffect debounce
                         }}
                         onBlur={checkUsername}
-                        className="w-full px-4 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded-lg text-white focus:outline-none focus:border-abyss-cyan focus:ring-2 focus:ring-abyss-cyan/50"
+                        className="genesis-input w-full px-4 py-2"
                         placeholder="Choose a username"
                       />
                       <div className="text-sm mt-1 min-h-[20px]">
                         {usernameStatus === 'checking' && (
-                          <span className="text-gray-400">Checking...</span>
+                          <span className="text-genesis-text-tertiary">Checking...</span>
                         )}
                         {usernameStatus === 'available' && (
                           <span className="text-green-400">✓ Available</span>
@@ -257,21 +257,21 @@ export function QorIDSignupModal({ isOpen, onClose, onSuccess }: QorIDSignupModa
                 </div>
               ) : (
                 <div key="backup-step">
-                  <h2 className="text-2xl font-bold mb-4 text-abyss-cyan">Back Up Your Secret</h2>
-                  <p className="text-gray-300 mb-4 text-sm">
-                    Save this code securely. You'll need it to access your QorID.
+                  <h2 className="text-2xl font-bold mb-4 text-genesis-flame-orange font-genesis-display">Back Up Your Secret</h2>
+                  <p className="text-genesis-text-secondary mb-4 text-sm">
+                    Save this code securely. You'll need it to access your QOR ID.
                   </p>
                   
                   {createdAccount && (
-                    <div className="bg-abyss-dark border border-abyss-cyan/30 rounded-lg p-4 mb-4">
-                      <div className="text-xs text-gray-400 mb-2">Your QorID Public Key:</div>
-                      <div className="font-mono text-sm text-abyss-cyan break-all">{createdAccount.publicKey}</div>
+                    <div className="bg-genesis-glass-light border border-genesis-border-default rounded-lg p-4 mb-4">
+                      <div className="text-xs text-genesis-text-tertiary mb-2">Your QOR ID Public Key:</div>
+                      <div className="font-mono text-sm text-genesis-cipher-cyan break-all">{createdAccount.publicKey}</div>
                     </div>
                   )}
                   
-                  <div className="bg-abyss-dark border border-abyss-cyan/30 rounded-lg p-4 mb-4">
-                    <div className="text-xs text-gray-400 mb-2">Your Secret Code:</div>
-                    <div className="font-mono text-sm text-abyss-cyan break-all">{secret}</div>
+                  <div className="bg-genesis-glass-light border border-genesis-border-default rounded-lg p-4 mb-4">
+                    <div className="text-xs text-genesis-text-tertiary mb-2">Your Secret Code:</div>
+                    <div className="font-mono text-sm text-genesis-cipher-cyan break-all">{secret}</div>
                   </div>
 
                   <Button onClick={copySecret} variant="secondary" className="w-full mb-4">
@@ -283,9 +283,9 @@ export function QorIDSignupModal({ isOpen, onClose, onSuccess }: QorIDSignupModa
                       type="checkbox"
                       checked={hasBackedUp}
                       onChange={(e) => setHasBackedUp(e.target.checked)}
-                      className="w-4 h-4 text-abyss-cyan bg-abyss-dark border-abyss-cyan rounded focus:ring-abyss-cyan"
+                      className="w-4 h-4 text-genesis-flame-orange bg-genesis-glass-light border-genesis-border-default rounded focus:ring-genesis-flame-orange"
                     />
-                    <span className="text-sm text-gray-300">I have backed up this code</span>
+                    <span className="text-sm text-genesis-text-secondary">I have backed up this code</span>
                   </label>
 
                   <Button
@@ -301,7 +301,7 @@ export function QorIDSignupModal({ isOpen, onClose, onSuccess }: QorIDSignupModa
 
               <button
                 onClick={handleClose}
-                className="mt-4 text-gray-400 hover:text-white text-sm"
+                className="mt-4 text-genesis-text-tertiary hover:text-genesis-text-primary text-sm transition-colors"
               >
                 Cancel
               </button>

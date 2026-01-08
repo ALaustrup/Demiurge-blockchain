@@ -25,11 +25,11 @@ export const ArchonPresence: React.FC = () => {
       
       <div className="metrics space-y-3">
         <div>
-          <div className="text-sm text-gray-400">Node Count</div>
+          <div className="text-sm text-genesis-text-tertiary">Node Count</div>
           <div className="text-2xl font-bold text-cyan-400">{presence.nodeCount}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Total Presence</div>
+          <div className="text-sm text-genesis-text-tertiary">Total Presence</div>
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-800 rounded h-4">
               <div 
@@ -41,7 +41,7 @@ export const ArchonPresence: React.FC = () => {
           </div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Avg Resonance</div>
+          <div className="text-sm text-genesis-text-tertiary">Avg Resonance</div>
           <div className="text-lg font-semibold text-yellow-400">{(presence.averageResonance * 100).toFixed(0)}%</div>
         </div>
       </div>

@@ -29,7 +29,7 @@ export const EvolutionKernelView: React.FC = () => {
               <span>{decision.delta}</span>
               <span className="text-green-400">Score: {decision.score.toFixed(2)}</span>
             </div>
-            <div className="text-sm text-gray-400 mt-1">
+            <div className="text-sm text-genesis-text-tertiary mt-1">
               Status: <span className={decision.status === 'Approved' ? 'text-green-400' : 'text-yellow-400'}>
                 {decision.status}
               </span>

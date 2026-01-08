@@ -316,7 +316,7 @@ export function QorWalletApp() {
     return (
       <div className="h-full flex items-center justify-center p-8">
         <div className="text-center">
-          <p className="text-gray-400 mb-4">Please log in with QorID to use the wallet</p>
+          <p className="text-genesis-text-tertiary mb-4">Please log in with QorID to use the wallet</p>
           <Button onClick={() => {}}>Login</Button>
         </div>
       </div>
@@ -327,18 +327,18 @@ export function QorWalletApp() {
     <div className="h-full flex flex-col min-h-0 p-6 space-y-6 overflow-auto">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-abyss-cyan mb-2">QorID Wallet</h2>
-        <p className="text-sm text-gray-400">Manage your CGT balance, transactions, and NFTs</p>
+        <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">QorID Wallet</h2>
+        <p className="text-sm text-genesis-text-tertiary">Manage your CGT balance, transactions, and NFTs</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-2 border-b border-abyss-cyan/20">
+      <div className="flex space-x-2 border-b border-genesis-border-default/20">
         <button
           onClick={() => setActiveTab('cgt')}
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === 'cgt'
-              ? 'text-abyss-cyan border-b-2 border-abyss-cyan'
-              : 'text-gray-400 hover:text-gray-300'
+              ? 'text-genesis-cipher-cyan border-b-2 border-genesis-border-default'
+              : 'text-genesis-text-tertiary hover:text-genesis-text-secondary'
           }`}
         >
           CGT
@@ -347,8 +347,8 @@ export function QorWalletApp() {
           onClick={() => setActiveTab('staking')}
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === 'staking'
-              ? 'text-abyss-cyan border-b-2 border-abyss-cyan'
-              : 'text-gray-400 hover:text-gray-300'
+              ? 'text-genesis-cipher-cyan border-b-2 border-genesis-border-default'
+              : 'text-genesis-text-tertiary hover:text-genesis-text-secondary'
           }`}
         >
           Staking
@@ -357,8 +357,8 @@ export function QorWalletApp() {
           onClick={() => setActiveTab('nft-swap')}
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === 'nft-swap'
-              ? 'text-abyss-cyan border-b-2 border-abyss-cyan'
-              : 'text-gray-400 hover:text-gray-300'
+              ? 'text-genesis-cipher-cyan border-b-2 border-genesis-border-default'
+              : 'text-genesis-text-tertiary hover:text-genesis-text-secondary'
           }`}
         >
           NFT Swap
@@ -367,8 +367,8 @@ export function QorWalletApp() {
           onClick={() => setActiveTab('premium')}
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === 'premium'
-              ? 'text-abyss-cyan border-b-2 border-abyss-cyan'
-              : 'text-gray-400 hover:text-gray-300'
+              ? 'text-genesis-cipher-cyan border-b-2 border-genesis-border-default'
+              : 'text-genesis-text-tertiary hover:text-genesis-text-secondary'
           }`}
         >
           Premium
@@ -387,7 +387,7 @@ export function QorWalletApp() {
       {activeTab === 'premium' && (
         <div className="space-y-6">
           {isLoadingPremium ? (
-            <div className="text-center text-gray-400 py-8">Loading premium status...</div>
+            <div className="text-center text-genesis-text-tertiary py-8">Loading premium status...</div>
           ) : (
             <>
               {/* Current Status Banner */}
@@ -396,25 +396,25 @@ export function QorWalletApp() {
                   ? 'bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-yellow-500/30'
                   : premiumStatus?.effective_tier === 'Archon'
                   ? 'bg-gradient-to-r from-abyss-purple/20 to-abyss-cyan/20 border-abyss-purple/30'
-                  : 'bg-abyss-navy/50 border-abyss-cyan/20'
+                  : 'bg-abyss-navy/50 border-genesis-border-default/20'
               }`}>
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <div className="text-sm text-gray-400 mb-1">Your Current Tier</div>
+                    <div className="text-sm text-genesis-text-tertiary mb-1">Your Current Tier</div>
                     <div className={`text-3xl font-bold ${
                       premiumStatus?.effective_tier === 'Genesis' ? 'text-yellow-400' :
                       premiumStatus?.effective_tier === 'Archon' ? 'text-abyss-purple' :
-                      'text-gray-400'
+                      'text-genesis-text-tertiary'
                     }`}>
                       {premiumStatus?.effective_tier || 'Free'}
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm text-gray-400 mb-1">Storage</div>
+                    <div className="text-sm text-genesis-text-tertiary mb-1">Storage</div>
                     <div className="text-lg font-mono text-white">
                       {premiumStatus?.storage_used_gb?.toFixed(2) || '0.00'} / {premiumStatus?.storage_limit_gb || 2} GB
                     </div>
-                    <div className="w-32 h-2 bg-abyss-dark rounded-full overflow-hidden mt-1">
+                    <div className="w-32 h-2 bg-genesis-glass-light rounded-full overflow-hidden mt-1">
                       <div 
                         className="h-full bg-abyss-cyan transition-all"
                         style={{ width: `${Math.min(100, ((premiumStatus?.storage_used || 0) / (premiumStatus?.storage_limit || 1)) * 100)}%` }}
@@ -452,7 +452,7 @@ export function QorWalletApp() {
               
               {/* Tier Comparison */}
               <div className="space-y-4">
-                <h3 className="text-lg font-bold text-abyss-cyan">Premium Tiers</h3>
+                <h3 className="text-lg font-bold text-genesis-cipher-cyan">Premium Tiers</h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {premiumTiers.map((tier) => (
@@ -460,20 +460,20 @@ export function QorWalletApp() {
                       key={tier.id}
                       className={`border rounded-lg p-4 ${
                         tier.name === premiumStatus?.effective_tier
-                          ? 'border-abyss-cyan bg-abyss-cyan/10'
-                          : 'border-abyss-cyan/20 bg-abyss-dark/50'
+                          ? 'border-genesis-border-default bg-abyss-cyan/10'
+                          : 'border-genesis-border-default/20 bg-genesis-glass-light/50'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-3">
                         <h4 className={`text-lg font-bold ${
                           tier.name === 'Genesis' ? 'text-yellow-400' :
                           tier.name === 'Archon' ? 'text-abyss-purple' :
-                          'text-gray-300'
+                          'text-genesis-text-secondary'
                         }`}>
                           {tier.name}
                         </h4>
                         {tier.name === premiumStatus?.effective_tier && (
-                          <span className="px-2 py-1 text-xs bg-abyss-cyan/20 text-abyss-cyan rounded">
+                          <span className="px-2 py-1 text-xs bg-abyss-cyan/20 text-genesis-cipher-cyan rounded">
                             Current
                           </span>
                         )}
@@ -481,17 +481,17 @@ export function QorWalletApp() {
                       
                       <div className="space-y-2 mb-4">
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-400">Storage</span>
+                          <span className="text-genesis-text-tertiary">Storage</span>
                           <span className="text-white">{tier.storage_limit_gb} GB</span>
                         </div>
                         {tier.monthly_cost !== '0' && (
                           <>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-400">Monthly</span>
+                              <span className="text-genesis-text-tertiary">Monthly</span>
                               <span className="text-white">{formatCGT(tier.monthly_cost)} CGT</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                              <span className="text-gray-400">Or Stake</span>
+                              <span className="text-genesis-text-tertiary">Or Stake</span>
                               <span className="text-white">{formatCGT(tier.stake_requirement)} CGT</span>
                             </div>
                           </>
@@ -500,7 +500,7 @@ export function QorWalletApp() {
                       
                       <div className="space-y-1 border-t border-white/10 pt-3">
                         {tier.features.map((feature) => (
-                          <div key={feature} className="flex items-center text-xs text-gray-400">
+                          <div key={feature} className="flex items-center text-xs text-genesis-text-tertiary">
                             <span className="text-green-400 mr-2">✓</span>
                             {feature.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                           </div>
@@ -526,8 +526,8 @@ export function QorWalletApp() {
               
               {/* Treasury Info */}
               {treasuryStats && (
-                <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-                  <h4 className="text-sm font-medium text-abyss-cyan mb-3">Ecosystem Treasury</h4>
+                <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+                  <h4 className="text-sm font-medium text-genesis-cipher-cyan mb-3">Ecosystem Treasury</h4>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
                       <div className="text-xs text-gray-500">Treasury Balance</div>
@@ -549,7 +549,7 @@ export function QorWalletApp() {
                   <div className="mt-3 pt-3 border-t border-white/10">
                     <div className="text-xs text-gray-500 mb-2">Fee Distribution</div>
                     <div className="flex gap-4 text-xs">
-                      <span className="text-abyss-cyan">{treasuryStats.treasury_share_percent}% Treasury</span>
+                      <span className="text-genesis-cipher-cyan">{treasuryStats.treasury_share_percent}% Treasury</span>
                       <span className="text-red-400">{treasuryStats.burn_share_percent}% Burn</span>
                       <span className="text-green-400">{treasuryStats.validator_share_percent}% Validators</span>
                     </div>
@@ -558,9 +558,9 @@ export function QorWalletApp() {
               )}
               
               {/* Info Box */}
-              <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-abyss-cyan mb-2">How Premium Works</h4>
-                <ul className="text-xs text-gray-400 space-y-1">
+              <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-genesis-cipher-cyan mb-2">How Premium Works</h4>
+                <ul className="text-xs text-genesis-text-tertiary space-y-1">
                   <li>• <strong>Pay Monthly:</strong> Subscribe with CGT for immediate access</li>
                   <li>• <strong>Stake to Unlock:</strong> Stake CGT in the Staking tab to unlock tiers permanently while staked</li>
                   <li>• <strong>Best of Both:</strong> Your effective tier is always the highest between subscription and stake</li>
@@ -575,22 +575,22 @@ export function QorWalletApp() {
       {activeTab === 'staking' && (
         <div className="space-y-6">
           {/* Staking Stats Banner */}
-          <div className="bg-gradient-to-r from-abyss-purple/20 to-abyss-cyan/20 border border-abyss-cyan/30 rounded-lg p-4">
+          <div className="bg-gradient-to-r from-abyss-purple/20 to-abyss-cyan/20 border border-genesis-border-default/30 rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-gray-400">Network APY</div>
-                <div className="text-2xl font-bold text-abyss-cyan">
+                <div className="text-sm text-genesis-text-tertiary">Network APY</div>
+                <div className="text-2xl font-bold text-genesis-cipher-cyan">
                   {stakingStats ? `${stakingStats.apy_percent}%` : '...'}
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-sm text-gray-400">Total Staked</div>
+                <div className="text-sm text-genesis-text-tertiary">Total Staked</div>
                 <div className="text-lg font-mono text-white">
                   {stakingStats ? formatCGT(stakingStats.total_staked) : '...'} CGT
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-sm text-gray-400">Lock Period</div>
+                <div className="text-sm text-genesis-text-tertiary">Lock Period</div>
                 <div className="text-lg text-white">
                   {stakingStats ? `${stakingStats.lock_period_days} days` : '...'}
                 </div>
@@ -599,23 +599,23 @@ export function QorWalletApp() {
           </div>
           
           {/* Your Staking Position */}
-          <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-6">
-            <h3 className="text-lg font-bold text-abyss-cyan mb-4">Your Staking Position</h3>
+          <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-6">
+            <h3 className="text-lg font-bold text-genesis-cipher-cyan mb-4">Your Staking Position</h3>
             
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-abyss-dark/50 rounded-lg p-4">
-                <div className="text-sm text-gray-400 mb-1">Staked Amount</div>
+              <div className="bg-genesis-glass-light/50 rounded-lg p-4">
+                <div className="text-sm text-genesis-text-tertiary mb-1">Staked Amount</div>
                 <div className="text-2xl font-mono text-white">
                   {stakeInfo ? formatCGT(stakeInfo.amount) : '0.00'}
-                  <span className="text-sm text-gray-400 ml-2">CGT</span>
+                  <span className="text-sm text-genesis-text-tertiary ml-2">CGT</span>
                 </div>
               </div>
               
-              <div className="bg-abyss-dark/50 rounded-lg p-4">
-                <div className="text-sm text-gray-400 mb-1">Pending Rewards</div>
+              <div className="bg-genesis-glass-light/50 rounded-lg p-4">
+                <div className="text-sm text-genesis-text-tertiary mb-1">Pending Rewards</div>
                 <div className="text-2xl font-mono text-green-400">
                   +{stakeInfo ? formatCGT(stakeInfo.pending_rewards) : '0.00'}
-                  <span className="text-sm text-gray-400 ml-2">CGT</span>
+                  <span className="text-sm text-genesis-text-tertiary ml-2">CGT</span>
                 </div>
               </div>
             </div>
@@ -630,7 +630,7 @@ export function QorWalletApp() {
                       {formatCGT(stakeInfo.unstake_amount)} CGT
                     </div>
                   </div>
-                  <div className="text-right text-sm text-gray-400">
+                  <div className="text-right text-sm text-genesis-text-tertiary">
                     Unlocks in {stakingStats?.lock_period_days || 7} days
                   </div>
                 </div>
@@ -641,13 +641,13 @@ export function QorWalletApp() {
             <div className="grid grid-cols-2 gap-4">
               {/* Stake Form */}
               <div className="space-y-3">
-                <div className="text-sm font-medium text-gray-300">Stake CGT</div>
+                <div className="text-sm font-medium text-genesis-text-secondary">Stake CGT</div>
                 <input
                   type="number"
                   value={stakeAmount}
                   onChange={(e) => setStakeAmount(e.target.value)}
                   placeholder="Amount to stake"
-                  className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white text-sm"
                 />
                 <Button
                   onClick={() => {
@@ -662,13 +662,13 @@ export function QorWalletApp() {
               
               {/* Unstake Form */}
               <div className="space-y-3">
-                <div className="text-sm font-medium text-gray-300">Unstake CGT</div>
+                <div className="text-sm font-medium text-genesis-text-secondary">Unstake CGT</div>
                 <input
                   type="number"
                   value={unstakeAmount}
                   onChange={(e) => setUnstakeAmount(e.target.value)}
                   placeholder="Amount to unstake"
-                  className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-white text-sm"
+                  className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white text-sm"
                 />
                 <Button
                   onClick={() => {
@@ -706,9 +706,9 @@ export function QorWalletApp() {
           </div>
           
           {/* Staking Info */}
-          <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-abyss-cyan mb-2">How Staking Works</h4>
-            <ul className="text-xs text-gray-400 space-y-1">
+          <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-genesis-cipher-cyan mb-2">How Staking Works</h4>
+            <ul className="text-xs text-genesis-text-tertiary space-y-1">
               <li>• Stake CGT to earn {stakingStats?.apy_percent || 10}% APY rewards</li>
               <li>• Minimum stake: {stakingStats ? formatCGT(stakingStats.min_stake) : '1'} CGT</li>
               <li>• Unstaking has a {stakingStats?.lock_period_days || 7}-day lock period</li>
@@ -723,20 +723,20 @@ export function QorWalletApp() {
         <>
       
       {/* Balance Card */}
-      <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-6 backdrop-blur-sm">
+      <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-6 backdrop-blur-sm">
         <div className="flex items-start justify-between">
           <div>
-            <div className="text-sm text-gray-400 mb-2">CGT Balance</div>
-            <div className="text-4xl font-mono text-abyss-cyan mb-2">
+            <div className="text-sm text-genesis-text-tertiary mb-2">CGT Balance</div>
+            <div className="text-4xl font-mono text-genesis-cipher-cyan mb-2">
               {isLoadingBalance ? '...' : (typeof balance === 'number' ? balance.toFixed(8) : String(balance))}
-              <span className="text-lg text-gray-400 ml-2">CGT</span>
+              <span className="text-lg text-genesis-text-tertiary ml-2">CGT</span>
             </div>
             <div className="text-xs text-gray-500 flex items-center gap-2">
               <span>Address:</span>
               {demiurgePublicKey && <AddressDisplay address={demiurgePublicKey} truncateLength={12} />}
               <button
                 onClick={() => setShowQR(!showQR)}
-                className="text-abyss-cyan hover:text-abyss-cyan/80 text-xs underline"
+                className="text-genesis-cipher-cyan hover:text-genesis-cipher-cyan/80 text-xs underline"
               >
                 {showQR ? 'Hide' : 'Show'} QR
               </button>
@@ -760,14 +760,14 @@ export function QorWalletApp() {
         
         {/* Staked Amount Preview */}
         {stakeInfo && Number(stakeInfo.amount) > 0 && (
-          <div className="mt-4 pt-4 border-t border-abyss-cyan/20">
+          <div className="mt-4 pt-4 border-t border-genesis-border-default/20">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-400">Staked:</span>
+              <span className="text-genesis-text-tertiary">Staked:</span>
               <span className="font-mono text-abyss-purple">{formatCGT(stakeInfo.amount)} CGT</span>
             </div>
             {Number(stakeInfo.pending_rewards) > 0 && (
               <div className="flex items-center justify-between text-sm mt-1">
-                <span className="text-gray-400">Pending Rewards:</span>
+                <span className="text-genesis-text-tertiary">Pending Rewards:</span>
                 <span className="font-mono text-green-400">+{formatCGT(stakeInfo.pending_rewards)} CGT</span>
               </div>
             )}
@@ -776,7 +776,7 @@ export function QorWalletApp() {
       </div>
       
       {/* Send CGT Section */}
-      <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
+      <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
         {!showSendForm ? (
           <Button onClick={() => setShowSendForm(true)} className="w-full">
             Send CGT
@@ -784,17 +784,17 @@ export function QorWalletApp() {
         ) : (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Recipient Address</label>
+              <label className="block text-sm text-genesis-text-tertiary mb-1">Recipient Address</label>
               <input
                 type="text"
                 value={sendTo}
                 onChange={(e) => setSendTo(e.target.value)}
                 placeholder="0x..."
-                className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-white text-sm focus:outline-none focus:border-abyss-cyan"
+                className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white text-sm focus:outline-none focus:border-genesis-border-default"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Amount (CGT)</label>
+              <label className="block text-sm text-genesis-text-tertiary mb-1">Amount (CGT)</label>
               <input
                 type="number"
                 value={sendAmount}
@@ -803,7 +803,7 @@ export function QorWalletApp() {
                 step="0.0001"
                 min="0"
                 max={balance}
-                className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-white text-sm focus:outline-none focus:border-abyss-cyan"
+                className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white text-sm focus:outline-none focus:border-genesis-border-default"
               />
             </div>
             {sendError && (
@@ -834,7 +834,7 @@ export function QorWalletApp() {
       {/* Transactions */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-abyss-cyan">Recent Transactions</h3>
+          <h3 className="text-lg font-bold text-genesis-cipher-cyan">Recent Transactions</h3>
           <Button
             onClick={refreshTransactions}
             disabled={isLoadingTransactions}
@@ -846,7 +846,7 @@ export function QorWalletApp() {
         </div>
         
         {transactions.length === 0 ? (
-          <div className="text-center text-gray-400 py-8">
+          <div className="text-center text-genesis-text-tertiary py-8">
             <p>No transactions yet</p>
             <p className="text-xs mt-2">Send or receive CGT to see transactions here</p>
           </div>
@@ -855,7 +855,7 @@ export function QorWalletApp() {
             {transactions.slice(0, 10).map((tx) => (
               <div
                 key={tx.hash}
-                className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4 hover:border-abyss-cyan/50 transition-colors"
+                className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4 hover:border-genesis-border-default/50 transition-colors"
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-2">
@@ -874,11 +874,11 @@ export function QorWalletApp() {
                       {tx.status}
                     </span>
                   </div>
-                  <div className="text-sm font-mono text-abyss-cyan">
+                  <div className="text-sm font-mono text-genesis-cipher-cyan">
                     {tx.type === 'send' ? '-' : '+'}{tx.amount.toFixed(4)} CGT
                   </div>
                 </div>
-                <div className="text-xs text-gray-400 space-y-1">
+                <div className="text-xs text-genesis-text-tertiary space-y-1">
                   <div className="flex items-center gap-1">
                     <span>To:</span> <AddressDisplay address={tx.to} truncateLength={8} />
                   </div>

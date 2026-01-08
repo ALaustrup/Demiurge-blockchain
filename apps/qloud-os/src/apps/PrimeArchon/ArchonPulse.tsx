@@ -37,7 +37,7 @@ export const ArchonPulse: React.FC = () => {
         </div>
         
         <div className="mt-4 text-center">
-          <div className="text-sm text-gray-400">Cognitive Load</div>
+          <div className="text-sm text-genesis-text-tertiary">Cognitive Load</div>
           <div className="text-2xl font-bold text-pink-400">{(pulse * 100).toFixed(0)}%</div>
         </div>
       </div>

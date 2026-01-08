@@ -74,18 +74,18 @@ export function AWEAtlasApp() {
   return (
     <div className="h-full flex flex-col min-h-0 p-6 space-y-4 overflow-auto">
       <div>
-        <h2 className="text-2xl font-bold text-abyss-cyan mb-2">World Atlas</h2>
-        <p className="text-sm text-gray-400">Browse and manage all worlds</p>
+        <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">World Atlas</h2>
+        <p className="text-sm text-genesis-text-tertiary">Browse and manage all worlds</p>
       </div>
       
       {loading && (
-        <div className="text-gray-400 text-center py-8">Loading worlds...</div>
+        <div className="text-genesis-text-tertiary text-center py-8">Loading worlds...</div>
       )}
       
       {/* Local Worlds */}
       <div className="space-y-4">
         <div>
-          <h3 className="text-lg font-medium text-abyss-cyan mb-2">Local Worlds</h3>
+          <h3 className="text-lg font-medium text-genesis-cipher-cyan mb-2">Local Worlds</h3>
           {localWorlds.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {localWorlds.map(worldId => {
@@ -96,12 +96,12 @@ export function AWEAtlasApp() {
                     key={worldId}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4 space-y-2"
+                    className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4 space-y-2"
                   >
-                    <div className="font-mono text-sm text-abyss-cyan truncate">{worldId}</div>
+                    <div className="font-mono text-sm text-genesis-cipher-cyan truncate">{worldId}</div>
                     {state && (
                       <>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-genesis-text-tertiary">
                           Tick: {state.tick} | Entities: {state.entities.size} | Species: {state.species.size}
                         </div>
                         <div className="flex space-x-2">
@@ -125,7 +125,7 @@ export function AWEAtlasApp() {
         
         {/* Chain Worlds */}
         <div>
-          <h3 className="text-lg font-medium text-abyss-cyan mb-2">On-Chain Worlds (DRC-369)</h3>
+          <h3 className="text-lg font-medium text-genesis-cipher-cyan mb-2">On-Chain Worlds (DRC-369)</h3>
           {chainWorlds.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {chainWorlds.map(asset => {
@@ -140,7 +140,7 @@ export function AWEAtlasApp() {
                     <div className="font-mono text-sm text-abyss-purple truncate">{asset.id.slice(0, 16)}...</div>
                     {metadata && (
                       <>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-genesis-text-tertiary">
                           Species: {metadata.speciesCount} | Ticks: {metadata.totalTicks}
                         </div>
                         <Button

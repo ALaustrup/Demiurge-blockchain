@@ -40,8 +40,8 @@ function ToolbarButton({ icon, title, active, disabled, onClick }: ToolbarButton
         ${disabled 
           ? 'text-gray-600 cursor-not-allowed' 
           : active 
-            ? 'bg-abyss-cyan/20 text-abyss-cyan' 
-            : 'text-gray-400 hover:text-white hover:bg-abyss-dark/50'
+            ? 'bg-abyss-cyan/20 text-genesis-cipher-cyan' 
+            : 'text-genesis-text-tertiary hover:text-white hover:bg-genesis-glass-light/50'
         }
       `}
     >
@@ -77,7 +77,7 @@ function Dropdown({ trigger, children, open, onOpenChange }: DropdownProps) {
             className="fixed inset-0 z-40"
             onClick={() => onOpenChange(false)}
           />
-          <div className="absolute top-full left-0 mt-1 bg-abyss-dark border border-abyss-cyan/30 rounded-lg shadow-lg py-1 z-50 min-w-[150px]">
+          <div className="absolute top-full left-0 mt-1 bg-genesis-glass-light border border-genesis-border-default/30 rounded-lg shadow-lg py-1 z-50 min-w-[150px]">
             {children}
           </div>
         </>
@@ -99,8 +99,8 @@ function DropdownItem({ children, active, onClick }: DropdownItemProps) {
       className={`
         w-full px-3 py-1.5 text-left text-sm transition-colors
         ${active 
-          ? 'bg-abyss-cyan/20 text-abyss-cyan' 
-          : 'text-gray-300 hover:bg-abyss-cyan/10'
+          ? 'bg-abyss-cyan/20 text-genesis-cipher-cyan' 
+          : 'text-genesis-text-secondary hover:bg-abyss-cyan/10'
         }
       `}
     >
@@ -196,7 +196,7 @@ export function WrytToolbar({ editor, onSave, hasUnsavedChanges }: WrytToolbarPr
   ];
   
   return (
-    <div className="flex items-center gap-1 px-4 py-2 bg-abyss-dark/30 border-b border-abyss-cyan/20 flex-wrap">
+    <div className="flex items-center gap-1 px-4 py-2 bg-genesis-glass-light/30 border-b border-genesis-border-default/20 flex-wrap">
       {/* Undo/Redo */}
       <ToolbarButton 
         icon={<UndoIcon />} 
@@ -246,7 +246,7 @@ export function WrytToolbar({ editor, onSave, hasUnsavedChanges }: WrytToolbarPr
         open={headingDropdown}
         onOpenChange={setHeadingDropdown}
         trigger={
-          <button className="flex items-center gap-1 px-2 py-1 rounded text-sm text-gray-300 hover:bg-abyss-dark/50 min-w-[100px]">
+          <button className="flex items-center gap-1 px-2 py-1 rounded text-sm text-genesis-text-secondary hover:bg-genesis-glass-light/50 min-w-[100px]">
             {getHeadingLabel()}
             <span className="text-xs">▾</span>
           </button>
@@ -289,7 +289,7 @@ export function WrytToolbar({ editor, onSave, hasUnsavedChanges }: WrytToolbarPr
         open={fontDropdown}
         onOpenChange={setFontDropdown}
         trigger={
-          <button className="flex items-center gap-1 px-2 py-1 rounded text-sm text-gray-300 hover:bg-abyss-dark/50 min-w-[100px]">
+          <button className="flex items-center gap-1 px-2 py-1 rounded text-sm text-genesis-text-secondary hover:bg-genesis-glass-light/50 min-w-[100px]">
             Font
             <span className="text-xs">▾</span>
           </button>
@@ -392,7 +392,7 @@ export function WrytToolbar({ editor, onSave, hasUnsavedChanges }: WrytToolbarPr
         open={colorDropdown}
         onOpenChange={setColorDropdown}
         trigger={
-          <button className="flex items-center gap-1 px-2 py-1 rounded text-sm text-gray-300 hover:bg-abyss-dark/50">
+          <button className="flex items-center gap-1 px-2 py-1 rounded text-sm text-genesis-text-secondary hover:bg-genesis-glass-light/50">
             🎨
             <span className="text-xs">▾</span>
           </button>

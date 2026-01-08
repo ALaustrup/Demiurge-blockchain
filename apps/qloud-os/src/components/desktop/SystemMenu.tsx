@@ -81,18 +81,18 @@ export function SystemMenu({ isOpen, onClose }: SystemMenuProps) {
 
           {/* Menu Container - Appears from top center */}
           <motion.div
-            className="fixed top-12 left-1/2 transform -translate-x-1/2 w-[90vw] max-w-4xl h-[70vh] max-h-[600px] bg-abyss-navy/95 backdrop-blur-xl border border-abyss-cyan/30 rounded-b-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
+            className="fixed top-12 left-1/2 transform -translate-x-1/2 w-[90vw] max-w-4xl h-[70vh] max-h-[600px] bg-abyss-navy/95 backdrop-blur-xl border border-genesis-border-default/30 rounded-b-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
             initial={{ y: '-100%', opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '-100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           >
             {/* Header */}
-            <div className="px-6 py-4 border-b border-abyss-cyan/20 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-abyss-cyan">Applications</h2>
+            <div className="px-6 py-4 border-b border-genesis-border-default/20 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-genesis-cipher-cyan">Applications</h2>
               <button
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-abyss-dark hover:bg-abyss-cyan/20 text-abyss-cyan flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-full bg-genesis-glass-light hover:bg-abyss-cyan/20 text-genesis-cipher-cyan flex items-center justify-center transition-colors"
               >
                 ✕
               </button>
@@ -101,15 +101,15 @@ export function SystemMenu({ isOpen, onClose }: SystemMenuProps) {
             {/* Content */}
             <div className="flex-1 flex min-h-0">
               {/* Category Tabs */}
-              <div className="w-48 border-r border-abyss-cyan/20 bg-abyss-dark/50 overflow-y-auto">
+              <div className="w-48 border-r border-genesis-border-default/20 bg-genesis-glass-light/50 overflow-y-auto">
                 {CATEGORIES.map((category) => (
                   <button
                     key={category.id}
                     onClick={() => setActiveCategory(category.id)}
                     className={`w-full px-4 py-3 text-left flex items-center gap-3 transition-colors ${
                       activeCategory === category.id
-                        ? 'bg-abyss-cyan/20 text-abyss-cyan border-l-2 border-abyss-cyan'
-                        : 'text-gray-300 hover:bg-abyss-cyan/10 hover:text-abyss-cyan'
+                        ? 'bg-abyss-cyan/20 text-genesis-cipher-cyan border-l-2 border-genesis-border-default'
+                        : 'text-genesis-text-secondary hover:bg-abyss-cyan/10 hover:text-genesis-cipher-cyan'
                     }`}
                   >
                     <span className="text-xl">{category.icon}</span>
@@ -140,12 +140,12 @@ export function SystemMenu({ isOpen, onClose }: SystemMenuProps) {
                         <button
                           key={appId}
                           onClick={() => handleAppClick(appId)}
-                          className="flex flex-col items-center gap-2 p-4 rounded-lg bg-abyss-dark/40 border border-abyss-cyan/20 hover:bg-abyss-cyan/10 hover:border-abyss-cyan/50 hover:shadow-[0_0_12px_rgba(0,255,255,0.3)] transition-all group"
+                          className="flex flex-col items-center gap-2 p-4 rounded-lg bg-genesis-glass-light/40 border border-genesis-border-default/20 hover:bg-abyss-cyan/10 hover:border-genesis-border-default/50 hover:shadow-[0_0_12px_rgba(0,255,255,0.3)] transition-all group"
                         >
                           <div className="text-4xl group-hover:scale-110 transition-transform">
                             {appInfo.icon}
                           </div>
-                          <span className="text-xs text-gray-300 group-hover:text-abyss-cyan text-center font-medium">
+                          <span className="text-xs text-genesis-text-secondary group-hover:text-genesis-cipher-cyan text-center font-medium">
                             {appInfo.label}
                           </span>
                         </motion.button>

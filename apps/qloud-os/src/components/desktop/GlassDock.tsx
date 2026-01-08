@@ -207,7 +207,7 @@ export function GlassDock() {
         {canScrollLeft && (
           <button
             onClick={() => handleScroll('left')}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full mr-2 w-8 h-8 rounded-full bg-abyss-navy/80 border border-abyss-cyan/30 text-abyss-cyan flex items-center justify-center hover:bg-abyss-cyan/20 z-20"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-full mr-2 w-8 h-8 rounded-full bg-abyss-navy/80 border border-genesis-border-default/30 text-genesis-cipher-cyan flex items-center justify-center hover:bg-abyss-cyan/20 z-20"
           >
             ‹
           </button>
@@ -310,7 +310,7 @@ export function GlassDock() {
               setIsEditMode(false);
               setDraggedIndex(null);
             }}
-            className="ml-4 px-3 py-1.5 text-xs text-abyss-cyan border border-abyss-cyan/30 rounded-lg hover:bg-abyss-cyan/10"
+            className="ml-4 px-3 py-1.5 text-xs text-genesis-cipher-cyan border border-genesis-border-default/30 rounded-lg hover:bg-abyss-cyan/10"
           >
             Done
           </motion.button>
@@ -321,7 +321,7 @@ export function GlassDock() {
         {canScrollRight && (
           <button
             onClick={() => handleScroll('right')}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full ml-2 w-8 h-8 rounded-full bg-abyss-navy/80 border border-abyss-cyan/30 text-abyss-cyan flex items-center justify-center hover:bg-abyss-cyan/20 z-20"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full ml-2 w-8 h-8 rounded-full bg-abyss-navy/80 border border-genesis-border-default/30 text-genesis-cipher-cyan flex items-center justify-center hover:bg-abyss-cyan/20 z-20"
           >
             ›
           </button>

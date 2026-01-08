@@ -138,20 +138,20 @@ export function NFTSwapPanel({ onSwapComplete }: NFTSwapPanelProps) {
 
   return (
     <div className="space-y-4">
-      <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-        <h3 className="text-lg font-bold text-abyss-cyan mb-4">Swap NFT to DRC-369</h3>
-        <p className="text-sm text-gray-400 mb-4">
+      <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+        <h3 className="text-lg font-bold text-genesis-cipher-cyan mb-4">Swap NFT to DRC-369</h3>
+        <p className="text-sm text-genesis-text-tertiary mb-4">
           Swap NFTs from other chains to DRC-369 assets in your QOR Wallet.
           Ownership will be validated before swapping.
         </p>
 
         <div className="space-y-3">
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Source Chain</label>
+            <label className="block text-sm text-genesis-text-tertiary mb-1">Source Chain</label>
             <select
               value={chain}
               onChange={(e) => setChain(e.target.value as any)}
-              className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-white text-sm"
+              className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white text-sm"
             >
               <option value="ETH">Ethereum</option>
               <option value="POLYGON">Polygon</option>
@@ -165,11 +165,11 @@ export function NFTSwapPanel({ onSwapComplete }: NFTSwapPanelProps) {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">NFT Standard</label>
+            <label className="block text-sm text-genesis-text-tertiary mb-1">NFT Standard</label>
             <select
               value={standard}
               onChange={(e) => setStandard(e.target.value as any)}
-              className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-white text-sm"
+              className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white text-sm"
             >
               <option value="ERC-721">ERC-721</option>
               <option value="ERC-1155">ERC-1155</option>
@@ -181,36 +181,36 @@ export function NFTSwapPanel({ onSwapComplete }: NFTSwapPanelProps) {
 
           {(chain === 'ETH' || chain === 'POLYGON' || chain === 'BSC' || chain === 'ARBITRUM' || chain === 'OPTIMISM' || chain === 'AVALANCHE') && (
             <div>
-              <label className="block text-sm text-gray-400 mb-1">Contract Address</label>
+              <label className="block text-sm text-genesis-text-tertiary mb-1">Contract Address</label>
               <input
                 type="text"
                 value={contractAddress}
                 onChange={(e) => setContractAddress(e.target.value)}
                 placeholder="0x..."
-                className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-white text-sm font-mono"
+                className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white text-sm font-mono"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Token ID</label>
+            <label className="block text-sm text-genesis-text-tertiary mb-1">Token ID</label>
             <input
               type="text"
               value={tokenId}
               onChange={(e) => setTokenId(e.target.value)}
               placeholder="Token ID"
-              className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-white text-sm font-mono"
+              className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white text-sm font-mono"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Your Address (on source chain)</label>
+            <label className="block text-sm text-genesis-text-tertiary mb-1">Your Address (on source chain)</label>
             <input
               type="text"
               value={ownerAddress}
               onChange={(e) => setOwnerAddress(e.target.value)}
               placeholder="0x... or Solana address"
-              className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-white text-sm font-mono"
+              className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white text-sm font-mono"
             />
             <p className="text-xs text-gray-500 mt-1">
               The address that owns this NFT on {chain}. Ownership will be validated.
@@ -221,7 +221,7 @@ export function NFTSwapPanel({ onSwapComplete }: NFTSwapPanelProps) {
             <div className="p-3 bg-yellow-500/20 border border-yellow-500/30 rounded text-yellow-400 text-sm">
               <p className="font-medium mb-2">Signature Required</p>
               <p className="text-xs mb-2">Message to sign:</p>
-              <code className="block text-xs bg-abyss-dark p-2 rounded mb-2 break-all">{signedMessage}</code>
+              <code className="block text-xs bg-genesis-glass-light p-2 rounded mb-2 break-all">{signedMessage}</code>
               <p className="text-xs">Please sign this message in your wallet to prove ownership.</p>
             </div>
           )}

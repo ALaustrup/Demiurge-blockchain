@@ -202,7 +202,7 @@ export function WindowFrame({ id, title, children, x = 100, y = 100, width = 800
     <motion.div
       ref={windowRef}
       className={`absolute bg-abyss-navy/90 backdrop-blur-md border rounded-2xl shadow-2xl ${
-        isActive ? 'border-abyss-cyan' : 'border-abyss-cyan/30'
+        isActive ? 'border-genesis-border-default' : 'border-genesis-border-default/30'
       }`}
       style={{
         left: position.x,
@@ -268,10 +268,10 @@ export function WindowFrame({ id, title, children, x = 100, y = 100, width = 800
 
       {/* Title bar */}
       <div
-        className="flex items-center justify-between px-4 py-2 bg-abyss-dark/50 border-b border-abyss-cyan/20 rounded-t-2xl cursor-move"
+        className="flex items-center justify-between px-4 py-2 bg-genesis-glass-light/50 border-b border-genesis-border-default/20 rounded-t-2xl cursor-move"
         onMouseDown={handleMouseDown}
       >
-        <h3 className="text-sm font-medium text-abyss-cyan">{title}</h3>
+        <h3 className="text-sm font-medium text-genesis-cipher-cyan">{title}</h3>
         <div className="flex items-center gap-2">
           {/* Minimize button */}
           <button

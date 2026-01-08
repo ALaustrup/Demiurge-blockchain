@@ -126,10 +126,10 @@ export function NeonRadioApp({ initialGenre = 'all' }: NeonRadioAppProps) {
       width={600}
       height={500}
     >
-      <div className="w-full h-full bg-abyss-dark/90 backdrop-blur-sm flex flex-col">
+      <div className="w-full h-full bg-genesis-glass-light/90 backdrop-blur-sm flex flex-col">
         {/* Header */}
-        <div className="p-4 border-b border-abyss-cyan/30">
-          <h2 className="text-xl font-bold text-abyss-cyan mb-3">QOR Radio</h2>
+        <div className="p-4 border-b border-genesis-border-default/30">
+          <h2 className="text-xl font-bold text-genesis-cipher-cyan mb-3">QOR Radio</h2>
           
           {/* Genre Selector */}
           <div className="flex flex-wrap gap-2 mb-3">
@@ -140,7 +140,7 @@ export function NeonRadioApp({ initialGenre = 'all' }: NeonRadioAppProps) {
                 className={`px-3 py-1 rounded text-sm ${
                   selectedGenre === genre.id
                     ? 'bg-abyss-cyan text-black'
-                    : 'bg-abyss-dark text-gray-300 hover:bg-abyss-cyan/20'
+                    : 'bg-genesis-glass-light text-genesis-text-secondary hover:bg-abyss-cyan/20'
                 }`}
               >
                 {genre.label}
@@ -149,7 +149,7 @@ export function NeonRadioApp({ initialGenre = 'all' }: NeonRadioAppProps) {
           </div>
           
           {/* Queue Info */}
-          <div className="text-xs text-gray-400">
+          <div className="text-xs text-genesis-text-tertiary">
             Queue: {queueLength} tracks
           </div>
         </div>
@@ -157,19 +157,19 @@ export function NeonRadioApp({ initialGenre = 'all' }: NeonRadioAppProps) {
         {/* Now Playing */}
         <div className="flex-1 p-4 flex flex-col items-center justify-center">
           {bufferStatus === 'buffering' && (
-            <div className="text-abyss-cyan mb-4 animate-pulse">Buffering...</div>
+            <div className="text-genesis-cipher-cyan mb-4 animate-pulse">Buffering...</div>
           )}
           
           {currentTrack && (
             <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold text-abyss-cyan mb-2">
+              <h3 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">
                 {currentTrack.music?.trackName || currentTrack.name || 'Unknown Track'}
               </h3>
-              <p className="text-gray-300 mb-1">
+              <p className="text-genesis-text-secondary mb-1">
                 {currentTrack.music?.artistName || 'Unknown Artist'}
               </p>
               {currentTrack.music?.albumName && (
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-genesis-text-tertiary">
                   {currentTrack.music.albumName}
                 </p>
               )}
@@ -177,7 +177,7 @@ export function NeonRadioApp({ initialGenre = 'all' }: NeonRadioAppProps) {
           )}
           
           {!currentTrack && !isPlaying && (
-            <div className="text-center text-gray-400">
+            <div className="text-center text-genesis-text-tertiary">
               <p>Select a genre and press Play to start listening</p>
             </div>
           )}
@@ -198,7 +198,7 @@ export function NeonRadioApp({ initialGenre = 'all' }: NeonRadioAppProps) {
             {currentTrack && (
               <button
                 onClick={handleQueueTrack}
-                className="px-4 py-2 rounded bg-abyss-dark text-abyss-cyan border border-abyss-cyan/30 hover:bg-abyss-cyan/10"
+                className="px-4 py-2 rounded bg-genesis-glass-light text-genesis-cipher-cyan border border-genesis-border-default/30 hover:bg-abyss-cyan/10"
               >
                 Queue This Track
               </button>
@@ -207,7 +207,7 @@ export function NeonRadioApp({ initialGenre = 'all' }: NeonRadioAppProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-abyss-cyan/30 text-xs text-gray-400">
+        <div className="p-4 border-t border-genesis-border-default/30 text-xs text-genesis-text-tertiary">
           <div className="flex justify-between">
             <span>Status: {isPlaying ? 'Live' : 'Stopped'}</span>
             {currentBlock && (

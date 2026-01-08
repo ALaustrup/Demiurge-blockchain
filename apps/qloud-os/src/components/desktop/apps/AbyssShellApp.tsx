@@ -112,31 +112,31 @@ export function AbyssShellApp() {
   };
   
   return (
-    <div className="h-full flex flex-col min-h-0 bg-abyss-dark">
+    <div className="h-full flex flex-col min-h-0 bg-genesis-glass-light">
       {/* Terminal Header */}
-      <div className="bg-abyss-navy/80 border-b border-abyss-cyan/20 px-4 py-2 flex items-center justify-between">
+      <div className="bg-abyss-navy/80 border-b border-genesis-border-default/20 px-4 py-2 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 rounded-full bg-red-500"></div>
           <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
           <div className="w-3 h-3 rounded-full bg-green-500"></div>
         </div>
-        <div className="text-xs text-gray-400">QOR OS Shell</div>
+        <div className="text-xs text-genesis-text-tertiary">QOR OS Shell</div>
       </div>
       
       {/* Terminal Output */}
       <div className="flex-1 overflow-auto p-4 font-mono text-sm min-h-0">
-        <div className="text-abyss-cyan mb-4">
+        <div className="text-genesis-cipher-cyan mb-4">
           <div className="glitch-text">ABYSS OS SHELL v1.0</div>
-          <div className="text-gray-400 text-xs mt-1">Type 'help' for available commands</div>
+          <div className="text-genesis-text-tertiary text-xs mt-1">Type 'help' for available commands</div>
         </div>
         
         {history.map((entry, i) => (
           <div key={i} className="mb-4">
-            <div className="text-abyss-cyan mb-1">
+            <div className="text-genesis-cipher-cyan mb-1">
               <span className="text-gray-500">$ </span>
               {entry.input}
             </div>
-            <div className={`ml-4 ${entry.result.success ? 'text-gray-300' : 'text-red-400'}`}>
+            <div className={`ml-4 ${entry.result.success ? 'text-genesis-text-secondary' : 'text-red-400'}`}>
               {entry.result.error ? (
                 <div className="text-red-400">Error: {entry.result.error}</div>
               ) : (
@@ -154,9 +154,9 @@ export function AbyssShellApp() {
       </div>
       
       {/* Terminal Input */}
-      <form onSubmit={handleSubmit} className="border-t border-abyss-cyan/20 p-4 bg-abyss-navy/40">
+      <form onSubmit={handleSubmit} className="border-t border-genesis-border-default/20 p-4 bg-abyss-navy/40">
         <div className="flex items-center space-x-2">
-          <span className="text-abyss-cyan font-mono">$</span>
+          <span className="text-genesis-cipher-cyan font-mono">$</span>
           <input
             ref={inputRef}
             type="text"
@@ -172,7 +172,7 @@ export function AbyssShellApp() {
         {autocompleteSuggestions.length > 0 && (
           <div className="mt-2 text-xs text-gray-500 space-y-1">
             {autocompleteSuggestions.map((suggestion, i) => (
-              <div key={i} className="cursor-pointer hover:text-abyss-cyan" onClick={() => setInput(suggestion)}>
+              <div key={i} className="cursor-pointer hover:text-genesis-cipher-cyan" onClick={() => setInput(suggestion)}>
                 {suggestion}
               </div>
             ))}

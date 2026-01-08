@@ -88,28 +88,28 @@ export function AbyssDNSApp() {
   const getSourceColor = (source: string) => {
     switch (source) {
       case 'chain': return 'text-abyss-purple';
-      case 'cache': return 'text-abyss-cyan';
+      case 'cache': return 'text-genesis-cipher-cyan';
       case 'unbound': return 'text-green-400';
       case 'upstream': return 'text-yellow-400';
       case 'grid': return 'text-abyss-purple';
-      default: return 'text-gray-400';
+      default: return 'text-genesis-text-tertiary';
     }
   };
   
   return (
     <div className="h-full flex flex-col min-h-0 p-6 space-y-4 overflow-auto">
       <div>
-        <h2 className="text-2xl font-bold text-abyss-cyan mb-2">Abyss DNS Console</h2>
-        <p className="text-sm text-gray-400">DNS Intelligence Layer</p>
+        <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">Abyss DNS Console</h2>
+        <p className="text-sm text-genesis-text-tertiary">DNS Intelligence Layer</p>
       </div>
       
       {/* Tabs */}
-      <div className="flex space-x-2 border-b border-abyss-cyan/20">
+      <div className="flex space-x-2 border-b border-genesis-border-default/20">
         <button
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === 'lookup'
-              ? 'text-abyss-cyan border-b-2 border-abyss-cyan'
-              : 'text-gray-400 hover:text-abyss-cyan'
+              ? 'text-genesis-cipher-cyan border-b-2 border-genesis-border-default'
+              : 'text-genesis-text-tertiary hover:text-genesis-cipher-cyan'
           }`}
           onClick={() => setActiveTab('lookup')}
         >
@@ -118,8 +118,8 @@ export function AbyssDNSApp() {
         <button
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === 'cache'
-              ? 'text-abyss-cyan border-b-2 border-abyss-cyan'
-              : 'text-gray-400 hover:text-abyss-cyan'
+              ? 'text-genesis-cipher-cyan border-b-2 border-genesis-border-default'
+              : 'text-genesis-text-tertiary hover:text-genesis-cipher-cyan'
           }`}
           onClick={() => setActiveTab('cache')}
         >
@@ -128,8 +128,8 @@ export function AbyssDNSApp() {
         <button
           className={`px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === 'chain'
-              ? 'text-abyss-cyan border-b-2 border-abyss-cyan'
-              : 'text-gray-400 hover:text-abyss-cyan'
+              ? 'text-genesis-cipher-cyan border-b-2 border-genesis-border-default'
+              : 'text-genesis-text-tertiary hover:text-genesis-cipher-cyan'
           }`}
           onClick={() => setActiveTab('chain')}
         >
@@ -147,13 +147,13 @@ export function AbyssDNSApp() {
               value={domain}
               onChange={(e) => setDomain(e.target.value)}
               placeholder="example.com"
-              className="flex-1 px-4 py-2 bg-abyss-dark/50 border border-abyss-cyan/20 rounded text-abyss-cyan placeholder-gray-500 focus:border-abyss-cyan focus:outline-none"
+              className="flex-1 px-4 py-2 bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded text-genesis-cipher-cyan placeholder-gray-500 focus:border-genesis-border-default focus:outline-none"
               onKeyPress={(e) => e.key === 'Enter' && handleLookup()}
             />
             <select
               value={recordType}
               onChange={(e) => setRecordType(e.target.value as RecordType)}
-              className="px-4 py-2 bg-abyss-dark/50 border border-abyss-cyan/20 rounded text-abyss-cyan focus:border-abyss-cyan focus:outline-none"
+              className="px-4 py-2 bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded text-genesis-cipher-cyan focus:border-genesis-border-default focus:outline-none"
             >
               <option value="A">A</option>
               <option value="AAAA">AAAA</option>
@@ -177,18 +177,18 @@ export function AbyssDNSApp() {
                 type="checkbox"
                 checked={trace}
                 onChange={(e) => setTrace(e.target.checked)}
-                className="w-4 h-4 text-abyss-cyan bg-abyss-dark border-abyss-cyan/20 rounded focus:ring-abyss-cyan"
+                className="w-4 h-4 text-genesis-cipher-cyan bg-genesis-glass-light border-genesis-border-default/20 rounded focus:ring-abyss-cyan"
               />
-              <span className="text-gray-400">Trace Mode</span>
+              <span className="text-genesis-text-tertiary">Trace Mode</span>
             </label>
             <label className="flex items-center space-x-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={useGrid}
                 onChange={(e) => setUseGrid(e.target.checked)}
-                className="w-4 h-4 text-abyss-cyan bg-abyss-dark border-abyss-cyan/20 rounded focus:ring-abyss-cyan"
+                className="w-4 h-4 text-genesis-cipher-cyan bg-genesis-glass-light border-genesis-border-default/20 rounded focus:ring-abyss-cyan"
               />
-              <span className="text-gray-400">Resolve Using Grid</span>
+              <span className="text-genesis-text-tertiary">Resolve Using Grid</span>
             </label>
           </div>
           
@@ -197,32 +197,32 @@ export function AbyssDNSApp() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-6 space-y-4"
+              className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-6 space-y-4"
             >
               <div>
-                <div className="text-sm text-gray-400 mb-1">Domain</div>
-                <div className="font-mono text-abyss-cyan">{result.domain}</div>
+                <div className="text-sm text-genesis-text-tertiary mb-1">Domain</div>
+                <div className="font-mono text-genesis-cipher-cyan">{result.domain}</div>
               </div>
               
               <div>
-                <div className="text-sm text-gray-400 mb-1">Source</div>
+                <div className="text-sm text-genesis-text-tertiary mb-1">Source</div>
                 <div className={`font-medium ${getSourceColor(result.source)}`}>
                   {result.source.toUpperCase()}
                 </div>
               </div>
               
               <div>
-                <div className="text-sm text-gray-400 mb-2">Records</div>
+                <div className="text-sm text-genesis-text-tertiary mb-2">Records</div>
                 <div className="space-y-2">
                   {result.records.map((record, i) => (
-                    <div key={i} className="p-3 bg-abyss-navy/30 rounded border border-abyss-cyan/10">
+                    <div key={i} className="p-3 bg-abyss-navy/30 rounded border border-genesis-border-default/10">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-mono text-sm text-abyss-cyan">{record.type}</span>
+                        <span className="font-mono text-sm text-genesis-cipher-cyan">{record.type}</span>
                         <span className={`text-xs ${getSourceColor(record.source)}`}>
                           {record.source}
                         </span>
                       </div>
-                      <div className="font-mono text-sm text-gray-300">
+                      <div className="font-mono text-sm text-genesis-text-secondary">
                         {Array.isArray(record.value) ? record.value.join(', ') : record.value}
                       </div>
                       <div className="text-xs text-gray-500 mt-1">
@@ -236,7 +236,7 @@ export function AbyssDNSApp() {
               {/* Trace */}
               {result.trace && result.trace.length > 0 && (
                 <div>
-                  <div className="text-sm text-gray-400 mb-2">Resolver Trace</div>
+                  <div className="text-sm text-genesis-text-tertiary mb-2">Resolver Trace</div>
                   <div className="space-y-1">
                     {result.trace.map((step, i) => (
                       <div key={i} className="text-xs text-gray-500">
@@ -258,7 +258,7 @@ export function AbyssDNSApp() {
               className="bg-abyss-purple/20 border border-abyss-purple/30 rounded-lg p-4"
             >
               <div className="text-sm font-medium text-abyss-purple mb-2">On-Chain DNS Record</div>
-              <div className="text-xs text-gray-400 space-y-1">
+              <div className="text-xs text-genesis-text-tertiary space-y-1">
                 <div>Asset ID: {chainRecord.assetId.slice(0, 16)}...</div>
                 <div>TX Hash: {chainRecord.txHash.slice(0, 16)}...</div>
                 <div>Block: {chainRecord.blockHeight}</div>
@@ -272,7 +272,7 @@ export function AbyssDNSApp() {
       {activeTab === 'cache' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-400">Cached DNS Records</div>
+            <div className="text-sm text-genesis-text-tertiary">Cached DNS Records</div>
             <Button onClick={handleClearCache} className="text-xs">
               Clear Cache
             </Button>
@@ -281,9 +281,9 @@ export function AbyssDNSApp() {
           {cacheEntries.length > 0 ? (
             <div className="space-y-2">
               {cacheEntries.map((entry, i) => (
-                <div key={i} className="p-3 bg-abyss-dark/50 border border-abyss-cyan/20 rounded">
-                  <div className="font-mono text-sm text-abyss-cyan">{entry.domain}</div>
-                  <div className="text-xs text-gray-400 mt-1">
+                <div key={i} className="p-3 bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded">
+                  <div className="font-mono text-sm text-genesis-cipher-cyan">{entry.domain}</div>
+                  <div className="text-xs text-genesis-text-tertiary mt-1">
                     {entry.type} · {formatExpiration(entry)} remaining
                   </div>
                 </div>
@@ -298,39 +298,39 @@ export function AbyssDNSApp() {
       {/* Chain Records Tab */}
       {activeTab === 'chain' && (
         <div className="space-y-4">
-          <div className="text-sm text-gray-400">On-Chain DNS Records</div>
+          <div className="text-sm text-genesis-text-tertiary">On-Chain DNS Records</div>
           {chainRecord ? (
-            <div className="bg-abyss-dark/50 border border-abyss-purple/20 rounded-lg p-6">
+            <div className="bg-genesis-glass-light/50 border border-abyss-purple/20 rounded-lg p-6">
               <div className="font-mono text-lg text-abyss-purple mb-4">{chainRecord.domain}</div>
               <div className="space-y-3">
                 {chainRecord.records.a && (
                   <div>
-                    <div className="text-xs text-gray-400 mb-1">A Records</div>
-                    <div className="font-mono text-sm text-abyss-cyan">
+                    <div className="text-xs text-genesis-text-tertiary mb-1">A Records</div>
+                    <div className="font-mono text-sm text-genesis-cipher-cyan">
                       {chainRecord.records.a.join(', ')}
                     </div>
                   </div>
                 )}
                 {chainRecord.records.aaaa && (
                   <div>
-                    <div className="text-xs text-gray-400 mb-1">AAAA Records</div>
-                    <div className="font-mono text-sm text-abyss-cyan">
+                    <div className="text-xs text-genesis-text-tertiary mb-1">AAAA Records</div>
+                    <div className="font-mono text-sm text-genesis-cipher-cyan">
                       {chainRecord.records.aaaa.join(', ')}
                     </div>
                   </div>
                 )}
                 {chainRecord.records.cname && (
                   <div>
-                    <div className="text-xs text-gray-400 mb-1">CNAME</div>
-                    <div className="font-mono text-sm text-abyss-cyan">
+                    <div className="text-xs text-genesis-text-tertiary mb-1">CNAME</div>
+                    <div className="font-mono text-sm text-genesis-cipher-cyan">
                       {chainRecord.records.cname.join(', ')}
                     </div>
                   </div>
                 )}
                 {chainRecord.records.txt && (
                   <div>
-                    <div className="text-xs text-gray-400 mb-1">TXT</div>
-                    <div className="font-mono text-sm text-abyss-cyan">
+                    <div className="text-xs text-genesis-text-tertiary mb-1">TXT</div>
+                    <div className="font-mono text-sm text-genesis-cipher-cyan">
                       {chainRecord.records.txt.join(', ')}
                     </div>
                   </div>

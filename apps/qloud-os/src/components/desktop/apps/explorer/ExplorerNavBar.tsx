@@ -78,7 +78,7 @@ function NavButton({ onClick, disabled, title, children, compact }: NavButtonPro
         ${compact ? 'p-1' : 'p-1.5'} rounded transition-colors
         ${disabled 
           ? 'text-gray-600 cursor-not-allowed' 
-          : 'text-gray-400 hover:text-white hover:bg-abyss-cyan/20'
+          : 'text-genesis-text-tertiary hover:text-white hover:bg-abyss-cyan/20'
         }
       `}
     >
@@ -127,8 +127,8 @@ function TabItem({ tab, isActive, isVertical, compact, onSelect, onClose }: TabI
         className={`
           group flex items-center gap-2 px-2 py-1.5 cursor-pointer transition-all rounded-lg mx-1
           ${isActive 
-            ? 'bg-abyss-cyan/20 border-l-2 border-abyss-cyan' 
-            : 'hover:bg-abyss-dark/50'
+            ? 'bg-abyss-cyan/20 border-l-2 border-genesis-border-default' 
+            : 'hover:bg-genesis-glass-light/50'
           }
           ${compact ? 'justify-center' : ''}
         `}
@@ -139,12 +139,12 @@ function TabItem({ tab, isActive, isVertical, compact, onSelect, onClose }: TabI
         
         {!compact && (
           <>
-            <span className={`flex-1 text-xs truncate ${isActive ? 'text-white' : 'text-gray-400'}`}>
+            <span className={`flex-1 text-xs truncate ${isActive ? 'text-white' : 'text-genesis-text-tertiary'}`}>
               {displayTitle}
             </span>
             
             {tab.isLoading && (
-              <span className="flex-shrink-0 w-3 h-3 border-2 border-abyss-cyan/30 border-t-abyss-cyan rounded-full animate-spin" />
+              <span className="flex-shrink-0 w-3 h-3 border-2 border-genesis-border-default/30 border-t-abyss-cyan rounded-full animate-spin" />
             )}
             
             <button
@@ -165,11 +165,11 @@ function TabItem({ tab, isActive, isVertical, compact, onSelect, onClose }: TabI
       onClick={onSelect}
       className={`
         group flex items-center gap-2 px-3 py-1.5 cursor-pointer transition-all
-        border-r border-abyss-cyan/10
+        border-r border-genesis-border-default/10
         ${compact ? 'min-w-[40px] justify-center' : 'min-w-[100px] max-w-[180px]'}
         ${isActive 
-          ? 'bg-abyss-dark/80 border-b-2 border-b-abyss-cyan' 
-          : 'bg-abyss-navy/30 hover:bg-abyss-dark/50'
+          ? 'bg-genesis-glass-light/80 border-b-2 border-b-abyss-cyan' 
+          : 'bg-abyss-navy/30 hover:bg-genesis-glass-light/50'
         }
       `}
     >
@@ -179,12 +179,12 @@ function TabItem({ tab, isActive, isVertical, compact, onSelect, onClose }: TabI
       
       {!compact && (
         <>
-          <span className={`flex-1 text-xs truncate ${isActive ? 'text-white' : 'text-gray-400'}`}>
+          <span className={`flex-1 text-xs truncate ${isActive ? 'text-white' : 'text-genesis-text-tertiary'}`}>
             {displayTitle}
           </span>
           
           {tab.isLoading && (
-            <span className="flex-shrink-0 w-3 h-3 border-2 border-abyss-cyan/30 border-t-abyss-cyan rounded-full animate-spin" />
+            <span className="flex-shrink-0 w-3 h-3 border-2 border-genesis-border-default/30 border-t-abyss-cyan rounded-full animate-spin" />
           )}
           
           <button
@@ -337,23 +337,23 @@ export function ExplorerNavBar({ onRefresh, onToggleBookmarks, showBookmarks }: 
 
   // Position menu
   const PositionMenu = () => (
-    <div className="absolute z-50 bg-abyss-navy border border-abyss-cyan/30 rounded-lg shadow-xl p-2 min-w-[140px]">
-      <div className="text-xs text-gray-500 px-2 pb-1 mb-1 border-b border-abyss-cyan/20">Position</div>
+    <div className="absolute z-50 bg-abyss-navy border border-genesis-border-default/30 rounded-lg shadow-xl p-2 min-w-[140px]">
+      <div className="text-xs text-gray-500 px-2 pb-1 mb-1 border-b border-genesis-border-default/20">Position</div>
       {(['top', 'bottom', 'left', 'right'] as NavPosition[]).map(pos => (
         <button
           key={pos}
           onClick={() => { setNavPosition(pos); setShowPositionMenu(false); }}
-          className={`w-full text-left px-2 py-1 text-sm rounded ${navPosition === pos ? 'bg-abyss-cyan/20 text-abyss-cyan' : 'text-gray-300 hover:bg-abyss-dark/50'}`}
+          className={`w-full text-left px-2 py-1 text-sm rounded ${navPosition === pos ? 'bg-abyss-cyan/20 text-genesis-cipher-cyan' : 'text-genesis-text-secondary hover:bg-genesis-glass-light/50'}`}
         >
           {pos.charAt(0).toUpperCase() + pos.slice(1)}
         </button>
       ))}
-      <div className="border-t border-abyss-cyan/20 mt-1 pt-1">
+      <div className="border-t border-genesis-border-default/20 mt-1 pt-1">
         <button
           onClick={() => { setCompactMode(!compactMode); setShowPositionMenu(false); }}
-          className="w-full text-left px-2 py-1 text-sm text-gray-300 hover:bg-abyss-dark/50 rounded flex items-center gap-2"
+          className="w-full text-left px-2 py-1 text-sm text-genesis-text-secondary hover:bg-genesis-glass-light/50 rounded flex items-center gap-2"
         >
-          <span className={`w-3 h-3 rounded border ${compactMode ? 'bg-abyss-cyan border-abyss-cyan' : 'border-gray-500'}`} />
+          <span className={`w-3 h-3 rounded border ${compactMode ? 'bg-abyss-cyan border-genesis-border-default' : 'border-gray-500'}`} />
           Compact Mode
         </button>
       </div>
@@ -364,12 +364,12 @@ export function ExplorerNavBar({ onRefresh, onToggleBookmarks, showBookmarks }: 
   if (isVertical) {
     return (
       <div className={`
-        flex flex-col bg-abyss-navy/80 border-abyss-cyan/20
+        flex flex-col bg-abyss-navy/80 border-genesis-border-default/20
         ${navPosition === 'left' ? 'border-r' : 'border-l'}
         ${compactMode ? 'w-12' : 'w-56'}
       `}>
         {/* Navigation controls */}
-        <div className={`p-2 border-b border-abyss-cyan/20 ${compactMode ? 'flex flex-col items-center gap-1' : 'flex flex-wrap gap-1'}`}>
+        <div className={`p-2 border-b border-genesis-border-default/20 ${compactMode ? 'flex flex-col items-center gap-1' : 'flex flex-wrap gap-1'}`}>
           <NavButton onClick={() => activeTab && goBack(activeTab.id)} disabled={!activeTab?.canGoBack} title="Back" compact={compactMode}>
             <BackIcon />
           </NavButton>
@@ -386,9 +386,9 @@ export function ExplorerNavBar({ onRefresh, onToggleBookmarks, showBookmarks }: 
         
         {/* Address bar (only in non-compact) */}
         {!compactMode && (
-          <div className="p-2 border-b border-abyss-cyan/20">
+          <div className="p-2 border-b border-genesis-border-default/20">
             <div className="relative">
-              <div className="flex items-center bg-abyss-dark border border-abyss-cyan/30 rounded-lg overflow-hidden focus-within:border-abyss-cyan">
+              <div className="flex items-center bg-genesis-glass-light border border-genesis-border-default/30 rounded-lg overflow-hidden focus-within:border-genesis-border-default">
                 <div className={`px-2 ${isSecure ? 'text-green-400' : 'text-gray-500'}`}>
                   {isSecure ? <LockIcon /> : '⚠️'}
                 </div>
@@ -406,12 +406,12 @@ export function ExplorerNavBar({ onRefresh, onToggleBookmarks, showBookmarks }: 
               </div>
               
               {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-abyss-navy border border-abyss-cyan/30 rounded-lg shadow-xl z-50 overflow-hidden">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-abyss-navy border border-genesis-border-default/30 rounded-lg shadow-xl z-50 overflow-hidden">
                   {suggestions.map((s, i) => (
                     <div
                       key={s.url}
                       onClick={() => handleNavigate(s.url)}
-                      className={`px-2 py-1.5 text-xs cursor-pointer truncate ${i === selectedSuggestion ? 'bg-abyss-cyan/20 text-white' : 'text-gray-400 hover:bg-abyss-dark/50'}`}
+                      className={`px-2 py-1.5 text-xs cursor-pointer truncate ${i === selectedSuggestion ? 'bg-abyss-cyan/20 text-white' : 'text-genesis-text-tertiary hover:bg-genesis-glass-light/50'}`}
                     >
                       {s.title}
                     </div>
@@ -439,7 +439,7 @@ export function ExplorerNavBar({ onRefresh, onToggleBookmarks, showBookmarks }: 
           {/* New tab button */}
           <button
             onClick={() => createTab()}
-            className={`w-full flex items-center gap-2 px-2 py-1.5 text-gray-500 hover:text-abyss-cyan hover:bg-abyss-dark/50 transition-colors ${compactMode ? 'justify-center' : ''}`}
+            className={`w-full flex items-center gap-2 px-2 py-1.5 text-gray-500 hover:text-genesis-cipher-cyan hover:bg-genesis-glass-light/50 transition-colors ${compactMode ? 'justify-center' : ''}`}
           >
             <span>+</span>
             {!compactMode && <span className="text-xs">New Tab</span>}
@@ -447,7 +447,7 @@ export function ExplorerNavBar({ onRefresh, onToggleBookmarks, showBookmarks }: 
         </div>
         
         {/* Settings */}
-        <div className="p-2 border-t border-abyss-cyan/20 relative">
+        <div className="p-2 border-t border-genesis-border-default/20 relative">
           <div className={`flex ${compactMode ? 'justify-center' : 'gap-1'}`}>
             {!compactMode && (
               <NavButton onClick={() => onToggleBookmarks?.()} title="Bookmarks" compact={compactMode}>
@@ -471,12 +471,12 @@ export function ExplorerNavBar({ onRefresh, onToggleBookmarks, showBookmarks }: 
   // Horizontal layout (top/bottom)
   return (
     <div className={`
-      flex flex-col bg-abyss-navy/50 border-abyss-cyan/20
+      flex flex-col bg-abyss-navy/50 border-genesis-border-default/20
       ${navPosition === 'top' ? 'border-b' : 'border-t'}
       ${isReversed ? 'flex-col-reverse' : ''}
     `}>
       {/* Tab bar */}
-      <div className="flex items-center bg-abyss-dark/30">
+      <div className="flex items-center bg-genesis-glass-light/30">
         <div className="flex-1 flex items-center overflow-x-auto scrollbar-thin scrollbar-thumb-abyss-cyan/30">
           {tabs.map(tab => (
             <TabItem
@@ -493,7 +493,7 @@ export function ExplorerNavBar({ onRefresh, onToggleBookmarks, showBookmarks }: 
         
         <button
           onClick={() => createTab()}
-          className="flex-shrink-0 px-3 py-1.5 text-gray-400 hover:text-abyss-cyan hover:bg-abyss-dark/50 transition-colors"
+          className="flex-shrink-0 px-3 py-1.5 text-genesis-text-tertiary hover:text-genesis-cipher-cyan hover:bg-genesis-glass-light/50 transition-colors"
           title="New Tab"
         >
           +
@@ -520,7 +520,7 @@ export function ExplorerNavBar({ onRefresh, onToggleBookmarks, showBookmarks }: 
         
         {/* Address bar */}
         <div className="flex-1 relative">
-          <div className="flex items-center bg-abyss-navy border border-abyss-cyan/30 rounded-lg overflow-hidden focus-within:border-abyss-cyan focus-within:ring-2 focus-within:ring-abyss-cyan/30">
+          <div className="flex items-center bg-abyss-navy border border-genesis-border-default/30 rounded-lg overflow-hidden focus-within:border-genesis-border-default focus-within:ring-2 focus-within:ring-abyss-cyan/30">
             <div className={`px-2 ${isSecure ? 'text-green-400' : 'text-gray-500'}`}>
               {isSecure ? <LockIcon /> : '⚠️'}
             </div>
@@ -540,12 +540,12 @@ export function ExplorerNavBar({ onRefresh, onToggleBookmarks, showBookmarks }: 
           </div>
           
           {showSuggestions && suggestions.length > 0 && (
-            <div className={`absolute ${navPosition === 'bottom' ? 'bottom-full mb-1' : 'top-full mt-1'} left-0 right-0 bg-abyss-navy border border-abyss-cyan/30 rounded-lg shadow-xl z-50 overflow-hidden`}>
+            <div className={`absolute ${navPosition === 'bottom' ? 'bottom-full mb-1' : 'top-full mt-1'} left-0 right-0 bg-abyss-navy border border-genesis-border-default/30 rounded-lg shadow-xl z-50 overflow-hidden`}>
               {suggestions.map((s, i) => (
                 <div
                   key={s.url}
                   onClick={() => handleNavigate(s.url)}
-                  className={`px-3 py-2 flex items-center gap-2 cursor-pointer ${i === selectedSuggestion ? 'bg-abyss-cyan/20' : 'hover:bg-abyss-dark/50'}`}
+                  className={`px-3 py-2 flex items-center gap-2 cursor-pointer ${i === selectedSuggestion ? 'bg-abyss-cyan/20' : 'hover:bg-genesis-glass-light/50'}`}
                 >
                   <span className="text-xs">{s.type === 'bookmark' ? '⭐' : '🕐'}</span>
                   <div className="flex-1 min-w-0">

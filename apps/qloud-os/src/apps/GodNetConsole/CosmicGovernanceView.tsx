@@ -26,19 +26,19 @@ export const CosmicGovernanceView: React.FC = () => {
       
       <div className="metrics grid grid-cols-2 gap-4">
         <div>
-          <div className="text-sm text-gray-400">Active Proposals</div>
+          <div className="text-sm text-genesis-text-tertiary">Active Proposals</div>
           <div className="text-2xl font-bold text-indigo-400">{governance.activeProposals}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Quorum Met</div>
+          <div className="text-sm text-genesis-text-tertiary">Quorum Met</div>
           <div className="text-2xl font-bold text-green-400">{governance.quorumMet}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Participation</div>
+          <div className="text-sm text-genesis-text-tertiary">Participation</div>
           <div className="text-lg font-semibold text-blue-400">{(governance.participation * 100).toFixed(0)}%</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Approval Rate</div>
+          <div className="text-sm text-genesis-text-tertiary">Approval Rate</div>
           <div className="text-lg font-semibold text-cyan-400">{(governance.approvalRate * 100).toFixed(0)}%</div>
         </div>
       </div>

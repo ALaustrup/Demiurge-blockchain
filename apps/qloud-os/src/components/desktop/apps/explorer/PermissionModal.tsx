@@ -100,12 +100,12 @@ export function PermissionModal({ request }: PermissionModalProps) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-abyss-navy border border-abyss-cyan/30 rounded-xl shadow-2xl max-w-md w-full mx-4 overflow-hidden animate-in fade-in zoom-in duration-200">
+      <div className="bg-abyss-navy border border-genesis-border-default/30 rounded-xl shadow-2xl max-w-md w-full mx-4 overflow-hidden animate-in fade-in zoom-in duration-200">
         {/* Header */}
-        <div className="p-6 border-b border-abyss-cyan/20">
+        <div className="p-6 border-b border-genesis-border-default/20">
           <div className="flex items-center gap-4">
             {/* Site favicon */}
-            <div className="w-12 h-12 rounded-xl bg-abyss-dark flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-genesis-glass-light flex items-center justify-center">
               {request.favicon ? (
                 <img src={request.favicon} alt="" className="w-8 h-8" />
               ) : (
@@ -115,14 +115,14 @@ export function PermissionModal({ request }: PermissionModalProps) {
             
             <div className="flex-1">
               <h2 className="text-lg font-bold text-white">Connection Request</h2>
-              <p className="text-sm text-abyss-cyan truncate">{siteName}</p>
+              <p className="text-sm text-genesis-cipher-cyan truncate">{siteName}</p>
             </div>
           </div>
         </div>
 
         {/* Content */}
         <div className="p-6">
-          <p className="text-sm text-gray-400 mb-4">
+          <p className="text-sm text-genesis-text-tertiary mb-4">
             This site is requesting the following permissions:
           </p>
 
@@ -142,8 +142,8 @@ export function PermissionModal({ request }: PermissionModalProps) {
                   className={`
                     flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors
                     ${selectedPermissions.has(perm) 
-                      ? 'bg-abyss-cyan/10 border border-abyss-cyan/30' 
-                      : 'bg-abyss-dark/50 border border-transparent hover:border-abyss-cyan/20'
+                      ? 'bg-abyss-cyan/10 border border-genesis-border-default/30' 
+                      : 'bg-genesis-glass-light/50 border border-transparent hover:border-genesis-border-default/20'
                     }
                   `}
                 >
@@ -151,7 +151,7 @@ export function PermissionModal({ request }: PermissionModalProps) {
                     type="checkbox"
                     checked={selectedPermissions.has(perm)}
                     onChange={() => togglePermission(perm)}
-                    className="w-4 h-4 rounded border-abyss-cyan/30 bg-abyss-dark text-abyss-cyan focus:ring-abyss-cyan/50"
+                    className="w-4 h-4 rounded border-genesis-border-default/30 bg-genesis-glass-light text-genesis-cipher-cyan focus:ring-abyss-cyan/50"
                   />
                   
                   <span className="text-xl">{info.icon}</span>
@@ -181,7 +181,7 @@ export function PermissionModal({ request }: PermissionModalProps) {
               <span className="text-xl">⚠️</span>
               <div>
                 <p className="text-sm font-medium text-red-400">High Risk Permission</p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-genesis-text-tertiary">
                   This site is requesting transaction permissions. Only approve if you trust this site.
                 </p>
               </div>
@@ -194,9 +194,9 @@ export function PermissionModal({ request }: PermissionModalProps) {
               type="checkbox"
               checked={rememberChoice}
               onChange={(e) => setRememberChoice(e.target.checked)}
-              className="w-4 h-4 rounded border-abyss-cyan/30 bg-abyss-dark text-abyss-cyan focus:ring-abyss-cyan/50"
+              className="w-4 h-4 rounded border-genesis-border-default/30 bg-genesis-glass-light text-genesis-cipher-cyan focus:ring-abyss-cyan/50"
             />
-            <span className="text-sm text-gray-400">Remember this choice for {siteName}</span>
+            <span className="text-sm text-genesis-text-tertiary">Remember this choice for {siteName}</span>
           </label>
 
           {/* Actions */}
@@ -220,9 +220,9 @@ export function PermissionModal({ request }: PermissionModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 bg-abyss-dark/50 border-t border-abyss-cyan/20">
+        <div className="px-6 py-3 bg-genesis-glass-light/50 border-t border-genesis-border-default/20">
           <p className="text-xs text-gray-500 text-center">
-            Connected with <span className="text-abyss-cyan">QorID</span> • Your keys, your identity
+            Connected with <span className="text-genesis-cipher-cyan">QorID</span> • Your keys, your identity
           </p>
         </div>
       </div>

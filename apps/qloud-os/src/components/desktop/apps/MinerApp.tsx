@@ -349,26 +349,26 @@ export function MinerApp() {
     <div className="h-full flex flex-col min-h-0 p-6 space-y-4 overflow-auto">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-abyss-cyan mb-2">Mandelbrot Miner</h2>
-        <p className="text-sm text-gray-400">Mine CGT by exploring the infinite depths of the Mandelbrot set</p>
+        <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">Mandelbrot Miner</h2>
+        <p className="text-sm text-genesis-text-tertiary">Mine CGT by exploring the infinite depths of the Mandelbrot set</p>
       </div>
       
       {/* Mining Canvas & Controls */}
       <div className="grid grid-cols-2 gap-4">
         {/* Canvas */}
-        <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
+        <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
           <canvas
             ref={canvasRef}
             width={280}
             height={200}
-            className="w-full rounded border border-abyss-cyan/30"
+            className="w-full rounded border border-genesis-border-default/30"
           />
           
           <div className="mt-3 flex items-center justify-between">
-            <div className="text-xs text-gray-400">
+            <div className="text-xs text-genesis-text-tertiary">
               Zoom: {zoom.toFixed(2)}x
             </div>
-            <div className="text-xs text-gray-400">
+            <div className="text-xs text-genesis-text-tertiary">
               Iterations: {iterations.toLocaleString()}
             </div>
           </div>
@@ -397,16 +397,16 @@ export function MinerApp() {
         
         {/* Current Session Stats */}
         <div className="space-y-4">
-          <div className="bg-abyss-navy/50 border border-abyss-cyan/20 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-abyss-cyan mb-3">Current Session</h3>
+          <div className="bg-abyss-navy/50 border border-genesis-border-default/20 rounded-lg p-4">
+            <h3 className="text-sm font-medium text-genesis-cipher-cyan mb-3">Current Session</h3>
             
             {currentSession ? (
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Status:</span>
+                  <span className="text-genesis-text-tertiary">Status:</span>
                   <span className={`font-medium ${
                     currentSession.status === 'active' ? 'text-green-400' :
-                    currentSession.status === 'rewarded' ? 'text-abyss-cyan' :
+                    currentSession.status === 'rewarded' ? 'text-genesis-cipher-cyan' :
                     'text-yellow-400'
                   }`}>
                     {currentSession.status === 'active' ? '⚡ Mining' :
@@ -415,16 +415,16 @@ export function MinerApp() {
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Duration:</span>
+                  <span className="text-genesis-text-tertiary">Duration:</span>
                   <span className="font-mono text-white">{formatDuration(currentSession.activeMs)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Depth Metric:</span>
+                  <span className="text-genesis-text-tertiary">Depth Metric:</span>
                   <span className="font-mono text-white">{currentSession.depthMetric.toFixed(4)}</span>
                 </div>
                 {currentSession.reward !== undefined && (
-                  <div className="flex justify-between text-sm pt-2 border-t border-abyss-cyan/20">
-                    <span className="text-gray-400">Reward:</span>
+                  <div className="flex justify-between text-sm pt-2 border-t border-genesis-border-default/20">
+                    <span className="text-genesis-text-tertiary">Reward:</span>
                     <span className="font-mono text-green-400">+{formatCGT(currentSession.reward)} CGT</span>
                   </div>
                 )}
@@ -437,24 +437,24 @@ export function MinerApp() {
           </div>
           
           {/* Lifetime Stats */}
-          <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-abyss-cyan mb-3">Lifetime Stats</h3>
+          <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+            <h3 className="text-sm font-medium text-genesis-cipher-cyan mb-3">Lifetime Stats</h3>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div>
-                <span className="text-gray-400">Sessions:</span>
+                <span className="text-genesis-text-tertiary">Sessions:</span>
                 <span className="ml-2 text-white">{miningStats.totalSessions}</span>
               </div>
               <div>
-                <span className="text-gray-400">Total Rewards:</span>
+                <span className="text-genesis-text-tertiary">Total Rewards:</span>
                 <span className="ml-2 text-green-400">{formatCGT(miningStats.totalRewards)}</span>
               </div>
               <div>
-                <span className="text-gray-400">Avg Reward:</span>
+                <span className="text-genesis-text-tertiary">Avg Reward:</span>
                 <span className="ml-2 text-white">{formatCGT(miningStats.averageReward)}</span>
               </div>
               <div>
-                <span className="text-gray-400">Best Session:</span>
-                <span className="ml-2 text-abyss-cyan">{formatCGT(miningStats.bestSession)}</span>
+                <span className="text-genesis-text-tertiary">Best Session:</span>
+                <span className="ml-2 text-genesis-cipher-cyan">{formatCGT(miningStats.bestSession)}</span>
               </div>
             </div>
           </div>
@@ -470,12 +470,12 @@ export function MinerApp() {
       
       {/* Mining History */}
       <div className="flex-1 min-h-0">
-        <h3 className="text-lg font-bold text-abyss-cyan mb-3">Mining History</h3>
+        <h3 className="text-lg font-bold text-genesis-cipher-cyan mb-3">Mining History</h3>
         
         {claimHistory.length === 0 ? (
-          <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-8 text-center">
+          <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-8 text-center">
             <div className="text-4xl mb-2">🔷</div>
-            <div className="text-gray-400 text-sm">No mining sessions yet</div>
+            <div className="text-genesis-text-tertiary text-sm">No mining sessions yet</div>
             <div className="text-gray-500 text-xs mt-1">Start mining to earn CGT rewards</div>
           </div>
         ) : (
@@ -483,11 +483,11 @@ export function MinerApp() {
             {claimHistory.map((claim) => (
               <div
                 key={claim.id}
-                className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-3 hover:border-abyss-cyan/50 transition-colors"
+                className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-3 hover:border-genesis-border-default/50 transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-genesis-text-tertiary">
                       {new Date(claim.timestamp).toLocaleDateString()}{' '}
                       {new Date(claim.timestamp).toLocaleTimeString()}
                     </div>
@@ -514,9 +514,9 @@ export function MinerApp() {
       </div>
       
       {/* Info Box */}
-      <div className="bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg p-4">
-        <h4 className="text-sm font-medium text-abyss-cyan mb-2">How Mining Works</h4>
-        <ul className="text-xs text-gray-400 space-y-1">
+      <div className="bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg p-4">
+        <h4 className="text-sm font-medium text-genesis-cipher-cyan mb-2">How Mining Works</h4>
+        <ul className="text-xs text-genesis-text-tertiary space-y-1">
           <li>• Explore the Mandelbrot set by zooming in - deeper = more rewards</li>
           <li>• Longer mining sessions earn more CGT</li>
           <li>• Reward formula: (depth × 100) + (seconds × 0.1) CGT</li>

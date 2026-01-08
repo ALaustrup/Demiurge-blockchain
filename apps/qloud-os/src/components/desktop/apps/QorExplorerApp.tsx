@@ -36,8 +36,8 @@ function InternalPage({ path, onNavigate }: InternalPageProps) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center overflow-y-auto">
         <div className="text-6xl mb-4">🌊</div>
-        <h2 className="text-2xl font-bold text-abyss-cyan mb-2">QOR Explorer</h2>
-        <p className="text-gray-400 mb-6">Navigate the Demiurge Network with Web3 integration</p>
+        <h2 className="text-2xl font-bold text-genesis-cipher-cyan mb-2">QOR Explorer</h2>
+        <p className="text-genesis-text-tertiary mb-6">Navigate the Demiurge Network with Web3 integration</p>
         
         {/* Quick links */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 max-w-2xl">
@@ -50,10 +50,10 @@ function InternalPage({ path, onNavigate }: InternalPageProps) {
             <button
               key={link.url}
               onClick={() => onNavigate(link.url)}
-              className="flex flex-col items-center gap-2 p-4 bg-abyss-dark/50 border border-abyss-cyan/20 rounded-lg hover:border-abyss-cyan/50 hover:bg-abyss-dark transition-all"
+              className="flex flex-col items-center gap-2 p-4 bg-genesis-glass-light/50 border border-genesis-border-default/20 rounded-lg hover:border-genesis-border-default/50 hover:bg-genesis-glass-light transition-all"
             >
               <span className="text-2xl">{link.icon}</span>
-              <span className="text-sm text-gray-300">{link.name}</span>
+              <span className="text-sm text-genesis-text-secondary">{link.name}</span>
             </button>
           ))}
         </div>
@@ -62,13 +62,13 @@ function InternalPage({ path, onNavigate }: InternalPageProps) {
         <div className="flex items-center gap-4 text-sm mb-6">
           <div className="flex items-center gap-2">
             <span className={`w-2 h-2 rounded-full ${identity ? 'bg-green-500' : 'bg-gray-500'}`} />
-            <span className="text-gray-400">
+            <span className="text-genesis-text-tertiary">
               {identity ? `${identity.username || 'Connected'}` : 'Not logged in'}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <span className={`w-2 h-2 rounded-full ${status.state === 'connected' ? 'bg-green-500' : 'bg-red-500'}`} />
-            <span className="text-gray-400">
+            <span className="text-genesis-text-tertiary">
               {status.state === 'connected' ? `Block #${status.height}` : 'Chain Offline'}
             </span>
           </div>
@@ -77,16 +77,16 @@ function InternalPage({ path, onNavigate }: InternalPageProps) {
         {/* Recent bookmarks */}
         {bookmarks.length > 0 && (
           <div className="w-full max-w-lg mb-8">
-            <h3 className="text-sm font-medium text-gray-400 mb-3">Recent Bookmarks</h3>
+            <h3 className="text-sm font-medium text-genesis-text-tertiary mb-3">Recent Bookmarks</h3>
             <div className="space-y-2">
               {bookmarks.slice(0, 5).map(b => (
                 <button
                   key={b.id}
                   onClick={() => onNavigate(b.url)}
-                  className="w-full flex items-center gap-3 p-2 bg-abyss-dark/30 rounded-lg hover:bg-abyss-dark/50 transition-colors text-left"
+                  className="w-full flex items-center gap-3 p-2 bg-genesis-glass-light/30 rounded-lg hover:bg-genesis-glass-light/50 transition-colors text-left"
                 >
                   <span className="text-sm">⭐</span>
-                  <span className="flex-1 text-sm text-gray-300 truncate">{b.title}</span>
+                  <span className="flex-1 text-sm text-genesis-text-secondary truncate">{b.title}</span>
                 </button>
               ))}
             </div>
@@ -110,8 +110,8 @@ function InternalPage({ path, onNavigate }: InternalPageProps) {
   }
   
   return (
-    <div className="w-full h-full flex items-center justify-center text-gray-400">
-      <p>Unknown page: <code className="text-abyss-cyan">abyss://{path}</code></p>
+    <div className="w-full h-full flex items-center justify-center text-genesis-text-tertiary">
+      <p>Unknown page: <code className="text-genesis-cipher-cyan">abyss://{path}</code></p>
     </div>
   );
 }
@@ -130,12 +130,12 @@ function ExplorerSettings() {
   
   return (
     <div className="w-full h-full p-6 overflow-y-auto">
-      <h2 className="text-xl font-bold text-abyss-cyan mb-6">Explorer Settings</h2>
+      <h2 className="text-xl font-bold text-genesis-cipher-cyan mb-6">Explorer Settings</h2>
       
       <div className="space-y-6 max-w-lg">
         {/* Navigation position */}
         <div>
-          <label className="block text-sm text-gray-400 mb-2">Navigation Bar Position</label>
+          <label className="block text-sm text-genesis-text-tertiary mb-2">Navigation Bar Position</label>
           <div className="grid grid-cols-4 gap-2">
             {(['top', 'bottom', 'left', 'right'] as const).map(pos => (
               <button
@@ -143,8 +143,8 @@ function ExplorerSettings() {
                 onClick={() => setNavPosition(pos)}
                 className={`px-3 py-2 rounded-lg text-sm transition-colors ${
                   navPosition === pos
-                    ? 'bg-abyss-cyan/20 text-abyss-cyan border border-abyss-cyan'
-                    : 'bg-abyss-dark border border-abyss-cyan/30 text-gray-400 hover:text-white'
+                    ? 'bg-abyss-cyan/20 text-genesis-cipher-cyan border border-genesis-border-default'
+                    : 'bg-genesis-glass-light border border-genesis-border-default/30 text-genesis-text-tertiary hover:text-white'
                 }`}
               >
                 {pos.charAt(0).toUpperCase() + pos.slice(1)}
@@ -160,31 +160,31 @@ function ExplorerSettings() {
               type="checkbox"
               checked={compactMode}
               onChange={(e) => setCompactMode(e.target.checked)}
-              className="w-4 h-4 rounded border-abyss-cyan/30 bg-abyss-dark text-abyss-cyan focus:ring-abyss-cyan/50"
+              className="w-4 h-4 rounded border-genesis-border-default/30 bg-genesis-glass-light text-genesis-cipher-cyan focus:ring-abyss-cyan/50"
             />
-            <span className="text-sm text-gray-300">Compact Mode</span>
+            <span className="text-sm text-genesis-text-secondary">Compact Mode</span>
           </label>
           <p className="text-xs text-gray-500 mt-1 ml-7">Hide tab titles and show only favicons</p>
         </div>
         
         {/* Home page */}
         <div>
-          <label className="block text-sm text-gray-400 mb-2">Home Page</label>
+          <label className="block text-sm text-genesis-text-tertiary mb-2">Home Page</label>
           <input
             type="text"
             value={homePage}
             onChange={(e) => setHomePage(e.target.value)}
-            className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded-lg text-white text-sm focus:outline-none focus:border-abyss-cyan"
+            className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded-lg text-white text-sm focus:outline-none focus:border-genesis-border-default"
           />
         </div>
         
         {/* Search engine */}
         <div>
-          <label className="block text-sm text-gray-400 mb-2">Search Engine</label>
+          <label className="block text-sm text-genesis-text-tertiary mb-2">Search Engine</label>
           <select
             value={searchEngine}
             onChange={(e) => setSearchEngine(e.target.value as any)}
-            className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded-lg text-white text-sm focus:outline-none focus:border-abyss-cyan"
+            className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded-lg text-white text-sm focus:outline-none focus:border-genesis-border-default"
           >
             <option value="duckduckgo">DuckDuckGo</option>
             <option value="google">Google</option>
@@ -194,7 +194,7 @@ function ExplorerSettings() {
         
         {/* Clear history */}
         <div>
-          <label className="block text-sm text-gray-400 mb-2">Privacy</label>
+          <label className="block text-sm text-genesis-text-tertiary mb-2">Privacy</label>
           <Button onClick={clearHistory} variant="secondary" className="text-sm">
             Clear Browsing History
           </Button>
@@ -221,7 +221,7 @@ function ExplorerHistory({ onNavigate }: { onNavigate: (url: string) => void }) 
   return (
     <div className="w-full h-full p-6 overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-abyss-cyan">Browsing History</h2>
+        <h2 className="text-xl font-bold text-genesis-cipher-cyan">Browsing History</h2>
         {history.length > 0 && (
           <Button onClick={clearHistory} variant="ghost" className="text-sm text-red-400">
             Clear All
@@ -237,12 +237,12 @@ function ExplorerHistory({ onNavigate }: { onNavigate: (url: string) => void }) 
         <div className="space-y-6">
           {Object.entries(groupedHistory).map(([date, entries]) => (
             <div key={date}>
-              <h3 className="text-sm font-medium text-gray-400 mb-2">{date}</h3>
+              <h3 className="text-sm font-medium text-genesis-text-tertiary mb-2">{date}</h3>
               <div className="space-y-1">
                 {entries.map((entry, i) => (
                   <div
                     key={`${entry.url}-${i}`}
-                    className="group flex items-center gap-3 p-2 hover:bg-abyss-dark/50 rounded-lg cursor-pointer"
+                    className="group flex items-center gap-3 p-2 hover:bg-genesis-glass-light/50 rounded-lg cursor-pointer"
                     onClick={() => onNavigate(entry.url)}
                   >
                     <span className="text-gray-500 text-xs">
@@ -412,9 +412,9 @@ export function QorExplorerApp() {
       )}
       
       {/* Browser Content */}
-      <div className="flex-1 border border-abyss-cyan/20 rounded-lg overflow-hidden bg-abyss-dark min-h-0 relative m-1">
+      <div className="flex-1 border border-genesis-border-default/20 rounded-lg overflow-hidden bg-genesis-glass-light min-h-0 relative m-1">
         {!activeTab ? (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
+          <div className="w-full h-full flex items-center justify-center text-genesis-text-tertiary">
             No tab selected
           </div>
         ) : isInternalPage ? (
@@ -423,11 +423,11 @@ export function QorExplorerApp() {
           <>
             {/* Error overlay */}
             {iframeError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-abyss-dark/95 backdrop-blur-sm z-10 p-8">
+              <div className="absolute inset-0 flex items-center justify-center bg-genesis-glass-light/95 backdrop-blur-sm z-10 p-8">
                 <div className="text-center max-w-md">
                   <div className="text-red-400 text-4xl mb-4">⚠️</div>
                   <p className="text-red-400 mb-2 text-lg font-medium">{iframeError}</p>
-                  <p className="text-gray-400 text-sm mb-4">
+                  <p className="text-genesis-text-tertiary text-sm mb-4">
                     Many websites block embedding for security. You can open it in a new browser window instead.
                   </p>
                   <div className="flex gap-3 justify-center">
@@ -444,7 +444,7 @@ export function QorExplorerApp() {
             
             {/* Loading indicator */}
             {activeTab.isLoading && !iframeError && (
-              <div className="absolute top-0 left-0 right-0 h-0.5 bg-abyss-dark overflow-hidden z-10">
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-genesis-glass-light overflow-hidden z-10">
                 <div className="h-full w-1/3 bg-abyss-cyan animate-[loading_1s_ease-in-out_infinite]" />
               </div>
             )}
@@ -466,14 +466,14 @@ export function QorExplorerApp() {
   );
 
   const StatusBar = (
-    <div className="flex items-center justify-between px-3 py-1 bg-abyss-dark/50 border-t border-abyss-cyan/20 text-xs">
+    <div className="flex items-center justify-between px-3 py-1 bg-genesis-glass-light/50 border-t border-genesis-border-default/20 text-xs">
       <div className="flex items-center gap-3">
         {identity ? (
-          <span className="text-gray-400">
-            <span className="text-abyss-cyan">{identity.username}</span>
+          <span className="text-genesis-text-tertiary">
+            <span className="text-genesis-cipher-cyan">{identity.username}</span>
           </span>
         ) : (
-          <button onClick={() => login()} className="text-gray-400 hover:text-abyss-cyan transition-colors">
+          <button onClick={() => login()} className="text-genesis-text-tertiary hover:text-genesis-cipher-cyan transition-colors">
             Login
           </button>
         )}

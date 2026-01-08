@@ -30,15 +30,15 @@ export const SelfModelView: React.FC = () => {
       
       <div className="metrics grid grid-cols-3 gap-4 mb-4">
         <div>
-          <div className="text-sm text-gray-400">Global Health</div>
+          <div className="text-sm text-genesis-text-tertiary">Global Health</div>
           <div className="text-2xl font-bold text-green-400">{model.globalHealth.toFixed(2)}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Global Entropy</div>
+          <div className="text-sm text-genesis-text-tertiary">Global Entropy</div>
           <div className="text-2xl font-bold text-yellow-400">{model.globalEntropy.toFixed(2)}</div>
         </div>
         <div>
-          <div className="text-sm text-gray-400">Subsystems</div>
+          <div className="text-sm text-genesis-text-tertiary">Subsystems</div>
           <div className="text-2xl font-bold text-blue-400">{model.subsystems.length}</div>
         </div>
       </div>
@@ -51,7 +51,7 @@ export const SelfModelView: React.FC = () => {
               <span className="font-semibold">{sub.id}</span>
               <span className="text-green-400">Health: {sub.health.toFixed(2)}</span>
             </div>
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-genesis-text-tertiary">
               Performance: {sub.performance.toFixed(2)} | Drift: {sub.drift.toFixed(2)}
             </div>
           </div>

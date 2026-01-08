@@ -117,14 +117,14 @@ export function ArchonAIAssistantApp() {
   ];
 
   return (
-    <div className="w-full h-full bg-abyss-dark text-white flex flex-col">
+    <div className="w-full h-full bg-genesis-glass-light text-white flex flex-col">
       {/* Header */}
-      <div className="h-16 bg-abyss-navy/50 border-b border-abyss-cyan/20 flex items-center justify-between px-6">
+      <div className="h-16 bg-abyss-navy/50 border-b border-genesis-border-default/20 flex items-center justify-between px-6">
         <div className="flex items-center gap-3">
           <div className="text-2xl">🤖</div>
           <div>
-            <h2 className="text-xl font-bold text-abyss-cyan">ArchonAI Assistant</h2>
-            <div className="text-xs text-gray-400">Intelligent help for Demiurge</div>
+            <h2 className="text-xl font-bold text-genesis-cipher-cyan">ArchonAI Assistant</h2>
+            <div className="text-xs text-genesis-text-tertiary">Intelligent help for Demiurge</div>
           </div>
         </div>
         {error && (
@@ -151,11 +151,11 @@ export function ArchonAIAssistantApp() {
               <div className="whitespace-pre-wrap">{message.content}</div>
               
               {message.sources && message.sources.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-abyss-cyan/20">
-                  <div className="text-xs text-gray-400 mb-2">📚 Sources:</div>
+                <div className="mt-3 pt-3 border-t border-genesis-border-default/20">
+                  <div className="text-xs text-genesis-text-tertiary mb-2">📚 Sources:</div>
                   <div className="space-y-1">
                     {message.sources.map((source, i) => (
-                      <div key={i} className="text-xs text-abyss-cyan">
+                      <div key={i} className="text-xs text-genesis-cipher-cyan">
                         • {source.title} ({source.path})
                       </div>
                     ))}
@@ -173,7 +173,7 @@ export function ArchonAIAssistantApp() {
         {sending && (
           <div className="flex justify-start">
             <div className="bg-abyss-navy/50 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-gray-400">
+              <div className="flex items-center gap-2 text-genesis-text-tertiary">
                 <div className="w-2 h-2 bg-abyss-cyan rounded-full animate-pulse"></div>
                 <span className="text-sm">ArchonAI is thinking...</span>
               </div>
@@ -186,14 +186,14 @@ export function ArchonAIAssistantApp() {
 
       {/* Quick Actions */}
       {messages.length === 1 && (
-        <div className="px-6 py-4 border-t border-abyss-cyan/20">
-          <div className="text-xs text-gray-400 mb-2">Quick Actions:</div>
+        <div className="px-6 py-4 border-t border-genesis-border-default/20">
+          <div className="text-xs text-genesis-text-tertiary mb-2">Quick Actions:</div>
           <div className="flex flex-wrap gap-2">
             {quickActions.map((action, i) => (
               <button
                 key={i}
                 onClick={() => setInput(action.query)}
-                className="px-3 py-1 bg-abyss-navy/30 border border-abyss-cyan/20 rounded text-xs hover:bg-abyss-cyan/20 transition-colors"
+                className="px-3 py-1 bg-abyss-navy/30 border border-genesis-border-default/20 rounded text-xs hover:bg-abyss-cyan/20 transition-colors"
               >
                 {action.label}
               </button>
@@ -203,14 +203,14 @@ export function ArchonAIAssistantApp() {
       )}
 
       {/* Input */}
-      <div className="h-24 bg-abyss-navy/30 border-t border-abyss-cyan/20 p-4">
+      <div className="h-24 bg-abyss-navy/30 border-t border-genesis-border-default/20 p-4">
         <div className="flex items-end gap-2">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask ArchonAI anything about Demiurge..."
-            className="flex-1 px-4 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded-lg text-sm resize-none focus:outline-none focus:border-abyss-cyan"
+            className="flex-1 px-4 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded-lg text-sm resize-none focus:outline-none focus:border-genesis-border-default"
             rows={2}
             disabled={sending}
           />

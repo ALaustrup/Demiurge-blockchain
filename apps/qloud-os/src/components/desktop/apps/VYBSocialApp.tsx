@@ -125,19 +125,19 @@ export function VYBSocialApp() {
 
   if (!isAuthenticated || !identity) {
     return (
-      <div className="h-full w-full flex items-center justify-center bg-abyss-dark text-gray-300">
+      <div className="h-full w-full flex items-center justify-center bg-genesis-glass-light text-genesis-text-secondary">
         <div className="text-center space-y-3">
           <div className="text-xl font-semibold">Sign in with QorID to enter VYB Social</div>
-          <div className="text-sm text-gray-400">Profiles, rooms, and chat all ride on your QorID.</div>
+          <div className="text-sm text-genesis-text-tertiary">Profiles, rooms, and chat all ride on your QorID.</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full w-full flex bg-abyss-dark/90 text-gray-100">
+    <div className="h-full w-full flex bg-genesis-glass-light/90 text-gray-100">
       {/* Left nav */}
-      <div className="w-56 border-r border-abyss-cyan/20 bg-abyss-dark/60 backdrop-blur-sm p-4 space-y-2">
+      <div className="w-56 border-r border-genesis-border-default/20 bg-genesis-glass-light/60 backdrop-blur-sm p-4 space-y-2">
         {(['rooms', 'dms', 'friends', 'discover', 'profile', 'quickmatch', 'settings'] as Tab[]).map((tab) => (
           <button
             key={tab}
@@ -159,13 +159,13 @@ export function VYBSocialApp() {
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="px-6 py-4 border-b border-abyss-cyan/20 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-genesis-border-default/20 flex items-center justify-between">
           <div>
-            <div className="text-2xl font-bold text-abyss-cyan">VYB Social</div>
-            <div className="text-sm text-gray-400">Premium on-chain social tied to QorID</div>
+            <div className="text-2xl font-bold text-genesis-cipher-cyan">VYB Social</div>
+            <div className="text-sm text-genesis-text-tertiary">Premium on-chain social tied to QorID</div>
           </div>
-          <div className="text-sm text-gray-300">
-            Signed in as <span className="text-abyss-cyan font-semibold">{identity.username}</span>
+          <div className="text-sm text-genesis-text-secondary">
+            Signed in as <span className="text-genesis-cipher-cyan font-semibold">{identity.username}</span>
           </div>
         </div>
 
@@ -174,10 +174,10 @@ export function VYBSocialApp() {
           {activeTab === 'rooms' && selectedRoom && (
             <div className="grid grid-cols-3 gap-4">
               {/* Room list */}
-              <div className="col-span-1 bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-3 space-y-3">
+              <div className="col-span-1 bg-genesis-glass-light/60 border border-genesis-border-default/20 rounded-lg p-3 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="font-semibold text-gray-200">Chatrooms</div>
-                  <span className="text-xs text-gray-400">{rooms.length} live</span>
+                  <span className="text-xs text-genesis-text-tertiary">{rooms.length} live</span>
                 </div>
                 <div className="space-y-2 overflow-auto max-h-[420px] pr-1">
                   {rooms.map((room) => (
@@ -186,29 +186,29 @@ export function VYBSocialApp() {
                       onClick={() => setSelectedRoomId(room.id)}
                       className={`w-full text-left px-3 py-2 rounded border transition-all ${
                         selectedRoomId === room.id
-                          ? 'border-abyss-cyan bg-abyss-cyan/10'
-                          : 'border-abyss-cyan/20 hover:border-abyss-cyan/50'
+                          ? 'border-genesis-border-default bg-abyss-cyan/10'
+                          : 'border-genesis-border-default/20 hover:border-genesis-border-default/50'
                       }`}
                     >
                       <div className="font-semibold text-gray-100">{room.name}</div>
-                      <div className="text-xs text-gray-400 line-clamp-2">{room.description}</div>
-                      <div className="text-[11px] text-abyss-cyan mt-1">
+                      <div className="text-xs text-genesis-text-tertiary line-clamp-2">{room.description}</div>
+                      <div className="text-[11px] text-genesis-cipher-cyan mt-1">
                         {room.tags.join(' • ')} · {room.memberCount} online
                       </div>
                     </button>
                   ))}
                 </div>
                 {/* Create room */}
-                <div className="pt-3 border-t border-abyss-cyan/20 space-y-2">
-                  <div className="text-sm text-gray-300 font-semibold">Create room</div>
+                <div className="pt-3 border-t border-genesis-border-default/20 space-y-2">
+                  <div className="text-sm text-genesis-text-secondary font-semibold">Create room</div>
                   <input
-                    className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-sm"
+                    className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-sm"
                     placeholder="Room name"
                     value={newRoomName}
                     onChange={(e) => setNewRoomName(e.target.value)}
                   />
                   <input
-                    className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-sm"
+                    className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-sm"
                     placeholder="Description"
                     value={newRoomDescription}
                     onChange={(e) => setNewRoomDescription(e.target.value)}
@@ -220,19 +220,19 @@ export function VYBSocialApp() {
               </div>
 
               {/* Messages */}
-              <div className="col-span-2 bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-4 flex flex-col min-h-[520px]">
+              <div className="col-span-2 bg-genesis-glass-light/60 border border-genesis-border-default/20 rounded-lg p-4 flex flex-col min-h-[520px]">
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <div className="text-lg font-semibold text-abyss-cyan">{selectedRoom.name}</div>
-                    <div className="text-xs text-gray-400">{selectedRoom.description}</div>
+                    <div className="text-lg font-semibold text-genesis-cipher-cyan">{selectedRoom.name}</div>
+                    <div className="text-xs text-genesis-text-tertiary">{selectedRoom.description}</div>
                   </div>
-                  <div className="text-xs text-gray-400">{selectedRoom.memberCount} online</div>
+                  <div className="text-xs text-genesis-text-tertiary">{selectedRoom.memberCount} online</div>
                 </div>
-                <div className="flex-1 bg-abyss-dark/40 rounded p-3 border border-abyss-cyan/10 overflow-auto space-y-3">
+                <div className="flex-1 bg-genesis-glass-light/40 rounded p-3 border border-genesis-border-default/10 overflow-auto space-y-3">
                   {roomMessages.map((msg) => (
                     <div key={msg.id} className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="text-abyss-cyan font-semibold">{msg.from}</span>
+                        <span className="text-genesis-cipher-cyan font-semibold">{msg.from}</span>
                         <span className="text-[11px] text-gray-500">
                           {new Date(msg.timestamp).toLocaleTimeString()}
                         </span>
@@ -246,7 +246,7 @@ export function VYBSocialApp() {
                 </div>
                 <div className="mt-3 flex items-center gap-2">
                   <input
-                    className="flex-1 px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-sm"
+                    className="flex-1 px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-sm"
                     placeholder="Send a message..."
                     value={composer}
                     onChange={(e) => setComposer(e.target.value)}
@@ -267,44 +267,44 @@ export function VYBSocialApp() {
 
           {activeTab === 'dms' && (
             <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-1 bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-3 space-y-2">
+              <div className="col-span-1 bg-genesis-glass-light/60 border border-genesis-border-default/20 rounded-lg p-3 space-y-2">
                 <div className="font-semibold text-gray-200">Inbox</div>
                 {threads.map((t) => (
-                  <div key={t.id} className="p-3 rounded border border-abyss-cyan/20 bg-abyss-dark/40">
-                    <div className="text-abyss-cyan font-semibold">{t.with}</div>
-                    <div className="text-xs text-gray-400 line-clamp-2">{t.lastMessage}</div>
+                  <div key={t.id} className="p-3 rounded border border-genesis-border-default/20 bg-genesis-glass-light/40">
+                    <div className="text-genesis-cipher-cyan font-semibold">{t.with}</div>
+                    <div className="text-xs text-genesis-text-tertiary line-clamp-2">{t.lastMessage}</div>
                   </div>
                 ))}
               </div>
-              <div className="col-span-2 bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-4">
-                <div className="text-sm text-gray-400">Select a thread to continue the conversation.</div>
+              <div className="col-span-2 bg-genesis-glass-light/60 border border-genesis-border-default/20 rounded-lg p-4">
+                <div className="text-sm text-genesis-text-tertiary">Select a thread to continue the conversation.</div>
               </div>
             </div>
           )}
 
           {activeTab === 'friends' && (
-            <div className="bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-4 space-y-4">
+            <div className="bg-genesis-glass-light/60 border border-genesis-border-default/20 rounded-lg p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-lg font-semibold text-abyss-cyan">Friend graph</div>
-                  <div className="text-sm text-gray-400">Requests, acceptances, blocks.</div>
+                  <div className="text-lg font-semibold text-genesis-cipher-cyan">Friend graph</div>
+                  <div className="text-sm text-genesis-text-tertiary">Requests, acceptances, blocks.</div>
                 </div>
                 <Button className="text-sm px-4">Add friend</Button>
               </div>
-              <div className="text-sm text-gray-400">Graph visualization coming with backend wiring.</div>
+              <div className="text-sm text-genesis-text-tertiary">Graph visualization coming with backend wiring.</div>
             </div>
           )}
 
           {activeTab === 'discover' && (
-            <div className="bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-4 space-y-3">
+            <div className="bg-genesis-glass-light/60 border border-genesis-border-default/20 rounded-lg p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-lg font-semibold text-abyss-cyan">Discover</div>
-                  <div className="text-sm text-gray-400">Geo + tags. Opt-in only.</div>
+                  <div className="text-lg font-semibold text-genesis-cipher-cyan">Discover</div>
+                  <div className="text-sm text-genesis-text-tertiary">Geo + tags. Opt-in only.</div>
                 </div>
                 <Button className="text-sm px-4">Refresh</Button>
               </div>
-              <div className="text-sm text-gray-400">
+              <div className="text-sm text-genesis-text-tertiary">
                 Discover uses opt-in location and tags to surface nearby rooms and people. This view is stubbed until
                 the backend + on-chain anchors are wired.
               </div>
@@ -312,13 +312,13 @@ export function VYBSocialApp() {
           )}
 
           {activeTab === 'profile' && (
-            <div className="bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-4 space-y-4">
-              <div className="text-lg font-semibold text-abyss-cyan">Profile</div>
+            <div className="bg-genesis-glass-light/60 border border-genesis-border-default/20 rounded-lg p-4 space-y-4">
+              <div className="text-lg font-semibold text-genesis-cipher-cyan">Profile</div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-300">Display name</label>
+                  <label className="text-sm text-genesis-text-secondary">Display name</label>
                   <input
-                    className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-sm"
+                    className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-sm"
                     value={profileDraft?.username || ''}
                     onChange={(e) =>
                       setProfileDraft((prev) =>
@@ -328,9 +328,9 @@ export function VYBSocialApp() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-300">Bio</label>
+                  <label className="text-sm text-genesis-text-secondary">Bio</label>
                   <input
-                    className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-sm"
+                    className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-sm"
                     value={profileDraft?.bio || ''}
                     onChange={(e) =>
                       setProfileDraft((prev) =>
@@ -340,9 +340,9 @@ export function VYBSocialApp() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-300">Tags (comma separated)</label>
+                  <label className="text-sm text-genesis-text-secondary">Tags (comma separated)</label>
                   <input
-                    className="w-full px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-sm"
+                    className="w-full px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-sm"
                     value={profileDraft?.tags.join(', ') || ''}
                     onChange={(e) =>
                       setProfileDraft((prev) =>
@@ -352,7 +352,7 @@ export function VYBSocialApp() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm text-gray-300">Location opt-in</label>
+                  <label className="text-sm text-genesis-text-secondary">Location opt-in</label>
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
@@ -363,7 +363,7 @@ export function VYBSocialApp() {
                         )
                       }
                     />
-                    <span className="text-sm text-gray-300">Share coarse location for discovery</span>
+                    <span className="text-sm text-genesis-text-secondary">Share coarse location for discovery</span>
                   </div>
                 </div>
               </div>
@@ -377,9 +377,9 @@ export function VYBSocialApp() {
           )}
 
           {activeTab === 'quickmatch' && (
-            <div className="bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-6 space-y-4">
-              <div className="text-lg font-semibold text-abyss-cyan">Quick Match</div>
-              <div className="text-sm text-gray-400">
+            <div className="bg-genesis-glass-light/60 border border-genesis-border-default/20 rounded-lg p-6 space-y-4">
+              <div className="text-lg font-semibold text-genesis-cipher-cyan">Quick Match</div>
+              <div className="text-sm text-genesis-text-tertiary">
                 Omegle-style: match by proximity and tags. Webcam optional. This UI is ready; signaling/wrtc backend is
                 stubbed.
               </div>
@@ -391,24 +391,24 @@ export function VYBSocialApp() {
                   Toggle webcam (UI only)
                 </Button>
               </div>
-              {quickMatchLooking && <div className="text-abyss-cyan text-sm">Searching for the perfect vibe...</div>}
+              {quickMatchLooking && <div className="text-genesis-cipher-cyan text-sm">Searching for the perfect vibe...</div>}
             </div>
           )}
 
           {activeTab === 'settings' && (
-            <div className="bg-abyss-dark/60 border border-abyss-cyan/20 rounded-lg p-4 space-y-4">
-              <div className="text-lg font-semibold text-abyss-cyan">Settings & Moderation</div>
-              <div className="grid grid-cols-2 gap-4 text-sm text-gray-300">
+            <div className="bg-genesis-glass-light/60 border border-genesis-border-default/20 rounded-lg p-4 space-y-4">
+              <div className="text-lg font-semibold text-genesis-cipher-cyan">Settings & Moderation</div>
+              <div className="grid grid-cols-2 gap-4 text-sm text-genesis-text-secondary">
                 <div className="space-y-2">
                   <div className="font-semibold text-gray-200">Room controls</div>
-                  <div className="space-y-1 text-gray-400">
+                  <div className="space-y-1 text-genesis-text-tertiary">
                     <div>• Assign mods, mute/ban, lock rooms.</div>
                     <div>• On-chain room metadata anchoring (planned).</div>
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="font-semibold text-gray-200">Security</div>
-                  <div className="space-y-1 text-gray-400">
+                  <div className="space-y-1 text-genesis-text-tertiary">
                     <div>• QorID session required for all actions.</div>
                     <div>• Media hashes and room manifests anchor to chain (coming).</div>
                   </div>

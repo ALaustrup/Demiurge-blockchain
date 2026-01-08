@@ -97,10 +97,10 @@ export function CustomizationPanel({ isOpen, onClose }: CustomizationPanelProps)
           >
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-abyss-cyan">Customization</h2>
+                <h2 className="text-2xl font-bold text-genesis-cipher-cyan">Customization</h2>
                 <button
                   onClick={onClose}
-                  className="text-gray-400 hover:text-white text-xl"
+                  className="text-genesis-text-tertiary hover:text-white text-xl"
                 >
                   ×
                 </button>
@@ -112,8 +112,8 @@ export function CustomizationPanel({ isOpen, onClose }: CustomizationPanelProps)
                   onClick={() => setActiveTab('colors')}
                   className={`px-4 py-2 rounded ${
                     activeTab === 'colors'
-                      ? 'bg-abyss-cyan/20 text-abyss-cyan'
-                      : 'text-gray-400 hover:text-white'
+                      ? 'bg-abyss-cyan/20 text-genesis-cipher-cyan'
+                      : 'text-genesis-text-tertiary hover:text-white'
                   }`}
                 >
                   Colors
@@ -122,8 +122,8 @@ export function CustomizationPanel({ isOpen, onClose }: CustomizationPanelProps)
                   onClick={() => setActiveTab('toolbar')}
                   className={`px-4 py-2 rounded ${
                     activeTab === 'toolbar'
-                      ? 'bg-abyss-cyan/20 text-abyss-cyan'
-                      : 'text-gray-400 hover:text-white'
+                      ? 'bg-abyss-cyan/20 text-genesis-cipher-cyan'
+                      : 'text-genesis-text-tertiary hover:text-white'
                   }`}
                 >
                   Toolbar
@@ -132,8 +132,8 @@ export function CustomizationPanel({ isOpen, onClose }: CustomizationPanelProps)
                   onClick={() => setActiveTab('settings')}
                   className={`px-4 py-2 rounded ${
                     activeTab === 'settings'
-                      ? 'bg-abyss-cyan/20 text-abyss-cyan'
-                      : 'text-gray-400 hover:text-white'
+                      ? 'bg-abyss-cyan/20 text-genesis-cipher-cyan'
+                      : 'text-genesis-text-tertiary hover:text-white'
                   }`}
                 >
                   Settings
@@ -144,7 +144,7 @@ export function CustomizationPanel({ isOpen, onClose }: CustomizationPanelProps)
               {activeTab === 'colors' && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <label className="text-gray-300">Use Custom Colors</label>
+                    <label className="text-genesis-text-secondary">Use Custom Colors</label>
                     <input
                       type="checkbox"
                       checked={useCustomColors}
@@ -156,7 +156,7 @@ export function CustomizationPanel({ isOpen, onClose }: CustomizationPanelProps)
                   {useCustomColors && (
                     <>
                       <div>
-                        <label className="block text-sm text-gray-300 mb-2">Primary Color</label>
+                        <label className="block text-sm text-genesis-text-secondary mb-2">Primary Color</label>
                         <div className="flex items-center space-x-2">
                           <input
                             type="color"
@@ -168,13 +168,13 @@ export function CustomizationPanel({ isOpen, onClose }: CustomizationPanelProps)
                             type="text"
                             value={localColors.primary}
                             onChange={(e) => handleColorChange('primary', e.target.value)}
-                            className="flex-1 px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-white"
+                            className="flex-1 px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-sm text-gray-300 mb-2">Secondary Color</label>
+                        <label className="block text-sm text-genesis-text-secondary mb-2">Secondary Color</label>
                         <div className="flex items-center space-x-2">
                           <input
                             type="color"
@@ -186,13 +186,13 @@ export function CustomizationPanel({ isOpen, onClose }: CustomizationPanelProps)
                             type="text"
                             value={localColors.secondary}
                             onChange={(e) => handleColorChange('secondary', e.target.value)}
-                            className="flex-1 px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-white"
+                            className="flex-1 px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-sm text-gray-300 mb-2">Accent Color</label>
+                        <label className="block text-sm text-genesis-text-secondary mb-2">Accent Color</label>
                         <div className="flex items-center space-x-2">
                           <input
                             type="color"
@@ -204,7 +204,7 @@ export function CustomizationPanel({ isOpen, onClose }: CustomizationPanelProps)
                             type="text"
                             value={localColors.accent}
                             onChange={(e) => handleColorChange('accent', e.target.value)}
-                            className="flex-1 px-3 py-2 bg-abyss-dark border border-abyss-cyan/30 rounded text-white"
+                            className="flex-1 px-3 py-2 bg-genesis-glass-light border border-genesis-border-default/30 rounded text-white"
                           />
                         </div>
                       </div>
@@ -225,7 +225,7 @@ export function CustomizationPanel({ isOpen, onClose }: CustomizationPanelProps)
               {/* Toolbar Tab */}
               {activeTab === 'toolbar' && (
                 <div className="space-y-4">
-                  <p className="text-sm text-gray-400 mb-4">
+                  <p className="text-sm text-genesis-text-tertiary mb-4">
                     Drag widgets to reorder. Changes apply immediately.
                   </p>
                   
@@ -235,11 +235,11 @@ export function CustomizationPanel({ isOpen, onClose }: CustomizationPanelProps)
                       .map((widget, index) => (
                         <div
                           key={widget.id}
-                          className="flex items-center justify-between p-3 bg-abyss-dark border border-abyss-cyan/30 rounded"
+                          className="flex items-center justify-between p-3 bg-genesis-glass-light border border-genesis-border-default/30 rounded"
                         >
                           <div className="flex items-center space-x-3">
-                            <span className="text-sm text-gray-400 w-6">{index + 1}</span>
-                            <span className="text-gray-300 capitalize">
+                            <span className="text-sm text-genesis-text-tertiary w-6">{index + 1}</span>
+                            <span className="text-genesis-text-secondary capitalize">
                               {widget.id.replace('-', ' ')}
                             </span>
                           </div>
@@ -281,9 +281,9 @@ export function CustomizationPanel({ isOpen, onClose }: CustomizationPanelProps)
               {activeTab === 'settings' && (
                 <div className="space-y-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-abyss-cyan mb-4">System Status</h3>
-                    <div className="p-4 bg-abyss-dark border border-abyss-cyan/30 rounded">
-                      <div className="mb-2 text-sm text-gray-300">RPC Connection Status</div>
+                    <h3 className="text-lg font-semibold text-genesis-cipher-cyan mb-4">System Status</h3>
+                    <div className="p-4 bg-genesis-glass-light border border-genesis-border-default/30 rounded">
+                      <div className="mb-2 text-sm text-genesis-text-secondary">RPC Connection Status</div>
                       <ChainStatusPill />
                     </div>
                   </div>
