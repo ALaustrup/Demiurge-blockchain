@@ -34,7 +34,7 @@ apps/qloud-os/
 │   │   └── Desktop.tsx      # Main desktop environment
 │   ├── components/
 │   │   ├── layout/          # FullscreenContainer, AbyssBackground, AudioReactiveBackground
-│   │   ├── auth/            # QorIDLoginForm, QorIDSignupModal
+│   │   ├── auth/            # QOR IDLoginForm, QorIDSignupModal
 │   │   ├── desktop/         # Dock, WindowFrame, StatusBar, SystemMenu, Apps
 │   │   └── shared/          # Button, Card, GlitchText
 │   ├── state/               # Zustand stores
@@ -44,7 +44,7 @@ apps/qloud-os/
 │   │   └── customizationStore.ts
 │   ├── services/            # Business logic
 │   │   ├── wallet/          # Wallet operations
-│   │   ├── qorid/         # QorID integration
+│   │   ├── qorid/         # QOR ID integration
 │   │   ├── chain/           # Blockchain RPC client
 │   │   ├── backgroundMusic.ts
 │   │   └── loginVoice.ts
@@ -321,7 +321,7 @@ apps/qloud-os/
 
 ## Authentication System
 
-### QorID Integration
+### QOR ID Integration
 
 **Context**: `QorIDContext.tsx`
 - Provides QorID session management
@@ -339,7 +339,7 @@ apps/qloud-os/
 3. Session persists across reloads
 4. Auto-login if session exists
 
-### QorID Features
+### QOR ID Features
 
 - **Username-based authentication**
 - **Seed phrase generation** (12-word mnemonic)
@@ -567,7 +567,7 @@ apps/qloud-os/
 - **keyDerivation.ts**: Key derivation utilities
 - **permissions.ts**: Web3 permissions
 
-### QorID Services
+### QOR ID Services
 
 - **localProvider.ts**: Local storage provider
 - **IdentityService.ts**: Identity management

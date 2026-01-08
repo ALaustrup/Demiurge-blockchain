@@ -149,7 +149,7 @@ components/
 2. **StatusBar.tsx**: Uses `StartButton3D` and `AppStoreMenu`
 3. **Audio Sources**: Automatically connects to `<audio>` and `<video>` elements
 
-## QorID System Review
+## QOR ID System Review
 
 **Status**: ✅ Functional
 

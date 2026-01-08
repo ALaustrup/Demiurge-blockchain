@@ -60,7 +60,7 @@ The Layer 1 blockchain written in Rust.
 | `recursion_registry` | Game world registry |
 | `work_claim` | Mining reward claims |
 
-### 3. QorID Service (`apps/qorid-service/`)
+### 3. QOR ID Service (`apps/qorid-service/`)
 
 TypeScript backend for identity and services.
 
@@ -103,7 +103,7 @@ Full desktop environment in the browser.
 User → Portal Web → "Enter Abyss" → QLOUD OS
                                          │
                                          ▼
-                                   QorID Service
+                                   QOR ID Service
                                          │
                                          ▼
                                    Demiurge Chain

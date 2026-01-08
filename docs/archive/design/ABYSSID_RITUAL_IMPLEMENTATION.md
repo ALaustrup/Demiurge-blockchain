@@ -1,4 +1,4 @@
-# QorID Ritual Implementation
+# QOR ID Ritual Implementation
 
 ## Overview
 The QorID Ritual is a complete identity initiation system for the Fracture Portal. This is not a login form—it is an initiation sequence that feels alive, inevitable, ancient, and quietly terrifying.

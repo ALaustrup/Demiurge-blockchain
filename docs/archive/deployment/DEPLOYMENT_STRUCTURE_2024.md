@@ -91,7 +91,7 @@ deploy/
 │
 ├── systemd/                     # Systemd services
 │   ├── demiurge-chain.service  # Chain node
-│   ├── abyssid.service         # QorID
+│   ├── abyssid.service         # QOR ID
 │   ├── dns-service.service     # DNS
 │   ├── qor-gateway.service   # Gateway
 │   └── abyss-radio.service     # Radio
@@ -113,7 +113,7 @@ All services use consistent paths:
 ## Service Ports
 
 - **Chain RPC**: 8545
-- **QorID**: 3001
+- **QOR ID**: 3001
 - **DNS Service**: 5053
 - **Gateway**: 4000
 - **NGINX**: 80/443

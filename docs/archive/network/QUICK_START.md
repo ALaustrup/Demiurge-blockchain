@@ -61,7 +61,7 @@ scp fracture-bg.mp4 ubuntu@YOUR_SERVER_IP:/opt/demiurge/media/
 ./scripts/setup_pm2.sh
 ```
 
-### 7. Deploy QorID Backend (Phase 5)
+### 7. Deploy QOR ID Backend (Phase 5)
 
 ```bash
 ./scripts/phase5_abyssid_backend.sh

@@ -62,7 +62,7 @@ Sovereign Layer 1 blockchain built in Rust with custom **Forge Proof-of-Work** c
 - **Demiurge.Guru** - Official portal (planned)
 
 **Services:**
-- **QorID Service** - Identity and authentication API
+- **QOR ID Service** - Identity and authentication API
 - **QOR Gateway** - GraphQL indexer
 - **Archon AI** - AI-powered assistance
 

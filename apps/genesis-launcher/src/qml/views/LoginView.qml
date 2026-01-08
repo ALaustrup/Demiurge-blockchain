@@ -97,7 +97,7 @@ Item {
         // Subtitle
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: "Sign in with your QorID"
+            text: "Sign in with your QOR ID"
             color: textSecondary
             font.family: "Rajdhani"
             font.pixelSize: 14

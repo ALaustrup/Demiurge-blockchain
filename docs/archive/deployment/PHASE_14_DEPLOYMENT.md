@@ -69,7 +69,7 @@ pnpm run build
 - **Nginx Status:** ✅ Active and reloaded
 
 ### 4. Backend Services
-- **QorID Service:** ✅ Running on port 8082
+- **QOR ID Service:** ✅ Running on port 8082
 - **Database:** ✅ Initialized and operational
 - **CORS:** Configured for `https://demiurge.cloud`
 
@@ -133,7 +133,7 @@ pnpm run build
 ## Service Status
 
 ```bash
-# QorID Service
+# QOR ID Service
 sudo systemctl status abyssid.service
 # ✅ Active (running) on port 8082
 

@@ -120,7 +120,7 @@ qor-desktop/
 │   │   ├── FileManager.cpp     # Filesystem access
 │   │   └── SecureVault.cpp     # Encrypted credentials
 │   ├── identity/               # Identity management
-│   │   ├── QorIDManager.cpp  # QorID integration
+│   │   ├── QorIDManager.cpp  # QOR ID integration
 │   │   └── WalletManager.cpp   # Wallet operations
 │   ├── chain/                  # Chain integration
 │   │   ├── ChainClient.cpp     # RPC communication

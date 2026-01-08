@@ -31,7 +31,7 @@
 | Service | Port | Status | Process Manager |
 |---------|------|--------|-----------------|
 | **Portal Web** | 3000 | ✅ Configured | PM2 (`demiurge-portal`) |
-| **QorID Backend** | 3001 | ✅ Configured | PM2 (`abyssid-backend`) |
+| **QOR ID Backend** | 3001 | ✅ Configured | PM2 (`abyssid-backend`) |
 | **NGINX** | 80/443 | ✅ Configured | systemd |
 | **Chain Node** | 8545 | ⚠️ Manual | (Not in PM2 yet) |
 | **QOR Gateway** | 4000 | ⚠️ Manual | (Not in PM2 yet) |
@@ -110,7 +110,7 @@
 
 ---
 
-### **Phase 5: QorID Backend** ✅
+### **Phase 5: QOR ID Backend** ✅
 - Backend server scaffolded
 - SQLite database initialized
 - API endpoints ready:
@@ -241,7 +241,7 @@ scp fracture-bg.mp4 ubuntu@YOUR_SERVER_IP:/opt/demiurge/media/
 - `PORT=3000`
 - (Set via PM2 config)
 
-### **QorID Backend**
+### **QOR ID Backend**
 - `PORT=3001`
 - `DB_PATH=./data/abyssid.db`
 - `NODE_ENV=production`
@@ -290,7 +290,7 @@ curl http://localhost:3000
 curl http://your-domain.com
 ```
 
-### **QorID Backend**
+### **QOR ID Backend**
 ```bash
 curl http://localhost:3001/health
 # Expected: {"status":"ok","service":"abyssid-backend"}
@@ -315,7 +315,7 @@ pm2 logs --lines 50
 | Service | Log File |
 |---------|----------|
 | Portal | `/opt/demiurge/logs/portal-out.log`<br>`/opt/demiurge/logs/portal-error.log` |
-| QorID Backend | `/opt/demiurge/logs/abyssid-out.log`<br>`/opt/demiurge/logs/abyssid-error.log` |
+| QOR ID Backend | `/opt/demiurge/logs/abyssid-out.log`<br>`/opt/demiurge/logs/abyssid-error.log` |
 | NGINX Access | `/var/log/nginx/demiurge-portal-access.log` |
 | NGINX Error | `/var/log/nginx/demiurge-portal-error.log` |
 
@@ -348,7 +348,7 @@ sudo nginx -t
 sudo tail -f /var/log/nginx/demiurge-portal-error.log
 ```
 
-### **QorID Backend Not Responding**
+### **QOR ID Backend Not Responding**
 ```bash
 # Check service
 pm2 status abyssid-backend
@@ -376,7 +376,7 @@ node src/db-init.js
 
 1. **PM2** (auto-starts on boot)
    - Portal (port 3000)
-   - QorID Backend (port 3001)
+   - QOR ID Backend (port 3001)
 
 2. **NGINX** (systemd)
    - Reverse proxy to portal
@@ -427,7 +427,7 @@ pnpm install
 pnpm run build
 pnpm run start
 
-# QorID Backend
+# QOR ID Backend
 cd /opt/demiurge/repo/apps/abyssid-backend
 node src/server.js
 

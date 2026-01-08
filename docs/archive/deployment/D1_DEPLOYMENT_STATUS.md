@@ -74,7 +74,7 @@
 ### Phase 6: Archon
 - ⏳ Not started (integrated in chain, no separate service needed)
 
-### Phase 7: QorID Service
+### Phase 7: QOR ID Service
 - ⏳ Not started
 - Requires: Node.js dependencies, build, systemd service
 

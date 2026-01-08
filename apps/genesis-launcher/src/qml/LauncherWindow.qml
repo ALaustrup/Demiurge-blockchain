@@ -214,7 +214,7 @@ ApplicationWindow {
                 // Subtitle
                 Text {
                     Layout.alignment: Qt.AlignHCenter
-                    text: "Sign in with your QorID"
+                    text: "Sign in with your QOR ID"
                     color: textSecondary
                     font.pixelSize: 14
                 }
@@ -281,7 +281,7 @@ ApplicationWindow {
                 // Create account link
                 Text {
                     Layout.alignment: Qt.AlignHCenter
-                    text: "Create new QorID"
+                    text: "Create new QOR ID"
                     color: cipherCyan
                     font.pixelSize: 13
                     MouseArea {

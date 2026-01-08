@@ -43,7 +43,7 @@ DEMIURGE implements several security measures:
 
 ### Application Security
 
-#### QorID Service
+#### QOR ID Service
 - Seed phrases never transmitted to server
 - Only public keys stored
 - Case-insensitive username handling

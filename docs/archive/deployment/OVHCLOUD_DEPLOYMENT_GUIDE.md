@@ -18,7 +18,7 @@ This guide will help you deploy the entire Demiurge Devnet stack to your OVHclou
 ### **Services to Deploy:**
 
 1. **Demiurge Portal Web** (Next.js) - Port 3000
-2. **QorID Backend** (Node.js) - Port 3001
+2. **QOR ID Backend** (Node.js) - Port 3001
 3. **QOR Gateway** (GraphQL) - Port 4000
 4. **NGINX** (Reverse Proxy) - Port 80/443
 5. **PM2** (Process Manager)
@@ -174,7 +174,7 @@ pnpm run start
 # Press Ctrl+C after verifying it works
 ```
 
-#### 3.2 Setup QorID Backend
+#### 3.2 Setup QOR ID Backend
 
 ```bash
 cd /opt/demiurge/repo/apps/abyssid-backend
@@ -334,7 +334,7 @@ server {
         add_header Cache-Control "public, immutable";
     }
 
-    # QorID Backend API
+    # QOR ID Backend API
     location /api/qorid/ {
         proxy_pass http://127.0.0.1:3001;
         proxy_http_version 1.1;
@@ -471,7 +471,7 @@ pm2 logs --lines 50
 # Portal
 curl http://localhost:3000
 
-# QorID Backend
+# QOR ID Backend
 curl http://localhost:3001/health
 
 # QOR Gateway

@@ -214,7 +214,7 @@ className="fixed top-8 left-0 right-0 w-full h-[calc(100vh-2rem)]
 
 ## Testing Checklist
 
-### QorID
+### QOR ID
 - [ ] Sign up new account
 - [ ] Save secret key
 - [ ] Log out

@@ -113,7 +113,7 @@
 
 1. ✅ **Chain Invariant Bug** - Fixed (genesis height check)
 2. ✅ **QorID TypeScript Errors** - All fixed
-3. ✅ **QorID Service** - Built, deployed, and running
+3. ✅ **QOR ID Service** - Built, deployed, and running
 4. ✅ **QOR Gateway** - Built, deployed, and running
 5. ✅ **QOR OS Build** - Built successfully
 6. ✅ **QOR OS Deployment** - Deployed with all assets
@@ -176,7 +176,7 @@ curl -X POST http://127.0.0.1:4000/graphql \
   -H "Content-Type: application/json" \
   -d '{"query":"{ __typename }"}'
 
-# QorID Health
+# QOR ID Health
 curl http://127.0.0.1:8082/healthz
 ```
 

@@ -7,7 +7,7 @@ Configuration for deploying to https://demiurge.guru
 | Component | Platform | URL |
 |-----------|----------|-----|
 | Portal Web | **Vercel** | https://demiurge.guru |
-| QorID Service | Server (51.210.209.112) | https://api.demiurge.guru |
+| QOR ID Service | Server (51.210.209.112) | https://api.demiurge.guru |
 | QOR Gateway | Server | https://gateway.demiurge.guru |
 | RPC Node | Server | https://rpc.demiurge.cloud |
 
@@ -17,7 +17,7 @@ Configuration for deploying to https://demiurge.guru
 Demiurge.Guru
 ├── / (root)           → Portal Web (Vercel)
 │   └── "Enter Abyss"  → QLOUD OS
-├── api.demiurge.guru  → QorID Service (Server)
+├── api.demiurge.guru  → QOR ID Service (Server)
 ├── gateway.demiurge.guru → QOR Gateway (Server)
 └── rpc.demiurge.cloud → RPC endpoint (existing)
 ```
@@ -141,7 +141,7 @@ Backend services remain on **51.210.209.112**.
 ```nginx
 # /etc/nginx/sites-available/api.demiurge.guru
 
-# QorID Service API
+# QOR ID Service API
 server {
     listen 443 ssl http2;
     server_name api.demiurge.guru;
@@ -195,7 +195,7 @@ server {
 }
 ```
 
-### QorID Service Environment
+### QOR ID Service Environment
 
 ```env
 # apps/qorid-service/.env
@@ -217,7 +217,7 @@ sudo systemctl enable certbot.timer
 ### Start Services
 
 ```bash
-# QorID Service
+# QOR ID Service
 cd /opt/demiurge/apps/qorid-service
 pnpm install --production
 pm2 start dist/index.js --name qorid-service

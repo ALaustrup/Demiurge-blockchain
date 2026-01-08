@@ -48,7 +48,7 @@ apps/qloud-os/
 - Auto-transitions to login/desktop after 2.5 seconds
 - Skips if user is already authenticated
 
-#### QorID Authentication
+#### QOR ID Authentication
 - **Login**: Username + public key/code authentication
 - **Signup**: Username availability check, secret code generation, backup flow
 - **Storage**: LocalStorage-based account management (ready for real QorID SDK integration)
@@ -189,7 +189,7 @@ export function ExternalApp() {
 
 ## Future Integration Points
 
-### QorID Wallet SDK
+### QOR ID Wallet SDK
 - Current: LocalStorage-based mock implementation
 - Future: Replace `qorIdClient.ts` with real SDK
 - Integration point: `src/lib/qorIdClient.ts`

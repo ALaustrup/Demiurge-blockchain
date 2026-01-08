@@ -10,7 +10,7 @@ This guide walks through testing the full QorID registration flow from start to 
 
 ### **1. Start Backend Services**
 
-#### **QorID Backend**
+#### **QOR ID Backend**
 ```bash
 cd apps/abyssid-backend
 npm install  # If not already done
@@ -20,7 +20,7 @@ node src/server.js
 
 **Expected Output:**
 ```
-QorID Backend running on port 3001
+QOR ID Backend running on port 3001
 Database: ./data/abyssid.db
 ```
 

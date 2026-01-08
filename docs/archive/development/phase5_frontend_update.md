@@ -1,4 +1,4 @@
-# Phase 5: Frontend Updates for QorID Backend
+# Phase 5: Frontend Updates for QOR ID Backend
 
 ## Update AbyssStateMachine.ts
 

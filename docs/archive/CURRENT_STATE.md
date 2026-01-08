@@ -31,7 +31,7 @@
    - URL: http://localhost:4000/graphql (internal)
    - Status: ✅ Running (integrated with portal-web)
 
-4. **QorID Backend**
+4. **QOR ID Backend**
    - URL: http://localhost:3001/api/abyssid
    - Database: SQLite3
    - Status: ✅ Running (for local development)
@@ -82,8 +82,8 @@ DEMIURGE/
 │   │   ├── src/routes/     # BootScreen, LoginScreen, Desktop
 │   │   ├── src/components/ # UI components
 │   │   └── src/state/      # Zustand stores
-│   ├── abyssid-backend/    # QorID backend service (SQLite)
-│   ├── qorid-service/    # QorID service (TypeScript)
+│   ├── abyssid-backend/    # QOR ID backend service (SQLite)
+│   ├── qorid-service/    # QOR ID service (TypeScript)
 │   └── desktop-qt/         # Qt desktop app
 ├── indexer/
 │   └── qor-gateway/      # GraphQL gateway + indexer
@@ -177,7 +177,7 @@ See [Runtime Modules Documentation](overview/RUNTIME.md) for complete details.
   - Badge system (Luminary at 10,000 syzygy)
   - Archon status tracking
 
-- ✅ **QorID** - Off-chain authentication system
+- ✅ **QOR ID** - Off-chain authentication system
   - Username-based authentication
   - Seed phrase generation and recovery
   - Deterministic key derivation (Ed25519)
@@ -292,7 +292,7 @@ See [RPC API Documentation](api/RPC.md) and [GraphQL API Documentation](api/GRAP
    ```
    - GraphQL API at `http://localhost:4000/graphql`
 
-6. **Start QorID Backend (dev):**
+6. **Start QOR ID Backend (dev):**
    ```bash
    cd apps/abyssid-backend
    npm install

@@ -366,7 +366,7 @@ Set these **before building** (`pnpm build`):
 # RPC Endpoint (required)
 export VITE_DEMIURGE_RPC_URL=https://rpc.demiurge.cloud/rpc
 
-# QorID API (optional, defaults to local mode)
+# QOR ID API (optional, defaults to local mode)
 export VITE_QORID_MODE=remote
 export VITE_QORID_API_URL=https://YOUR_DOMAIN.com/api/abyssid
 ```

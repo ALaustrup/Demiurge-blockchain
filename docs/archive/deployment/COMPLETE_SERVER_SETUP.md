@@ -292,7 +292,7 @@ Should return JSON with chain information.
 # Chain logs
 sudo journalctl -u demiurge-chain -n 50 --no-pager
 
-# QorID logs
+# QOR ID logs
 sudo journalctl -u abyssid -n 50 --no-pager
 
 # DNS service logs
@@ -311,7 +311,7 @@ sudo journalctl -u qor-gateway -n 50 --no-pager
 Some services may need `.env` files:
 
 ```bash
-# QorID service
+# QOR ID service
 cd /opt/demiurge/qorid-service
 # Create .env file if needed
 sudo nano .env
@@ -385,7 +385,7 @@ curl -X POST http://localhost:8545/rpc \
   -H 'Content-Type: application/json' \
   -d '{"jsonrpc":"2.0","method":"getNetworkInfo","params":[],"id":1}'
 
-# QorID health
+# QOR ID health
 curl http://localhost:3001/health
 
 # DNS service

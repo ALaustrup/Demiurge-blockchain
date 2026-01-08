@@ -1,4 +1,4 @@
-# QorID Universal Authentication System
+# QOR ID Universal Authentication System
 
 ## Overview
 

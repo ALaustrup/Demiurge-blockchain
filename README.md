@@ -6,9 +6,9 @@ DEMIURGE is a sovereign L1 blockchain ecosystem designed for creators, gamers, m
 
 ## Core Universe Model
 
-### Identity: QorID
+### Identity: QOR ID
 
-**QorID** is the sovereign identity system on Demiurge. Every user has an QorID that serves as:
+**QOR ID** is the sovereign identity system on Demiurge. Every user has a QOR ID that serves as:
 - **Wallet Address**: Receive and send CGT
 - **Identity Profile**: Display name, bio, handle (@username)
 - **Syzygy Tracking**: Contribution score for seeding/serving other creators' content
@@ -16,15 +16,15 @@ DEMIURGE is a sovereign L1 blockchain ecosystem designed for creators, gamers, m
 
 ### Roles
 
-**QorID Users**
-- All users have an QorID identity
+**QOR ID Users**
+- All users have a QOR ID identity
 - Can browse Fabric, buy NFTs, explore worlds, hold CGT and assets
 - Can send and receive CGT transfers
 - Track Syzygy contributions
 
 **Archons (Creators)**
-- QorID users who have "ascended" to creator status
-- Have all QorID abilities plus:
+- QOR ID users who have "ascended" to creator status
+- Have all QOR ID abilities plus:
   - Upload to Fabric with revenue hooks
   - Mint D-GEN NFTs
   - List and sell in the Abyss
@@ -51,7 +51,7 @@ DEMIURGE is a sovereign L1 blockchain ecosystem designed for creators, gamers, m
   - Pays Forge compute workers
   - Denominates Abyss marketplace prices
   - Routes royalties to creators
-  - Transferable between QorIDs
+  - Transferable between QOR IDs
 
 All CGT amounts are stored as `u128` in smallest units (10^-8 precision). RPC methods return amounts as strings to avoid JavaScript number overflow.
 
@@ -64,7 +64,7 @@ Other tokens (e.g., ETH, USDC) can exist later via bridges/swap modules, but the
 - **Fabric** – content-addressed P2P network (libp2p), with Proof-of-Delivery rewards in CGT
 - **Abyss** – marketplace + dev hub: listing, royalties, licensing (NFT-based), GraphQL API for apps/games
 - **D-GEN NFT Standard (D-721)** – single flexible NFT standard with metadata profiles for art/audio, game items/worlds, plugins/tools, code modules
-- **UrgeID Registry** – on-chain identity system with profiles, handles, Syzygy scores, and badges
+- **QOR ID Registry** – on-chain identity system with profiles, handles, Syzygy scores, and badges
 - **Transaction Signing** – Ed25519 client-side signing with transaction hash tracking and status polling
 
 ## Repository Structure
@@ -78,8 +78,9 @@ DEMIURGE/
 ├── sdk/                     # TypeScript & Rust SDKs
 ├── apps/
 │   ├── portal-web/          # Next.js website + creator dashboard
-│   ├── qloud-os/      # QOR OS - Full-screen desktop environment
-│   └── desktop-qt/          # Qt 6.10 Pantheon Console
+│   ├── qloud-os/            # QLOUD OS - Web-based desktop environment
+│   ├── qor-desktop/         # QOR OS - Native Qt desktop client
+│   └── genesis-launcher/    # DEMIURGE QOR - Desktop launcher
 ├── deploy/                  # Deployment scripts and configs
 ├── other/                   # Legacy code and experimental features
 │   └── legacy-runtime-stubs/ # Legacy placeholder runtime crates (superseded)

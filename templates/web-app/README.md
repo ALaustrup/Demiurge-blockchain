@@ -46,13 +46,13 @@ Full-featured Next.js + TypeScript dApp template for building on Demiurge Blockc
 src/
 ├── app/
 │   ├── page.tsx          # Home page
-│   ├── qorid/           # QorID page
+│   ├── qorid/           # QOR ID page
 │   ├── wallet/             # Wallet page
 │   ├── nfts/               # NFT gallery
 │   ├── marketplace/        # Marketplace
 │   └── chat/               # Chat interface
 ├── hooks/
-│   └── useQorID.ts       # QorID hook
+│   └── useQorID.ts       # QOR ID hook
 └── lib/
     └── sdk.ts              # SDK initialization
 ```

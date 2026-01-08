@@ -61,7 +61,7 @@ I've created a complete deployment guide and all necessary scripts for deploying
 - Wires ShaderPlane to audio data
 - Adds background music support structure
 
-### Phase 5: QorID Backend
+### Phase 5: QOR ID Backend
 - Creates SQLite database schema
 - Implements REST API endpoints:
   - `/api/qorid/check` - Username availability
@@ -131,7 +131,7 @@ I've created a complete deployment guide and all necessary scripts for deploying
 
 ## Key Implementation Details
 
-### QorID Backend API
+### QOR ID Backend API
 
 **Base URL**: `http://localhost:3001` (or your domain)
 
@@ -157,7 +157,7 @@ I've created a complete deployment guide and all necessary scripts for deploying
 NEXT_PUBLIC_QORID_API_URL=http://localhost:3001
 ```
 
-**QorID Backend** (`.env`):
+**QOR ID Backend** (`.env`):
 ```env
 PORT=3001
 DB_PATH=./data/abyssid.db

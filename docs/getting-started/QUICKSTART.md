@@ -79,7 +79,7 @@ pnpm dev
 ```
 Opens at http://localhost:3000
 
-**QorID Service** (Auth API):
+**QOR ID Service** (Auth API):
 ```bash
 cd apps/qorid-service
 pnpm dev

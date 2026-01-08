@@ -149,7 +149,7 @@
 - Archon AI integration
 - Fabric visualization
 
-#### 3. QorID Service (`apps/qorid-service/`)
+#### 3. QOR ID Service (`apps/qorid-service/`)
 
 **Technology**: Node.js, TypeScript, Express, SQLite, Zod
 
@@ -317,7 +317,7 @@
 - Badges (achievement markers)
 - Role flags (Archon status)
 
-### QorID
+### QOR ID
 
 **QOR OS Identity Layer**:
 - Username + public key identity

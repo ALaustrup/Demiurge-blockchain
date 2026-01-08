@@ -22,7 +22,7 @@ demiurge abyss init --install        # Install all dependencies
 demiurge abyss init --directories    # Create necessary directories
 ```
 
-### QorID Operations
+### QOR ID Operations
 
 ```bash
 # Generate a new QorID

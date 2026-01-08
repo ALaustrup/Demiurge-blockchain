@@ -43,7 +43,7 @@
 
 ### **Services Configured:**
 1. **Demiurge Portal Web** (Next.js) - Port 3000
-2. **QorID Backend** (Node.js) - Port 3001
+2. **QOR ID Backend** (Node.js) - Port 3001
 3. **QOR Gateway** (GraphQL) - Port 4000
 4. **NGINX** (Reverse Proxy) - Port 80/443
 5. **PM2** (Process Manager)

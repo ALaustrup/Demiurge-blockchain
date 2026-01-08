@@ -1,4 +1,4 @@
-# QorID Authentication System
+# QOR ID Authentication System
 
 **Last Updated**: January 5, 2026
 
@@ -19,7 +19,7 @@ QorID is the authentication system used in QOR OS and the Fracture Portal. It pr
 
 ### Components
 
-1. **QorID Backend** (`apps/abyssid-backend/`)
+1. **QOR ID Backend** (`apps/abyssid-backend/`)
    - Node.js/Express server
    - SQLite3 database
    - REST API endpoints
@@ -27,7 +27,7 @@ QorID is the authentication system used in QOR OS and the Fracture Portal. It pr
    - Identity registration
    - Public key storage
 
-2. **QorID Service** (`apps/qorid-service/`)
+2. **QOR ID Service** (`apps/qorid-service/`)
    - TypeScript service layer
    - Key derivation utilities
    - Wallet integration

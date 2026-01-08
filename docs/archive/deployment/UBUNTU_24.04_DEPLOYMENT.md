@@ -226,7 +226,7 @@ sudo systemctl restart demiurge-chain abyssid dns-service qor-gateway
 # Chain logs
 sudo journalctl -u demiurge-chain -f
 
-# QorID logs
+# QOR ID logs
 sudo journalctl -u abyssid -f
 
 # DNS service logs

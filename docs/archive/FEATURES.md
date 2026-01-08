@@ -59,7 +59,7 @@
 ### Docker Support
 - **Development Containers**: Docker Compose setup for local development
 - **User Workspaces**: Isolated development environments
-- **Service Orchestration**: Chain, QorID Service, and Portal containers
+- **Service Orchestration**: Chain, QOR ID Service, and Portal containers
 
 ## Application Categories
 

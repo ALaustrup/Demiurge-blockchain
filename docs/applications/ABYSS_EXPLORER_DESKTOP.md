@@ -73,7 +73,7 @@ apps/abyss-explorer-desktop/
 │   ├── BrowserView.h
 │   ├── SystemTray.cpp          # System tray
 │   ├── SystemTray.h
-│   ├── QorIDManager.cpp      # QorID native integration
+│   ├── QorIDManager.cpp      # QOR ID native integration
 │   ├── QorIDManager.h
 │   ├── WalletBridge.cpp        # Wallet native bridge
 │   ├── WalletBridge.h

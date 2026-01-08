@@ -164,7 +164,7 @@ All Fracture v1 components have been refined to match the dark, ancient, hostile
 ## Backend Services
 
 **All backend processes remain unchanged:**
-- QorID Backend (port 3001) - Still works
+- QOR ID Backend (port 3001) - Still works
 - QOR Gateway (port 4000) - Still works
 - Demiurge Chain (port 8545) - Still works (optional)
 

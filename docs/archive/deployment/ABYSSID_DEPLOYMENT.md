@@ -1,4 +1,4 @@
-# QorID Service Deployment Guide
+# QOR ID Service Deployment Guide
 
 This guide covers deploying the QorID backend service alongside the Demiurge node and QOR OS portal.
 
@@ -77,7 +77,7 @@ pm2 startup
 Add the following to your nginx configuration (e.g., `/etc/nginx/sites-available/demiurge.cloud`):
 
 ```nginx
-# QorID API reverse proxy
+# QOR ID API reverse proxy
 location /api/qorid/ {
     proxy_pass http://127.0.0.1:8082/api/qorid/;
     proxy_set_header Host $host;

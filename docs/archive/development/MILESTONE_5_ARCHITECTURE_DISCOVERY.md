@@ -33,7 +33,7 @@
 ### Integration Points
 - GraphQL client: `lib/graphql.ts` → QOR Gateway (port 4000)
 - RPC client: `lib/rpc.ts` → Chain Node (port 8545)
-- QorID API: Direct fetch → QorID Backend (port 3001)
+- QorID API: Direct fetch → QOR ID Backend (port 3001)
 
 ---
 
@@ -41,7 +41,7 @@
 
 ### Services
 
-#### 1. QorID Backend (`apps/abyssid-backend/`)
+#### 1. QOR ID Backend (`apps/abyssid-backend/`)
 - **Stack:** Express.js + SQLite
 - **Port:** 3001
 - **Database:** `data/abyssid.db`
@@ -94,7 +94,7 @@
    - Add queries/mutations for timeline and ArchonAI
    - Extend SQLite schema
 
-2. **Extend QorID Backend:**
+2. **Extend QOR ID Backend:**
    - Add REST endpoints for events/snapshots (or use GraphQL)
    - Add ArchonAI context aggregation service
 
@@ -111,7 +111,7 @@
 2. Components call `lib/graphql.ts` or `lib/rpc.ts`
 3. GraphQL → QOR Gateway (port 4000)
 4. RPC → Chain Node (port 8545)
-5. Direct fetch → QorID Backend (port 3001)
+5. Direct fetch → QOR ID Backend (port 3001)
 
 ### New Flow (Milestone 5)
 1. **Ritual Engine:**

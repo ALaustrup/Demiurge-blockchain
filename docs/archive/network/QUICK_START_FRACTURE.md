@@ -11,13 +11,13 @@
 This script will:
 - ✅ Check and install dependencies
 - ✅ Initialize QorID database
-- ✅ Start QorID Backend (port 3001)
+- ✅ Start QOR ID Backend (port 3001)
 - ✅ Start Portal Web (port 3000)
 - ✅ Open separate windows for each service
 
 ### **Option 2: Manual Start**
 
-#### **1. Start QorID Backend**
+#### **1. Start QOR ID Backend**
 
 ```powershell
 cd apps/abyssid-backend
@@ -28,7 +28,7 @@ node src/server.js
 
 **Expected Output:**
 ```
-QorID Backend running on port 3001
+QOR ID Backend running on port 3001
 Database: ./data/abyssid.db
 ```
 
@@ -76,7 +76,7 @@ http://localhost:3000
 
 ## 🔍 **Verify Services**
 
-### **Check QorID Backend:**
+### **Check QOR ID Backend:**
 ```powershell
 curl http://localhost:3001/health
 # Expected: {"status":"ok","service":"abyssid-backend"}

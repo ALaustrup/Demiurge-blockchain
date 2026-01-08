@@ -136,7 +136,7 @@ See `scripts/phase4_audio_implementation.md` for detailed code changes.
 
 ---
 
-## Phase 5: QorID Backend & Real ID Binding
+## Phase 5: QOR ID Backend & Real ID Binding
 
 **Set up backend:**
 
@@ -260,7 +260,7 @@ pm2 monit  # Real-time monitoring
 - Check NGINX config: `sudo nginx -t`
 - Check NGINX logs: `sudo tail -f /var/log/nginx/demiurge-portal-error.log`
 
-### QorID backend not responding
+### QOR ID backend not responding
 - Check service: `pm2 status abyssid-backend`
 - Check logs: `pm2 logs abyssid-backend`
 - Test endpoint: `curl http://localhost:3001/health`

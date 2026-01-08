@@ -58,7 +58,7 @@
 
 ### Backend Services
 
-#### QorID Service
+#### QOR ID Service
 - **Runtime**: Node.js 20+
 - **Framework**: Express
 - **Database**: SQLite
@@ -139,7 +139,7 @@ DEMIURGE/
 │   │   └── src/                   # React components, stores, services
 │   ├── portal-web/                # Legacy Next.js portal
 │   ├── qorid-service/           # Identity backend service
-│   ├── abyssid-backend/           # QorID backend
+│   ├── abyssid-backend/           # QOR ID backend
 │   ├── dns-service/               # DNS resolution service
 │   ├── desktop/                   # QML desktop app
 │   └── desktop-qt/                # Qt Widgets desktop app

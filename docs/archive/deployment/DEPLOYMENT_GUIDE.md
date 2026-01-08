@@ -359,7 +359,7 @@ The audio engine scaffolding is already in place. We need to:
 
 ---
 
-## Phase 5: QorID Backend & Real ID Binding
+## Phase 5: QOR ID Backend & Real ID Binding
 
 ### Step 5.1: Choose Database
 

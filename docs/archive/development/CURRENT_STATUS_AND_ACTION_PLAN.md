@@ -34,7 +34,7 @@
 #### Deployment Infrastructure
 - ✅ **7 Deployment Scripts** - Phase 0-7 automation scripts
 - ✅ **Complete Documentation** - `COMPLETE_DEPLOYMENT_INSTRUCTIONS.md`
-- ✅ **QorID Backend** - Basic Express server scaffolded
+- ✅ **QOR ID Backend** - Basic Express server scaffolded
 
 ---
 
@@ -63,7 +63,7 @@
 
 ---
 
-### Phase 5: QorID Backend Integration ⚠️ **HIGH PRIORITY**
+### Phase 5: QOR ID Backend Integration ⚠️ **HIGH PRIORITY**
 
 **Status:** Backend scaffolded, frontend needs connection
 
@@ -140,7 +140,7 @@
 
 ---
 
-### **Step 2: Complete Phase 5 - QorID Backend** (2-3 hours)
+### **Step 2: Complete Phase 5 - QOR ID Backend** (2-3 hours)
 
 **Priority:** HIGH - Core identity functionality
 
@@ -195,7 +195,7 @@
 1. **Start All Services**
    - Chain: `cargo run --bin demiurge-chain` (or existing start script)
    - QOR Gateway: `cd indexer/qor-gateway && npm start`
-   - QorID Backend: `cd apps/abyssid-backend && node src/server.js`
+   - QOR ID Backend: `cd apps/abyssid-backend && node src/server.js`
    - Portal: `cd apps/portal-web && pnpm dev`
 
 2. **Test Fracture Portal**
