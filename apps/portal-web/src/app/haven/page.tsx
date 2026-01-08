@@ -2,6 +2,7 @@
 
 import { FractureShell } from "@/components/fracture/FractureShell";
 import { HeroPanel } from "@/components/fracture/HeroPanel";
+import { NftPromoCard } from "@/components/promo/NftPromoCard";
 import Link from "next/link";
 import { Home, User, Fingerprint, Key, Calendar, LogOut, Code, Sparkles, BarChart3, FolderKanban, Coins, Send, History, Lock, Eye, EyeOff, Download, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { useQorID } from "@/lib/fracture/identity/QorIDContext";
@@ -479,6 +480,14 @@ export default function HavenPage() {
       />
 
       <div className="space-y-6">
+        {/* NFT Promo Card - Only for logged in users */}
+        {identity && (
+          <NftPromoCard 
+            userAddress={identity.address} 
+            username={identity.username}
+          />
+        )}
+
         {/* Chain Node Error Banner */}
         {chainError && (
           <motion.div
