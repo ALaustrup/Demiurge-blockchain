@@ -36,15 +36,8 @@ const rajdhani = Rajdhani({
 
 export const metadata: Metadata = {
   title: "Demiurge — Sovereign Digital Pantheon",
-  description: "A sovereign L1 and creator economy for Archons and Nomads.",
+  description: "A sovereign L1 blockchain and creator economy. Build with QOR ID, launch with DEMIURGE QOR, create on QLOUD OS.",
   manifest: "/manifest.json",
-  themeColor: "#020617",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 5,
-    userScalable: true,
-  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -59,6 +52,14 @@ export const metadata: Metadata = {
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
     ],
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: "#020617",
 };
 
 export default function RootLayout({

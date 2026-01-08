@@ -40,7 +40,7 @@ export function HeroPanel({
       >
         {/* Overline */}
         <div className="text-xs sm:text-sm text-zinc-500 font-mono tracking-widest mb-4 text-center">
-          A B Y S S  OS
+          Q L O U D  OS
         </div>
 
         {/* Main Title */}
@@ -76,7 +76,7 @@ export function HeroPanel({
                 fontWeight: 700,
               }}
             >
-              Enter the Abyss
+              Enter QOR Realm
             </button>
             <Link
               href="/scrolls"
