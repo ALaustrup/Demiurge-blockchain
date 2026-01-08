@@ -4,9 +4,9 @@ import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useAbyssStateMachine } from "./AbyssStateMachine";
+import { useQorStateMachine } from "./QorStateMachine";
 import { ShaderPlane } from "./ShaderPlane";
-import { useAbyssReactive } from "@/lib/fracture/audio/AbyssReactive";
+import { useQorReactive } from "@/lib/fracture/audio/QorReactive";
 import { useQorID } from "@/lib/fracture/identity/QorIDContext";
 import { useAudioEngine } from "@/lib/fracture/audio/AudioContextProvider";
 
@@ -29,13 +29,13 @@ export function QorIDDialog({ open, onClose }: QorIDDialogProps) {
     startBinding,
     confirmAndProceed,
     verifyLogin,
-  } = useAbyssStateMachine();
+  } = useQorStateMachine();
 
   // Get audio engine for background ambience
   const { startAudio, isPlaying } = useAudioEngine();
 
   // Get audio-reactive values for shader
-  const reactive = useAbyssReactive(state);
+  const reactive = useQorReactive(state);
 
   // Start audio when dialog opens (if not already playing)
   useEffect(() => {

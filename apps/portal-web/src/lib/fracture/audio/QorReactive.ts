@@ -2,15 +2,15 @@
 
 import { useMemo } from "react";
 import { useAudioSpectrum } from "./useAudioSpectrum";
-import type { AbyssState } from "@/components/fracture/AbyssStateMachine";
+import type { QorState } from "@/components/fracture/QorStateMachine";
 
 /**
- * useAbyssReactive
+ * useQorReactive
  * 
  * Audio-reactive hook specifically tuned for QorID ritual states.
  * Maps frequency bands to semantic values for ritual animations.
  */
-export function useAbyssReactive(state: AbyssState) {
+export function useQorReactive(state: QorState) {
   const { low, mid, high, isActive } = useAudioSpectrum();
 
   const reactive = useMemo(() => {
@@ -60,7 +60,7 @@ export function useAbyssReactive(state: AbyssState) {
         break;
 
       case "accept":
-        // Deep collapse → slow expansion
+        // Deep collapse + slow expansion
         modalScale = 0.95 + lowNorm * 0.1;
         textShimmer = (lowNorm + midNorm) * 0.4;
         pulseEvent = lowNorm > 0.6;
@@ -97,4 +97,3 @@ export function useAbyssReactive(state: AbyssState) {
 
   return reactive;
 }
-

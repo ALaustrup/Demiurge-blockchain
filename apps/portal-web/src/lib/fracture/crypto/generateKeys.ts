@@ -6,7 +6,7 @@
  * TODO: Replace this stub with proper Ed25519 keypair generation and secure seed handling.
  */
 
-export interface GeneratedAbyssIdentity {
+export interface GeneratedQorIdentity {
   publicKey: string;
   privateKey: string;
   seedPhrase: string;
@@ -54,8 +54,8 @@ export async function deriveKeysFromSeed(seedPhrase: string): Promise<{ publicKe
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 
-  const publicKey = `ABYSS-PUB-${hexString.substring(0, 32)}`;
-  const privateKey = `ABYSS-PRIV-${hexString.substring(32, 64)}`;
+  const publicKey = `QOR-PUB-${hexString.substring(0, 32)}`;
+  const privateKey = `QOR-PRIV-${hexString.substring(32, 64)}`;
 
   return { publicKey, privateKey };
 }
@@ -64,7 +64,7 @@ export async function deriveKeysFromSeed(seedPhrase: string): Promise<{ publicKe
  * Generate QorID identity (creates new seed phrase and derives keys from it)
  * This ensures the seed phrase can be used to recover the keys later.
  */
-export async function generateKeys(username: string): Promise<GeneratedAbyssIdentity> {
+export async function generateKeys(username: string): Promise<GeneratedQorIdentity> {
   // Generate seed phrase first (8 words)
   const seedWords: string[] = [];
   const wordCount = 8;

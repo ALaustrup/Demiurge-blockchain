@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-export interface AbyssIdentity {
+export interface QorIdentity {
   username: string;
   address: string;
   publicKey: string;
@@ -12,21 +12,21 @@ export interface AbyssIdentity {
 }
 
 interface QorIDContextType {
-  identity: AbyssIdentity | null;
-  setIdentity: (identity: AbyssIdentity | null) => void;
+  identity: QorIdentity | null;
+  setIdentity: (identity: QorIdentity | null) => void;
   clearIdentity: () => void;
 }
 
 const QorIDContext = createContext<QorIDContextType | undefined>(undefined);
 
 export function QorIDProvider({ children }: { children: ReactNode }) {
-  const [identity, setIdentityState] = useState<AbyssIdentity | null>(null);
+  const [identity, setIdentityState] = useState<QorIdentity | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('abyssid_identity');
+      const stored = localStorage.getItem('qorid_identity');
       if (stored) {
         const parsed = JSON.parse(stored);
         setIdentityState(parsed);
@@ -38,16 +38,16 @@ export function QorIDProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const setIdentity = (newIdentity: AbyssIdentity | null) => {
+  const setIdentity = (newIdentity: QorIdentity | null) => {
     setIdentityState(newIdentity);
     if (newIdentity) {
       try {
-        localStorage.setItem('abyssid_identity', JSON.stringify(newIdentity));
+        localStorage.setItem('qorid_identity', JSON.stringify(newIdentity));
       } catch (e) {
         console.error('Failed to save identity to localStorage:', e);
       }
     } else {
-      localStorage.removeItem('abyssid_identity');
+      localStorage.removeItem('qorid_identity');
     }
   };
 

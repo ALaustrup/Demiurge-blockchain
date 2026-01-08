@@ -20,7 +20,7 @@ import {
   signTransactionRpc,
   setUsername,
   resolveUsername,
-  getAbyssIdProgress,
+  getQorIdProgress,
   getNftsByOwner,
   isDevBadgeNft,
   normalizeAddressForChain,
@@ -201,7 +201,7 @@ export default function HavenPage() {
 
       // Load progress
       try {
-        const progressData = await getAbyssIdProgress(normalizedAddr);
+        const progressData = await getQorIdProgress(normalizedAddr);
         setProgress(progressData);
       } catch (err) {
         console.warn("Failed to load progress:", err);

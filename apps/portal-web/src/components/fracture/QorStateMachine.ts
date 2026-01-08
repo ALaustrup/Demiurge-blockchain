@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { generateKeys, deriveKeysFromSeed, type GeneratedAbyssIdentity } from "@/lib/fracture/crypto/generateKeys";
+import { generateKeys, deriveKeysFromSeed, type GeneratedQorIdentity } from "@/lib/fracture/crypto/generateKeys";
 import { useQorID } from "@/lib/fracture/identity/QorIDContext";
 
-export type AbyssState = "idle" | "checking" | "reject" | "accept" | "binding" | "confirm" | "login" | "verifying";
+export type QorState = "idle" | "checking" | "reject" | "accept" | "binding" | "confirm" | "login" | "verifying";
 
-export interface AbyssContext {
+export interface QorContext {
   username: string;
   seedPhrase?: string;
   publicKey?: string;
@@ -26,15 +26,15 @@ const getApiUrl = () => {
 };
 
 /**
- * useAbyssStateMachine
+ * useQorStateMachine
  * 
  * React hook for managing the QorID ritual state machine.
  * Controls the flow: idle → checking → reject|accept → binding → confirm
  */
-export function useAbyssStateMachine() {
+export function useQorStateMachine() {
   const { setIdentity } = useQorID();
-  const [state, setState] = useState<AbyssState>("idle");
-  const [context, setContext] = useState<AbyssContext>({
+  const [state, setState] = useState<QorState>("idle");
+  const [context, setContext] = useState<QorContext>({
     username: "",
   });
 

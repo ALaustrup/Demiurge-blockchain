@@ -454,10 +454,10 @@ export async function getUrgeIdProfile(
 /**
  * Get QorID progression info (level, thresholds, progress).
  */
-export async function getAbyssIdProgress(
+export async function getQorIdProgress(
   address: string
 ): Promise<QorIDProgress> {
-  return callRpc<QorIDProgress>("abyssid_getProgress", {
+  return callRpc<QorIDProgress>("qorid_getProgress", {
     address,
   });
 }
