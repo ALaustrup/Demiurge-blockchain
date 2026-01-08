@@ -66,8 +66,18 @@ Submit a signed transaction.
 #### `cgt_isArchon`
 Check if address has Archon status.
 
-#### `abyssid_get`
-Get QorID profile for address.
+#### `qorid_get`
+Get QOR ID profile for address.
+
+```json
+{
+  "method": "qorid_get",
+  "params": {"address": "0x..."}
+}
+```
+
+#### `qorid_getProgress`
+Get QOR ID progression info (level, thresholds, progress).
 
 ### NFTs
 
