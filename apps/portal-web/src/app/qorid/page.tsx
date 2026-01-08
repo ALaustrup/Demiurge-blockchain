@@ -18,7 +18,7 @@ import {
   signTransactionRpc,
   setUsername,
   resolveUsername,
-  getAbyssIdProgress,
+  getQorIdProgress,
   devClaimDevNft,
   isDevBadgeNft,
   type QorIDProfile,
@@ -27,7 +27,7 @@ import {
 } from "@/lib/rpc";
 import { graphqlQuery } from "@/lib/graphql";
 import { signTransaction } from "@/lib/signing";
-import { formatAbyssId } from "@/lib/abyssid";
+import { formatQorId } from "@/lib/qorid";
 import { exportVault, importVault } from "@/lib/vault";
 import {
   saveTransaction,
@@ -239,7 +239,7 @@ export default function QorIDPage() {
 
       // Load progression data
       try {
-        const progressData = await getAbyssIdProgress(addr);
+        const progressData = await getQorIdProgress(addr);
         setProgress(progressData);
       } catch (err) {
         console.error("Failed to load progression:", err);

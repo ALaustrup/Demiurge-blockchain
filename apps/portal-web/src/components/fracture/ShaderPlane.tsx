@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { AbyssState } from "./AbyssStateMachine";
+import type { QorState } from "./QorStateMachine";
 import type { RitualEffects } from "@/lib/rituals/ritualTypes";
 
 interface ShaderPlaneProps {
-  state: AbyssState;
+  state: QorState;
   className?: string;
   // Audio-reactive values (optional - falls back to state-based if not provided)
   reactive?: {
