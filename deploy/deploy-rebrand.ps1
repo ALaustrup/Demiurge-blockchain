@@ -18,7 +18,8 @@ Write-Host ""
 # Helper function to run SSH commands
 function Invoke-SSH {
     param([string]$Command)
-    ssh $Server "bash -l -c `"$Command`""
+    $escapedCommand = $Command -replace '"', '\"'
+    ssh $Server "bash -l -c '$Command'"
     if ($LASTEXITCODE -ne 0) {
         throw "Command failed with exit code $LASTEXITCODE"
     }
@@ -114,7 +115,7 @@ try {
     Write-Host "Error: $_" -ForegroundColor Red
     Write-Host ""
     Write-Host "Check logs:" -ForegroundColor Yellow
-    Write-Host "  ssh $Server 'tail -100 ~/.npm/_logs/*.log'" -ForegroundColor White
+    Write-Host "  ssh $Server tail -100 ~/.npm/_logs/*.log" -ForegroundColor White
     Write-Host ""
     exit 1
 }
