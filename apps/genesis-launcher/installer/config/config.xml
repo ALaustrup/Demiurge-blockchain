@@ -2,32 +2,28 @@
 <Installer>
     <Name>DEMIURGE QOR</Name>
     <Version>1.0.0</Version>
-    <Title>DEMIURGE QOR Installer</Title>
-    <Publisher>Demiurge</Publisher>
+    <Title>DEMIURGE QOR - Gateway to the Blockchain</Title>
+    <Publisher>Demiurge Blockchain</Publisher>
     <ProductUrl>https://demiurge.cloud</ProductUrl>
-    <!-- Logo and icons are optional - removed to prevent crashes if missing -->
+    <StartMenuDir>DEMIURGE</StartMenuDir>
     
     <!-- Installation directory -->
     <TargetDir>@ApplicationsDir@/Demiurge/QOR</TargetDir>
     
-    <!-- Start menu directory (Windows) -->
-    <StartMenuDir>DEMIURGE</StartMenuDir>
-    
-    <!-- Allow non-ASCII characters in paths -->
-    <AllowNonAsciiCharacters>true</AllowNonAsciiCharacters>
-    
-    <!-- Allow space in path -->
-    <AllowSpaceInPath>true</AllowSpaceInPath>
-    
     <!-- Uninstaller name -->
     <MaintenanceToolName>DemiurgeQOR-Uninstall</MaintenanceToolName>
     
-    <!-- Control script - optional, removed to prevent crashes if missing -->
+    <!-- Path settings -->
+    <AllowNonAsciiCharacters>true</AllowNonAsciiCharacters>
+    <AllowSpaceInPath>true</AllowSpaceInPath>
     
-    <!-- Wizard pages -->
-    <WizardStyle>Classic</WizardStyle>
+    <!-- Wizard appearance -->
+    <WizardStyle>Modern</WizardStyle>
+    <WizardDefaultWidth>900</WizardDefaultWidth>
+    <WizardDefaultHeight>700</WizardDefaultHeight>
     
-    <!-- Wizard dimensions -->
-    <WizardDefaultWidth>800</WizardDefaultWidth>
-    <WizardDefaultHeight>600</WizardDefaultHeight>
+    <!-- Control script for custom pages -->
+    <ControlScript>controlscript.qs</ControlScript>
+    
+    <!-- Control script handles page customization -->
 </Installer>

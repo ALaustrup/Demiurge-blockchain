@@ -17,7 +17,7 @@ Component.prototype.createOperations = function() {
         
         // Get installation directory
         var installDir = installer.value("TargetDir");
-        var executable = "DemiurgeQOR";
+        var executable = "GenesisLauncher";  // Correct executable name
         
         // Platform-specific operations
         if (systemInfo.kernelType === "winnt") {
@@ -27,19 +27,17 @@ Component.prototype.createOperations = function() {
             // Create Start Menu shortcuts
             component.addOperation("CreateShortcut",
                 "@TargetDir@/" + executable,
-                "@StartMenuDir@/QOR Launcher.lnk",
+                "@StartMenuDir@/DEMIURGE QOR.lnk",
                 "workingDirectory=@TargetDir@",
-                "iconPath=@TargetDir@/qor.ico",
-                "description=Launch DEMIURGE QOR"
+                "description=Launch DEMIURGE QOR - Gateway to the Blockchain"
             );
             
-            // Create Desktop shortcut (optional)
+            // Create Desktop shortcut
             component.addOperation("CreateShortcut",
                 "@TargetDir@/" + executable,
                 "@DesktopDir@/DEMIURGE QOR.lnk",
                 "workingDirectory=@TargetDir@",
-                "iconPath=@TargetDir@/qor.ico",
-                "description=Launch DEMIURGE QOR"
+                "description=Launch DEMIURGE QOR - Gateway to the Blockchain"
             );
             
             // Add to Windows PATH
@@ -127,12 +125,12 @@ Component.prototype.beginUninstallation = function() {
         // Stop any running instances
         if (systemInfo.kernelType === "winnt") {
             component.addOperation("Execute",
-                "taskkill", "/F", "/IM", "DemiurgeQOR.exe",
+                "taskkill", "/F", "/IM", "GenesisLauncher.exe",
                 "UNDOEXECUTE", "echo", "Process was running"
             );
         } else {
             component.addOperation("Execute",
-                "killall", "DemiurgeQOR",
+                "killall", "GenesisLauncher",
                 "UNDOEXECUTE", "echo", "Process was running"
             );
         }
