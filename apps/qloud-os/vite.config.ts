@@ -29,7 +29,11 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: false
-  }
+    sourcemap: false,
+    // Ensure public assets (including video) are copied
+    copyPublicDir: true
+  },
+  // Public directory configuration
+  publicDir: 'public'
 })
 
