@@ -66,7 +66,7 @@ private:
     uint64_t tick_count_;
     double accumulated_time_;
     
-    // Placeholder for world state
+    // World state
     std::vector<std::string> event_history_;
 };
 

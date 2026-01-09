@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="qml/RecursionWorld.qml">qml/RecursionWorld.qml</file>
+        <file alias="qml/components/Entity3D.qml">qml/components/Entity3D.qml</file>
+        <file alias="qml/components/BlockchainHUD.qml">qml/components/BlockchainHUD.qml</file>
+    </qresource>
+</RCC>
