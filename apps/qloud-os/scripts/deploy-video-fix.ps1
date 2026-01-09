@@ -13,7 +13,10 @@ Write-Host "==========================================`n" -ForegroundColor Cyan
 
 # Step 1: Update Nginx config
 Write-Host "[1/3] Updating Nginx configuration..." -ForegroundColor Blue
-$nginxConfig = "apps\qloud-os\nginx-demiurge.cloud-https.conf"
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$qloudOsDir = Split-Path -Parent $scriptDir
+$projectRoot = Split-Path -Parent (Split-Path -Parent $qloudOsDir)
+$nginxConfig = Join-Path $qloudOsDir "nginx-demiurge.cloud-https.conf"
 if (Test-Path $nginxConfig) {
     scp $nginxConfig "${ServerUser}@${ServerIp}:/tmp/nginx-demiurge.cloud-https.conf"
     
@@ -39,14 +42,31 @@ if ($videoCheck -eq "EXISTS") {
 
 # Step 3: Copy video if needed
 Write-Host "`n[3/3] Copying video file..." -ForegroundColor Blue
-$localVideo = "apps\qloud-os\public\video\intro.mp4"
+$localVideo = Join-Path $qloudOsDir "public\video\intro.mp4"
+$distVideo = Join-Path $qloudOsDir "dist\video\intro.mp4"
+# Try dist first (built version), then public
+if (Test-Path $distVideo) {
+    $localVideo = $distVideo
+    Write-Host "Using video from dist folder" -ForegroundColor Gray
+} elseif (Test-Path $localVideo) {
+    Write-Host "Using video from public folder" -ForegroundColor Gray
+}
+
 if (Test-Path $localVideo) {
     # Ensure video directory exists on server
-    ssh "${ServerUser}@${ServerIp}" "mkdir -p ${DeployPath}/video"
+    ssh "${ServerUser}@${ServerIp}" "sudo mkdir -p ${DeployPath}/video && sudo chown ${ServerUser}:${ServerUser} ${DeployPath}/video"
     
     # Copy video
     scp $localVideo "${ServerUser}@${ServerIp}:${DeployPath}/video/intro.mp4"
-    Write-Host "✅ Video copied to server" -ForegroundColor Green
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "✅ Video copied to server" -ForegroundColor Green
+    } else {
+        Write-Host "⚠️  Video copy failed, trying with sudo..." -ForegroundColor Yellow
+        # Alternative: copy to temp then move with sudo
+        scp $localVideo "${ServerUser}@${ServerIp}:/tmp/intro.mp4"
+        ssh "${ServerUser}@${ServerIp}" "sudo mv /tmp/intro.mp4 ${DeployPath}/video/intro.mp4 && sudo chown ${ServerUser}:${ServerUser} ${DeployPath}/video/intro.mp4"
+        Write-Host "✅ Video copied to server (via /tmp)" -ForegroundColor Green
+    }
 } else {
     Write-Host "⚠️  Video file not found at: $localVideo" -ForegroundColor Yellow
     Write-Host "   Please ensure video is in public/video/intro.mp4" -ForegroundColor Yellow
