@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="MainWindow.qml">MainWindow.qml</file>
+        <file alias="components/TorrentItem.qml">components/TorrentItem.qml</file>
+    </qresource>
+</RCC>
