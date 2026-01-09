@@ -139,7 +139,7 @@ bool TorrentManager::addMagnetLink(const QString &magnetUriStr)
 #endif
 }
 
-bool TorrentManager::addTorrentFile(const QString &/*filePath*/)
+bool TorrentManager::addTorrentFile(const QString &filePath)
 {
 #ifdef TORRNT_LIBTORRENT_ENABLED
     if (!m_session) {
@@ -149,7 +149,8 @@ bool TorrentManager::addTorrentFile(const QString &/*filePath*/)
     
     try {
         libtorrent::add_torrent_params params;
-        params.ti = std::make_shared<libtorrent::torrent_info>(filePath.toStdString());
+        std::string filePathStr = filePath.toStdString();
+        params.ti = std::make_shared<libtorrent::torrent_info>(filePathStr);
         params.save_path = m_savePath.toStdString();
         
         libtorrent::error_code ec;
