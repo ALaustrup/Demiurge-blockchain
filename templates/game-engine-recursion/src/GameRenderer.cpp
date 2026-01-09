@@ -1,16 +1,11 @@
 #include "GameRenderer.h"
 #include "EntityManager.h"
-#include <QQuick3D>
-#include <QQuick3DNode>
 #include <QQmlContext>
 
 GameRenderer::GameRenderer(QQuickView *view, QObject *parent)
     : QObject(parent)
     , m_view(view)
     , m_entityManager(nullptr)
-    , m_sceneRoot(nullptr)
-    , m_camera(nullptr)
-    , m_light(nullptr)
 {
     setupScene();
 }
@@ -21,7 +16,7 @@ void GameRenderer::setupScene()
     // This class can manage dynamic entity rendering
 }
 
-void GameRenderer::update(double deltaTime)
+void GameRenderer::update(double /*deltaTime*/)
 {
     // Update rendering based on entity state
     if (m_entityManager) {

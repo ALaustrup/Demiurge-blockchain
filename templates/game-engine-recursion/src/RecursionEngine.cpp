@@ -39,7 +39,7 @@ void RecursionEngine::setupQmlEngine()
     m_view->rootContext()->setContextProperty("recursionEngine", this);
     
     // Set QML source
-    m_view->setSource(QUrl("qrc:/qml/RecursionWorld.qml"));
+    m_view->setSource(QUrl("qrc:/RecursionWorld.qml"));
     m_view->setResizeMode(QQuickView::SizeRootObjectToView);
     m_view->setTitle("Recursion Engine - Demiurge Blockchain");
     
@@ -232,7 +232,7 @@ void RecursionEngine::onBlockchainEvent(const QString &eventType, const QJsonObj
     applyChainEvent(eventType, eventData);
 }
 
-void RecursionEngine::onWorldLoaded(const QString &worldId, const QJsonObject &worldData)
+void RecursionEngine::onWorldLoaded(const QString &worldId, const QJsonObject &/*worldData*/)
 {
     loadWorld(worldId);
 }

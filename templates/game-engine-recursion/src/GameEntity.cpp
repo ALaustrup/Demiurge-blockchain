@@ -43,7 +43,7 @@ void GameEntity::setProperty(const QString &key, const QJsonValue &value)
     }
 }
 
-void GameEntity::update(double deltaTime)
+void GameEntity::update(double /*deltaTime*/)
 {
     // Entity-specific update logic
     // Can be extended with components (physics, animation, etc.)

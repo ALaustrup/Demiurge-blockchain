@@ -43,7 +43,7 @@ signals:
 
 private:
     quint64 m_nextEntityId;
-    QMap<quint64, std::unique_ptr<GameEntity>> m_entities;
+    QMap<quint64, GameEntity*> m_entities;
     QMap<QString, QVector<quint64>> m_entitiesByType;
 };
 

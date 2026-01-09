@@ -2,18 +2,6 @@
 #include "GameEntity.h"
 #include <QDebug>
 
-// Forward declaration - GameEntity will be implemented
-class GameEntity : public QObject {
-public:
-    GameEntity(quint64 id, const QString &type, const QJsonObject &props, QObject *parent = nullptr)
-        : QObject(parent), m_id(id), m_type(type), m_properties(props) {}
-    QString type() const { return m_type; }
-private:
-    quint64 m_id;
-    QString m_type;
-    QJsonObject m_properties;
-};
-
 EntityManager::EntityManager(QObject *parent)
     : QObject(parent)
     , m_nextEntityId(1)
@@ -29,8 +17,8 @@ quint64 EntityManager::createEntity(const QString &type, const QJsonObject &prop
 {
     quint64 id = m_nextEntityId++;
     
-    auto entity = std::make_unique<GameEntity>(id, type, properties);
-    m_entities[id] = std::move(entity);
+    auto *entity = new GameEntity(id, type, properties, this);
+    m_entities[id] = entity;
     m_entitiesByType[type].append(id);
     
     emit entityCreated(id, type);
@@ -41,28 +29,27 @@ void EntityManager::removeEntity(quint64 entityId)
 {
     if (!m_entities.contains(entityId)) return;
     
-    auto &entity = m_entities[entityId];
+    GameEntity *entity = m_entities[entityId];
     QString type = entity->type();
     
     m_entitiesByType[type].removeAll(entityId);
     m_entities.remove(entityId);
+    entity->deleteLater(); // Qt will handle deletion
     
     emit entityRemoved(entityId);
 }
 
 GameEntity* EntityManager::getEntity(quint64 entityId) const
 {
-    auto it = m_entities.find(entityId);
-    if (it != m_entities.end()) {
-        return it->get();
-    }
-    return nullptr;
+    return m_entities.value(entityId, nullptr);
 }
 
 void EntityManager::update(double deltaTime)
 {
-    for (auto &[id, entity] : m_entities) {
-        entity->update(deltaTime);
+    for (auto it = m_entities.begin(); it != m_entities.end(); ++it) {
+        if (it.value()) {
+            it.value()->update(deltaTime);
+        }
     }
 }
 

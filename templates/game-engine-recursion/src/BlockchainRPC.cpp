@@ -63,7 +63,8 @@ void BlockchainRPC::sendRequest(const QString &method, const QJsonValue &params,
     QJsonDocument doc(request);
     QByteArray data = doc.toJson(QJsonDocument::Compact);
     
-    QNetworkRequest req(QUrl(m_rpcUrl));
+    QUrl url(m_rpcUrl);
+    QNetworkRequest req(url);
     req.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     
     QNetworkReply *reply = m_networkManager->post(req, data);

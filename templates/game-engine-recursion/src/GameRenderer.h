@@ -7,9 +7,9 @@
 
 #include <QObject>
 #include <QQuickView>
-#include <QQuick3DNode>
-#include <QQuick3DPerspectiveCamera>
-#include <QQuick3DDirectionalLight>
+
+// Qt Quick 3D is handled in QML, not C++ headers
+// This class manages rendering coordination
 
 class EntityManager;
 
@@ -29,9 +29,7 @@ private:
     
     QQuickView *m_view;
     EntityManager *m_entityManager;
-    QQuick3DNode *m_sceneRoot;
-    QQuick3DPerspectiveCamera *m_camera;
-    QQuick3DDirectionalLight *m_light;
+    // 3D scene nodes are managed in QML
 };
 
 #endif // GAME_RENDERER_H

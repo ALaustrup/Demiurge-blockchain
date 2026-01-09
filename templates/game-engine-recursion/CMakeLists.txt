@@ -13,15 +13,28 @@ find_package(Qt6 REQUIRED COMPONENTS
     Gui
     Qml
     Quick
-    Quick3D
-    Quick3DRuntime
-    Quick3DAssetImport
     Network
     OpenGL
     OpenGLWidgets
     Multimedia
-    Gamepad
 )
+
+# Optional Qt 3D components
+find_package(Qt6 QUIET COMPONENTS Quick3D)
+if(Qt6Quick3D_FOUND)
+    message(STATUS "Qt Quick 3D found - 3D rendering enabled")
+    add_compile_definitions(RECURSION_QUICK3D_ENABLED)
+else()
+    message(WARNING "Qt Quick 3D not found - using basic rendering")
+    message(STATUS "Install Qt Quick 3D module for full 3D support")
+endif()
+
+# Optional components
+find_package(Qt6 QUIET COMPONENTS Gamepad)
+if(Qt6Gamepad_FOUND)
+    message(STATUS "Qt Gamepad found - gamepad support enabled")
+    add_compile_definitions(RECURSION_GAMEPAD_ENABLED)
+endif()
 
 # Source files
 set(SOURCES
@@ -30,6 +43,7 @@ set(SOURCES
     src/RecursionEngine.cpp
     src/BlockchainRPC.cpp
     src/EntityManager.cpp
+    src/GameEntity.cpp
     src/GameRenderer.cpp
 )
 
@@ -39,6 +53,7 @@ set(HEADERS
     src/RecursionEngine.h
     src/BlockchainRPC.h
     src/EntityManager.h
+    src/GameEntity.h
     src/GameRenderer.h
 )
 
@@ -56,15 +71,21 @@ target_link_libraries(recursion PRIVATE
     Qt6::Gui
     Qt6::Qml
     Qt6::Quick
-    Qt6::Quick3D
-    Qt6::Quick3DRuntime
-    Qt6::Quick3DAssetImport
     Qt6::Network
     Qt6::OpenGL
     Qt6::OpenGLWidgets
     Qt6::Multimedia
-    Qt6::Gamepad
 )
+
+# Optional Qt 3D
+if(Qt6Quick3D_FOUND)
+    target_link_libraries(recursion PRIVATE Qt6::Quick3D)
+endif()
+
+# Optional gamepad
+if(Qt6Gamepad_FOUND)
+    target_link_libraries(recursion PRIVATE Qt6::Gamepad)
+endif()
 
 # Include directories
 target_include_directories(recursion PRIVATE
@@ -72,11 +93,18 @@ target_include_directories(recursion PRIVATE
 )
 
 # Compiler options
-target_compile_options(recursion PRIVATE
-    -Wall
-    -Wextra
-    -Wpedantic
-)
+if(MSVC)
+    target_compile_options(recursion PRIVATE
+        /W4
+        /permissive-
+    )
+else()
+    target_compile_options(recursion PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+    )
+endif()
 
 # Windows-specific
 if(WIN32)

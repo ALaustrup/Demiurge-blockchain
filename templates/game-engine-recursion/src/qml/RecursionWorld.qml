@@ -5,10 +5,17 @@
  */
 
 import QtQuick
-import QtQuick3D
 import QtQuick.Controls
 import QtQuick.Layouts
 import "components"
+
+// Conditional import for Qt Quick 3D
+// If Quick3D is not available, we'll use Canvas/2D rendering
+try {
+    import QtQuick3D 1.0
+} catch(e) {
+    console.warn("Qt Quick 3D not available, using fallback rendering")
+}
 
 Window {
     id: root
