@@ -13,7 +13,7 @@ thiserror = { workspace = true }
 anyhow = { workspace = true }
 sha2 = { workspace = true }
 argon2 = "0.5"
-rocksdb = "0.22"
+rocksdb = "0.24"
 tokio = { version = "1.38", features = ["full"] }
 axum = { version = "0.8", features = ["json"] }
 tower = "0.5"
