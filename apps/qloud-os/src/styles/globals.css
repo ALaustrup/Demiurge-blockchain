@@ -37,7 +37,9 @@
 
 @layer base {
   body {
-    @apply bg-genesis-void text-genesis-text-primary overflow-hidden;
+    background-color: var(--genesis-void);
+    color: var(--genesis-text-primary);
+    overflow: hidden;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     /* Prevent mobile address bar collapse issues */
     height: 100dvh;
