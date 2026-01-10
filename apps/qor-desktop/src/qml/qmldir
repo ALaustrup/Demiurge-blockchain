@@ -1,2 +1,5 @@
 singleton Theme 1.0 Theme.qml
 GlassPane 1.0 GlassPane.qml
+InfinityDock 1.0 InfinityDock.qml
+BaseWidget 1.0 BaseWidget.qml
+LiquidWorkspace 1.0 LiquidWorkspace.qml

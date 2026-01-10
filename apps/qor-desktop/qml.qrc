@@ -9,6 +9,9 @@
         <file>src/qml/DesktopView.qml</file>
         <file>src/qml/Theme.qml</file>
         <file>src/qml/GlassPane.qml</file>
+        <file>src/qml/InfinityDock.qml</file>
+        <file>src/qml/BaseWidget.qml</file>
+        <file>src/qml/LiquidWorkspace.qml</file>
         <file>src/qml/qmldir</file>
         
         <!-- Components -->

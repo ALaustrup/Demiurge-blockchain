@@ -190,170 +190,32 @@ ApplicationWindow {
         // WORKSPACE (Widget Area)
         // ============================================
         
-        Item {
+        LiquidWorkspace {
             id: workspace
             anchors {
                 top: statusBar.bottom
                 left: parent.left
                 right: parent.right
                 bottom: infinityDock.top
+                margins: Theme.spacingMedium
             }
             
-            // Demo Glass Panel in center
-            GlassPane {
-                id: demoPanel
-                anchors.centerIn: parent
-                width: 600
-                height: 400
-                radius: Theme.borderRadiusLarge
-                
-                blurRadius: Theme.blurRadiusDefault
-                animated: true
-                showGlow: true
-                glowColor: Theme.primaryAccent
-                
-                Column {
-                    anchors.centerIn: parent
-                    spacing: Theme.spacingLarge
-                    
-                    // Title
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: "QOR Desktop"
-                        font.family: Theme.fontFamilyDisplay
-                        font.pixelSize: Theme.fontSizeXL
-                        font.weight: Font.Bold
-                        color: Theme.textPrimary
-                        
-                        layer.enabled: true
-                        layer.effect: MultiEffect {
-                            blurEnabled: true
-                            blur: 0.3
-                            blurMax: 8
-                        }
-                    }
-                    
-                    // Subtitle
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: "Ancient Code Meets Ethereal Glass"
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSizeMedium
-                        color: Theme.textSecondary
-                    }
-                    
-                    // Accent line
-                    Rectangle {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        width: 200
-                        height: 2
-                        
-                        gradient: Gradient {
-                            orientation: Gradient.Horizontal
-                            GradientStop { position: 0.0; color: "transparent" }
-                            GradientStop { position: 0.5; color: Theme.primaryAccent }
-                            GradientStop { position: 1.0; color: "transparent" }
-                        }
-                        
-                        layer.enabled: true
-                        layer.effect: MultiEffect {
-                            blurEnabled: true
-                            blur: 0.8
-                            blurMax: 12
-                        }
-                    }
-                    
-                    // Status text
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: "Glass Engine v1.0.0 - Phase 1 Foundation"
-                        font.family: Theme.fontFamilyMono
-                        font.pixelSize: Theme.fontSizeSmall
-                        color: Theme.primaryAccent
-                        opacity: 0.7
-                    }
-                }
-                
-                // Pulsing animation on glass
-                PropertyAnimation on pulseIntensity {
-                    from: 0.0
-                    to: 0.3
-                    duration: 2000
-                    easing.type: Easing.InOutSine
-                    loops: Animation.Infinite
-                    running: true
-                }
-            }
+            gridSize: 100
+            liquidMotion: true
+            showGrid: false
         }
         
         // ============================================
         // INFINITY DOCK (Bottom Navigation)
         // ============================================
         
-        Rectangle {
+        InfinityDock {
             id: infinityDock
-            width: parent.width * 0.6
-            height: 80
-            radius: height / 2
-            z: Theme.zIndexDock
             
             anchors {
                 horizontalCenter: parent.horizontalCenter
                 bottom: parent.bottom
                 bottomMargin: Theme.spacingLarge
-            }
-            
-            // Glass background
-            GlassPane {
-                anchors.fill: parent
-                blurRadius: Theme.blurRadiusLight
-                tintColor: Theme.glassTintDark
-                borderGlow: Theme.glowIntensityMedium
-                glowColor: Theme.primaryAccent
-                radius: parent.radius
-            }
-            
-            // Dock content
-            Row {
-                anchors.centerIn: parent
-                spacing: Theme.spacingLarge
-                
-                // Placeholder dock items
-                Repeater {
-                    model: ["⚡", "🎨", "⚙️", "📊", "🔮"]
-                    
-                    Rectangle {
-                        width: 50
-                        height: 50
-                        radius: Theme.borderRadiusMedium
-                        color: Qt.rgba(0.2, 0.2, 0.2, 0.5)
-                        border.width: 2
-                        border.color: Theme.primaryAccent
-                        
-                        Text {
-                            anchors.centerIn: parent
-                            text: modelData
-                            font.pixelSize: 24
-                        }
-                        
-                        // Hover effect
-                        MouseArea {
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            
-                            onEntered: parent.scale = 1.2
-                            onExited: parent.scale = 1.0
-                        }
-                        
-                        Behavior on scale {
-                            SpringAnimation {
-                                spring: Theme.springSnappy
-                                damping: Theme.dampingSnappy
-                                epsilon: 0.01
-                            }
-                        }
-                    }
-                }
             }
         }
     }
@@ -364,7 +226,8 @@ ApplicationWindow {
     
     Component.onCompleted: {
         console.log("🌌 QOR Desktop Environment Initialized")
-        console.log("✨ Glass Engine v1.0.0 - Phase 1")
+        console.log("✨ Glass Engine v1.0.0 - Phase 2")
         console.log("🎨 Theme: Ancient Code Meets Ethereal Glass")
+        console.log("💫 Features: Liquid Workspace + Infinity Dock + Draggable Widgets")
     }
 }
