@@ -173,6 +173,9 @@ Item {
             case "system":
                 component = Qt.createComponent("widgets/SystemMonitorWidget.qml")
                 break
+            case "explorer":
+                component = Qt.createComponent("widgets/ExplorerWidget.qml")
+                break
             default:
                 component = Qt.createComponent("BaseWidget.qml")
         }
@@ -421,7 +424,7 @@ Item {
         console.log("   Grid size:", gridSize)
         console.log("   Liquid motion:", liquidMotion)
         
-        // Create demo System Monitor widget
-        createWidget("system", 100, 100)
+        // Don't auto-create widgets - let user open them
+        console.log("   Ready for widgets (use dock or keyboard shortcuts)")
     }
 }

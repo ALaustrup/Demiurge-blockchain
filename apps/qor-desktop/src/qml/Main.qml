@@ -40,6 +40,47 @@ ApplicationWindow {
         onActivated: console.log("Escape pressed")
     }
     
+    // Widget shortcuts
+    Shortcut {
+        sequence: "Ctrl+T"
+        onActivated: {
+            console.log("Open Terminal (Ctrl+T)")
+            workspace.createWidget("terminal")
+        }
+    }
+    
+    Shortcut {
+        sequence: "Ctrl+W"
+        onActivated: {
+            console.log("Open Wallet (Ctrl+W)")
+            workspace.createWidget("wallet")
+        }
+    }
+    
+    Shortcut {
+        sequence: "Ctrl+S"
+        onActivated: {
+            console.log("Open Settings (Ctrl+S)")
+            workspace.createWidget("settings")
+        }
+    }
+    
+    Shortcut {
+        sequence: "Ctrl+E"
+        onActivated: {
+            console.log("Open Explorer (Ctrl+E)")
+            workspace.createWidget("explorer")
+        }
+    }
+    
+    Shortcut {
+        sequence: "Ctrl+Shift+S"
+        onActivated: {
+            console.log("Open System Monitor (Ctrl+Shift+S)")
+            workspace.createWidget("system")
+        }
+    }
+    
     // ============================================
     // BACKGROUND LAYER
     // ============================================
@@ -230,10 +271,17 @@ ApplicationWindow {
     
     Component.onCompleted: {
         console.log("🌌 QOR Desktop Environment Initialized")
-        console.log("✨ Glass Engine v1.0.0 - Phase 3")
+        console.log("✨ Glass Engine v1.0.0 - Phase 5")
         console.log("🎨 Theme: Ancient Code Meets Ethereal Glass")
         console.log("💫 Features: Liquid Workspace + Infinity Dock + Draggable Widgets")
         console.log("📊 System Integration: Live metrics + Audio reactive colors")
+        console.log("⌨️  Keyboard Shortcuts:")
+        console.log("   Ctrl+T - Terminal")
+        console.log("   Ctrl+W - Wallet")
+        console.log("   Ctrl+S - Settings")
+        console.log("   Ctrl+E - Explorer")
+        console.log("   Ctrl+Shift+S - System Monitor")
+        console.log("   Ctrl+Q - Quit")
         
         // Connect audio colors to theme
         if (typeof AudioColors !== 'undefined') {
