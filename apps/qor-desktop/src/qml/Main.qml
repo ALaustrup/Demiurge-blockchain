@@ -213,6 +213,9 @@ ApplicationWindow {
         InfinityDock {
             id: infinityDock
             
+            // Pass workspace reference so dock can create widgets
+            property var workspace: workspace
+            
             anchors {
                 horizontalCenter: parent.horizontalCenter
                 bottom: parent.bottom

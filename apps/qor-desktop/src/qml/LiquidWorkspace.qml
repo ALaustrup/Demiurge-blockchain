@@ -347,9 +347,7 @@ Item {
                     ListElement { name: "Terminal"; icon: "⚡"; type: "terminal" }
                     ListElement { name: "Wallet"; icon: "💰"; type: "wallet" }
                     ListElement { name: "Settings"; icon: "⚙️"; type: "settings" }
-                    ListElement { name: "Code"; icon: "🎨"; type: "editor" }
                     ListElement { name: "Explorer"; icon: "🔮"; type: "explorer" }
-                    ListElement { name: "Chat"; icon: "💬"; type: "chat" }
                 }
                 
                 delegate: Rectangle {

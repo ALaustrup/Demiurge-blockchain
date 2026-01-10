@@ -178,6 +178,11 @@ Rectangle {
                     onClicked: {
                         console.log("Dock item clicked:", model.name)
                         dockModel.activateItem(index)
+                        
+                        // Emit signal to workspace to create widget
+                        if (typeof workspace !== 'undefined') {
+                            workspace.createWidget(model.widgetType)
+                        }
                     }
                     
                     onPressAndHold: {
@@ -271,41 +276,41 @@ Rectangle {
 
 ListModel {
     id: dockItemsModelComponent
-    
-    ListElement {
-        name: "Terminal"
-        icon: "⚡"
-        active: false
-        widgetType: "terminal"
-    }
-    
-    ListElement {
-        name: "Code Editor"
-        icon: "🎨"
-        active: false
-        widgetType: "editor"
-    }
-    
-    ListElement {
-        name: "Settings"
-        icon: "⚙️"
-        active: true
-        widgetType: "settings"
-    }
-    
-    ListElement {
-        name: "Wallet"
-        icon: "📊"
-        active: false
-        widgetType: "wallet"
-    }
-    
-    ListElement {
-        name: "Explorer"
-        icon: "🔮"
-        active: false
-        widgetType: "explorer"
-    }
+        
+        ListElement {
+            name: "System"
+            icon: "📊"
+            active: false
+            widgetType: "system"
+        }
+        
+        ListElement {
+            name: "Terminal"
+            icon: "⚡"
+            active: false
+            widgetType: "terminal"
+        }
+        
+        ListElement {
+            name: "Wallet"
+            icon: "💰"
+            active: false
+            widgetType: "wallet"
+        }
+        
+        ListElement {
+            name: "Settings"
+            icon: "⚙️"
+            active: true
+            widgetType: "settings"
+        }
+        
+        ListElement {
+            name: "Explorer"
+            icon: "🔮"
+            active: false
+            widgetType: "explorer"
+        }
 }
 
 // Model wrapper component
