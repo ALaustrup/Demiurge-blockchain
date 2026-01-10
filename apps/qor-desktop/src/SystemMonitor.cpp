@@ -6,6 +6,7 @@
 #include <QThread>
 #include <QStorageInfo>
 #include <QDebug>
+#include <QRandomGenerator>
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -247,8 +248,8 @@ void SystemMonitor::updateNetworkUsage()
         qint64 timeDelta = currentTime - m_lastNetworkUpdateTime;
         if (timeDelta > 0) {
             // Mock data for now - in production, read from /proc/net/dev or Windows Performance Counters
-            m_networkDownloadKBps = (qrand() % 1000) / 10.0; // 0-100 KB/s random
-            m_networkUploadKBps = (qrand() % 500) / 10.0;    // 0-50 KB/s random
+            m_networkDownloadKBps = (QRandomGenerator::global()->bounded(1000)) / 10.0; // 0-100 KB/s random
+            m_networkUploadKBps = (QRandomGenerator::global()->bounded(500)) / 10.0;    // 0-50 KB/s random
             emit networkUsageChanged();
         }
     }

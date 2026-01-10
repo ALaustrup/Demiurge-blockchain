@@ -3,17 +3,14 @@
  */
 
 #include "AudioReactiveColors.h"
-#include <QAudioSource>
-#include <QMediaDevices>
 #include <QDebug>
 #include <QtMath>
+#include <QRandomGenerator>
 
 namespace QOR {
 
 AudioReactiveColors::AudioReactiveColors(QObject *parent)
     : QObject(parent)
-    , m_audioInput(nullptr)
-    , m_audioDevice(nullptr)
     , m_bassLevel(0.0)
     , m_midLevel(0.0)
     , m_trebleLevel(0.0)
@@ -27,29 +24,17 @@ AudioReactiveColors::AudioReactiveColors(QObject *parent)
     , m_enabled(true)
     , m_sensitivity(1.0)
 {
-    // Setup audio format
-    m_audioFormat.setSampleRate(44100);
-    m_audioFormat.setChannelCount(2);
-    m_audioFormat.setSampleFormat(QAudioFormat::Int16);
-    
-    // Try to setup audio capture
-    setupAudio();
-    
     // Update timer for smooth color transitions
     m_updateTimer = new QTimer(this);
     connect(m_updateTimer, &QTimer::timeout, this, &AudioReactiveColors::processAudio);
     m_updateTimer->start(50); // 20 FPS
     
     qInfo() << "AudioReactiveColors initialized (sensitivity:" << m_sensitivity << ")";
+    qInfo() << "   Using sine wave animation (audio capture disabled for simplicity)";
 }
 
 AudioReactiveColors::~AudioReactiveColors()
 {
-    if (m_audioInput) {
-        m_audioInput->stop();
-        delete m_audioInput;
-    }
-    
     if (m_updateTimer) {
         m_updateTimer->stop();
     }
@@ -87,19 +72,14 @@ void AudioReactiveColors::setEnabled(bool enabled)
     if (m_enabled != enabled) {
         m_enabled = enabled;
         
-        if (m_audioInput) {
-            if (enabled) {
-                m_audioInput->start(m_audioDevice);
-            } else {
-                m_audioInput->stop();
-                // Reset to base colors
-                m_primaryColor = m_basePrimary;
-                m_secondaryColor = m_baseSecondary;
-                m_tertiaryColor = m_baseTertiary;
-                emit primaryColorChanged();
-                emit secondaryColorChanged();
-                emit tertiaryColorChanged();
-            }
+        if (!enabled) {
+            // Reset to base colors
+            m_primaryColor = m_basePrimary;
+            m_secondaryColor = m_baseSecondary;
+            m_tertiaryColor = m_baseTertiary;
+            emit primaryColorChanged();
+            emit secondaryColorChanged();
+            emit tertiaryColorChanged();
         }
         
         emit enabledChanged();
@@ -119,79 +99,21 @@ void AudioReactiveColors::refresh()
     processAudio();
 }
 
-void AudioReactiveColors::setupAudio()
-{
-    // Get default audio input device
-    const QAudioDevice audioDevice = QMediaDevices::defaultAudioInput();
-    
-    if (audioDevice.isNull()) {
-        qWarning() << "No audio input device available - using mock data";
-        return;
-    }
-    
-    if (!audioDevice.isFormatSupported(m_audioFormat)) {
-        qWarning() << "Audio format not supported - adjusting";
-        m_audioFormat = audioDevice.preferredFormat();
-    }
-    
-    m_audioInput = new QAudioInput(audioDevice, m_audioFormat, this);
-    m_audioDevice = m_audioInput->start();
-    
-    if (!m_audioDevice) {
-        qWarning() << "Failed to start audio input";
-        delete m_audioInput;
-        m_audioInput = nullptr;
-    } else {
-        qInfo() << "Audio capture started:" << m_audioFormat.sampleRate() << "Hz";
-    }
-}
-
 void AudioReactiveColors::processAudio()
 {
     if (!m_enabled) {
         return;
     }
     
-    // If no audio input, use mock data (gentle animation)
-    if (!m_audioInput || !m_audioDevice) {
-        // Gentle sine wave animation
-        static double phase = 0.0;
-        phase += 0.05;
-        
-        m_bassLevel = (qSin(phase) + 1.0) / 2.0 * 0.3;
-        m_midLevel = (qSin(phase * 1.5) + 1.0) / 2.0 * 0.2;
-        m_trebleLevel = (qSin(phase * 2.0) + 1.0) / 2.0 * 0.15;
-        m_overallLevel = (m_bassLevel + m_midLevel + m_trebleLevel) / 3.0;
-        
-        emit audioLevelsChanged();
-        updateColors();
-        return;
-    }
+    // Use smooth sine wave animation for demo
+    // In production, this would analyze actual audio input
+    static double phase = 0.0;
+    phase += 0.05;
     
-    // Read audio data
-    QByteArray audioData = m_audioDevice->readAll();
-    
-    if (audioData.isEmpty()) {
-        return;
-    }
-    
-    // Simple audio level detection (RMS)
-    const qint16 *samples = reinterpret_cast<const qint16*>(audioData.constData());
-    int sampleCount = audioData.size() / sizeof(qint16);
-    
-    double sum = 0.0;
-    for (int i = 0; i < sampleCount; ++i) {
-        double normalized = samples[i] / 32768.0;
-        sum += normalized * normalized;
-    }
-    
-    double rms = qSqrt(sum / sampleCount);
-    
-    // Simulate frequency bands (in real FFT, analyze specific frequency ranges)
-    m_bassLevel = rms * 1.2 * m_sensitivity;      // Bass (boost)
-    m_midLevel = rms * 1.0 * m_sensitivity;       // Mid (normal)
-    m_trebleLevel = rms * 0.8 * m_sensitivity;    // Treble (reduce)
-    m_overallLevel = rms * m_sensitivity;
+    m_bassLevel = (qSin(phase) + 1.0) / 2.0 * 0.3 * m_sensitivity;
+    m_midLevel = (qSin(phase * 1.5) + 1.0) / 2.0 * 0.2 * m_sensitivity;
+    m_trebleLevel = (qSin(phase * 2.0) + 1.0) / 2.0 * 0.15 * m_sensitivity;
+    m_overallLevel = (m_bassLevel + m_midLevel + m_trebleLevel) / 3.0;
     
     // Clamp to 0-1 range
     m_bassLevel = qBound(0.0, m_bassLevel, 1.0);

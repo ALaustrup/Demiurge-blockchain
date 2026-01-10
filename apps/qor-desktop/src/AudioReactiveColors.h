@@ -10,9 +10,6 @@
 #include <QObject>
 #include <QColor>
 #include <QTimer>
-#include <QAudioInput>
-#include <QAudioFormat>
-#include <QIODevice>
 
 namespace QOR {
 
@@ -90,14 +87,8 @@ private slots:
     void processAudio();
 
 private:
-    void setupAudio();
     void updateColors();
     QColor modulateColor(const QColor &baseColor, double intensity);
-    
-    // Audio capture
-    QAudioInput *m_audioInput;
-    QIODevice *m_audioDevice;
-    QAudioFormat m_audioFormat;
     
     // Audio levels
     double m_bassLevel;

@@ -163,6 +163,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::MultimediaWidgets
 )
 
+# Platform-specific libraries
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE pdh)
+endif()
+
 # Link optional Qt libraries if available
 if(Qt6Quick3D_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Quick3D)
