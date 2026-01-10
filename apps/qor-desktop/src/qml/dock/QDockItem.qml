@@ -1,5 +1,5 @@
 import QtQuick
-import QtQuick.Effects
+// import QtQuick.Effects  // Not available
 
 import "../components"
 
@@ -129,3 +129,4 @@ Rectangle {
         onClicked: dockItem.clicked()
     }
 }
+

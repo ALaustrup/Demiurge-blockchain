@@ -1,5 +1,6 @@
 import QtQuick
-import QtQuick.Effects
+// import QtQuick.Effects  // Not available
+import ".."
 
 /**
  * GlowText - Text with optional flame glow effect
@@ -67,12 +68,12 @@ Item {
         
         visible: glowText.glowing
         
-        layer.enabled: glowText.glowing
-        layer.effect: MultiEffect {
-            blurEnabled: true
-            blur: 0.5
-            blurMax: 32
-        }
+        // layer.enabled: glowText.glowing
+        // layer.effect: MultiEffect {
+        //     blurEnabled: true
+        //     blur: 0.5
+        //     blurMax: 32
+        // }
         
         opacity: glowText.glowing ? 0.7 : 0
         

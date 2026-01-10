@@ -9,53 +9,71 @@
  * providing the QOR OS graphical environment.
  */
 
-#include <QApplication>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <QIcon>
 #include <QDir>
 #include <QStandardPaths>
-#include "MainWindow.h"
-
-#ifdef QOR_WEBENGINE_ENABLED
-#include <QWebEngineProfile>
-#include <QWebEngineSettings>
-#endif
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
+    qDebug() << "QOR Desktop starting...";
+    
     // Enable high DPI scaling for crisp display on modern monitors
-    QApplication::setHighDpiScaleFactorRoundingPolicy(
+    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
         Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
     
     // Initialize QØЯ application
-    QApplication app(argc, argv);
-    app.setApplicationName(APP_NAME);
-    app.setApplicationVersion(APP_VERSION);
-    app.setOrganizationName(APP_ORGANIZATION);
-    app.setOrganizationDomain(APP_DOMAIN);
-    app.setApplicationDisplayName(APP_DISPLAY_NAME);
+    QGuiApplication app(argc, argv);
     
-#ifdef QOR_WEBENGINE_ENABLED
-    // Configure WebEngine
-    QWebEngineProfile *profile = QWebEngineProfile::defaultProfile();
+    qDebug() << "Application initialized";
+    app.setApplicationName("QOR");
+    app.setApplicationVersion("1.0.0");
+    app.setOrganizationName("Demiurge");
+    app.setOrganizationDomain("demiurge.cloud");
+    app.setApplicationDisplayName("QØЯ - Demiurge Desktop");
     
-    // Set persistent storage path
-    QString dataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    profile->setPersistentStoragePath(dataPath + "/webengine");
-    profile->setCachePath(dataPath + "/cache");
+    // Set application icon
+    app.setWindowIcon(QIcon(":/assets/icon.png"));
     
-    // Enable local storage and IndexedDB
-    QWebEngineSettings *settings = profile->settings();
-    settings->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
-    settings->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
-    settings->setAttribute(QWebEngineSettings::LocalContentCanAccessFileUrls, true);
-    settings->setAttribute(QWebEngineSettings::JavascriptCanAccessClipboard, true);
-    settings->setAttribute(QWebEngineSettings::AllowWindowActivationFromJavaScript, true);
-    settings->setAttribute(QWebEngineSettings::WebGLEnabled, true);
-    settings->setAttribute(QWebEngineSettings::Accelerated2dCanvasEnabled, true);
-#endif
+    // Create QML engine
+    QQmlApplicationEngine engine;
     
-    // Create and show main window
-    MainWindow mainWindow;
-    mainWindow.show();
+    qDebug() << "QML engine created";
     
+    // Set import paths
+    engine.addImportPath("qrc:/qml");
+    engine.addImportPath("qrc:/");
+    
+    qDebug() << "Import paths set";
+    
+    // Load main QML file (note: qml.qrc prefix is /qml, file is src/qml/Main.qml)
+    const QUrl url(QStringLiteral("qrc:/qml/src/qml/Main.qml"));
+    
+    qDebug() << "Loading QML from:" << url;
+    
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
+        &app, [url](QObject *obj, const QUrl &objUrl) {
+            qDebug() << "Object created callback:" << obj << objUrl;
+            if (!obj && url == objUrl) {
+                qDebug() << "ERROR: Failed to create root object!";
+                QCoreApplication::exit(-1);
+            } else {
+                qDebug() << "Root object created successfully!";
+            }
+        }, Qt::QueuedConnection);
+    
+    engine.load(url);
+    
+    qDebug() << "QML load initiated. Root objects:" << engine.rootObjects().count();
+    
+    if (engine.rootObjects().isEmpty()) {
+        qDebug() << "ERROR: No root objects loaded!";
+        return -1;
+    }
+    
+    qDebug() << "Entering event loop...";
     return app.exec();
 }

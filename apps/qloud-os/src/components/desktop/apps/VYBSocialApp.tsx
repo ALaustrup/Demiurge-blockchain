@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useQorIDIdentity } from '../../../hooks/useQorIDIdentity';
+import { useAbyssIDIdentity } from '../../../hooks/useAbyssIDIdentity';
 import { Button } from '../../shared/Button';
 
 type Tab = 'rooms' | 'dms' | 'friends' | 'discover' | 'profile' | 'quickmatch' | 'settings';
@@ -56,7 +56,7 @@ const sampleThreads: DmThread[] = [
 ];
 
 export function VYBSocialApp() {
-  const { identity, isAuthenticated } = useQorIDIdentity();
+  const { identity, isAuthenticated } = useAbyssIDIdentity();
   const [activeTab, setActiveTab] = useState<Tab>('rooms');
   const [rooms, setRooms] = useState<Room[]>(sampleRooms);
   const [messages, setMessages] = useState<Message[]>(sampleMessages);

@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/qml">
         <!-- Main Views -->
+        <file>src/qml/Test.qml</file>
         <file>src/qml/Main.qml</file>
         <file>src/qml/SplashScreen.qml</file>
         <file>src/qml/LoginView.qml</file>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useQorID } from '../../../hooks/useQorID';
+import { useQorID } from '../../../hooks/useAbyssID';
 import { Button } from '../../shared/Button';
 
 interface DocumentEditorAppProps {

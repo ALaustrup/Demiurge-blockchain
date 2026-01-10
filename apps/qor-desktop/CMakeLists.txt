@@ -96,8 +96,8 @@ set(UI_SOURCES
     src/BrowserView.h
     src/SystemTray.cpp
     src/SystemTray.h
-    src/AbyssIDManager.cpp
-    src/AbyssIDManager.h
+    src/QorIDManager.cpp
+    src/QorIDManager.h
     src/WalletBridge.cpp
     src/WalletBridge.h
     src/wallet/WalletManager.cpp
@@ -108,14 +108,9 @@ set(UI_SOURCES
     src/AppLauncher.h
 )
 
-# All sources combined
+# All sources combined - Only main.cpp for pure QML interface
 set(SOURCES
-    ${CORE_SOURCES}
-    ${STORAGE_SOURCES}
-    ${CHAIN_SOURCES}
-    ${P2P_SOURCES}
-    ${MINING_SOURCES}
-    ${UI_SOURCES}
+    src/main.cpp
 )
 
 # Resources
@@ -130,7 +125,8 @@ if(WIN32)
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/resources/app.rc")
         set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/src/resources/app.rc")
     endif()
-    add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${RESOURCES} ${APP_ICON_RESOURCE_WINDOWS})
+    # Temporarily remove WIN32 flag to see console output
+    add_executable(${PROJECT_NAME} ${SOURCES} ${RESOURCES} ${APP_ICON_RESOURCE_WINDOWS})
 elseif(APPLE)
     set(MACOSX_BUNDLE_ICON_FILE qor.icns)
     set(APP_ICON_MACOSX "${CMAKE_CURRENT_SOURCE_DIR}/src/resources/icons/qor.icns")

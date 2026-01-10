@@ -1,5 +1,6 @@
 import QtQuick
-import QtQuick.Effects
+// import QtQuick.Effects  // Not available
+import ".."
 
 /**
  * FlameButton - Interactive button with flame glow on hover/press
@@ -72,14 +73,14 @@ Rectangle {
     // GLOW EFFECT
     // ========================================================================
     
-    layer.enabled: mouseArea.containsMouse && enabled
-    layer.effect: MultiEffect {
-        shadowEnabled: true
-        shadowColor: primary ? Theme.accentFlame : Theme.cipherCyan
-        shadowBlur: 0.5
-        shadowVerticalOffset: 0
-        shadowHorizontalOffset: 0
-    }
+    // layer.enabled: mouseArea.containsMouse && enabled
+    // layer.effect: MultiEffect {
+    //     shadowEnabled: true
+    //     shadowColor: primary ? Theme.accentFlame : Theme.cipherCyan
+    //     shadowBlur: 0.5
+    //     shadowVerticalOffset: 0
+    //     shadowHorizontalOffset: 0
+    // }
     
     // ========================================================================
     // CONTENT
@@ -100,11 +101,11 @@ Rectangle {
             anchors.verticalCenter: parent.verticalCenter
             
             // Tint icon to match text
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                colorization: 1.0
-                colorizationColor: buttonText.color
-            }
+            // layer.enabled: true
+            // layer.effect: MultiEffect {
+            //     colorization: 1.0
+            //     colorizationColor: buttonText.color
+            // }
         }
         
         // Text
@@ -139,3 +140,4 @@ Rectangle {
         onReleased: if (flameButton.enabled) flameButton.released()
     }
 }
+

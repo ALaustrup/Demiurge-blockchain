@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQorIDIdentity } from '../../../hooks/useQorIDIdentity';
+import { useAbyssIDIdentity } from '../../../hooks/useAbyssIDIdentity';
 import { Button } from '../../shared/Button';
 import { abyssIdSDK } from '../../../services/qorid/sdk';
 import type { DRC369 } from '../../../services/drc369/schema';
@@ -19,7 +19,7 @@ type MintStatus = 'idle' | 'minting' | 'finalizing' | 'confirmed' | 'error';
  * Uses unified QorID identity system - automatically syncs with logged-in user
  */
 function MyAssetsView() {
-  const { identity } = useQorIDIdentity();
+  const { identity } = useAbyssIDIdentity();
   const session = identity ? { username: identity.username, publicKey: identity.publicKey } : null;
   const [assets, setAssets] = useState<DRC369[]>([]);
   const [loading, setLoading] = useState(true);
@@ -635,7 +635,7 @@ function CustomWorkspaceOverlay({ onClose }: { onClose: () => void }) {
 }
 
 export function OnChainFilesApp() {
-  const { identity, isAuthenticated } = useQorIDIdentity();
+  const { identity, isAuthenticated } = useAbyssIDIdentity();
   const session = identity ? { username: identity.username, publicKey: identity.publicKey } : null;
   const mode = 'local'; // Default to local mode
   const [activeTab, setActiveTab] = useState<TabId>('my-assets');

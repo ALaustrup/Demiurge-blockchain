@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useQorID } from '../../hooks/useQorID';
+import { useQorID } from '../../hooks/useAbyssID';
 import { useTheme } from '../../context/ThemeContext';
 import { useMusicPlayerStore } from '../../state/musicPlayerStore';
 import { useDesktopStore } from '../../state/desktopStore';

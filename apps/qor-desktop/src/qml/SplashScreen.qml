@@ -1,5 +1,5 @@
 import QtQuick
-import QtQuick.Effects
+// import QtQuick.Effects  // Not available in Qt 6.10.0
 
 import "components"
 
@@ -136,10 +136,16 @@ Item {
             font.pixelSize: Theme.fontSizeSmall
             font.letterSpacing: 8
             color: Theme.textSecondary
-            opacity: sigilTimer.running ? 1 : 0
+            opacity: taglineOpacity.running ? 1 : 0
             
             Behavior on opacity {
-                NumberAnimation { duration: Theme.animSlow; delay: 500 }
+                NumberAnimation { duration: Theme.animSlow }
+            }
+            
+            Timer {
+                id: taglineOpacity
+                interval: 500
+                running: splashScreen.stage === 1
             }
         }
     }

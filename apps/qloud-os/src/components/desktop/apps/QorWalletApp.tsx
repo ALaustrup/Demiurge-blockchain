@@ -5,8 +5,8 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { useQorIDIdentity, useQorIDUserData } from '../../../hooks/useQorIDIdentity';
-import { useQorID } from '../../../hooks/useQorID';
+import { useAbyssIDIdentity, useAbyssIDUserData } from '../../../hooks/useAbyssIDIdentity';
+import { useQorID } from '../../../hooks/useAbyssID';
 import { useWalletStore } from '../../../state/walletStore';
 import { useBlockListener } from '../../../context/BlockListenerContext';
 import { sendCgt } from '../../../services/wallet/demiurgeWallet';
@@ -69,8 +69,8 @@ interface TreasuryStats {
 }
 
 export function QorWalletApp() {
-  const { identity, isAuthenticated } = useQorIDIdentity();
-  const { balance: userBalance, sync: syncUserData, isSyncing } = useQorIDUserData();
+  const { identity, isAuthenticated } = useAbyssIDIdentity();
+  const { balance: userBalance, sync: syncUserData, isSyncing } = useAbyssIDUserData();
   const { currentBlockHeight } = useBlockListener();
   const {
     transactions,

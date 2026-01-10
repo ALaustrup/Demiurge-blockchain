@@ -1,5 +1,6 @@
 import QtQuick
-import QtQuick.Effects
+// import QtQuick.Effects  // Not available in Qt 6.10.0
+import ".."
 
 /**
  * GlassPanel - The foundational glassmorphic component
@@ -87,14 +88,14 @@ Rectangle {
     // BLUR EFFECT (The "Smoky Glass" Look)
     // ========================================================================
     
-    // Enable layer for blur effect
-    layer.enabled: blurRadius > 0
-    layer.effect: MultiEffect {
-        blurEnabled: true
-        blur: glassPanel.blurRadius / 100.0  // MultiEffect uses 0-1 range
-        blurMax: 64
-        saturation: 0.8  // Slightly desaturate for that smoky look
-    }
+    // Enable layer for blur effect - temporarily disabled (MultiEffect not available)
+    // layer.enabled: blurRadius > 0
+    // layer.effect: MultiEffect {
+    //     blurEnabled: true
+    //     blur: glassPanel.blurRadius / 100.0
+    //     blurMax: 64
+    //     saturation: 0.8
+    // }
     
     // ========================================================================
     // GLOW EFFECT (Optional flame glow)

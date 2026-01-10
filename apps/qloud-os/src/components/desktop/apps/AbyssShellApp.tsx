@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { useQorID } from '../../../hooks/useQorID';
+import { useQorID } from '../../../hooks/useAbyssID';
 import { useBlockListener } from '../../../context/BlockListenerContext';
 import { executeCommand, type CommandContext } from '../../../services/shell/commands';
 import { deriveDemiurgePublicKey, getCgtBalance } from '../../../services/wallet/demiurgeWallet';

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useQorID } from '../../../hooks/useQorID';
+import { useQorID } from '../../../hooks/useAbyssID';
 import { Button } from '../../shared/Button';
 import { abyssIdSDK } from '../../../services/qorid/sdk';
 

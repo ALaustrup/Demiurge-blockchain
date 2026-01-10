@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useQorID } from '../../../hooks/useQorID';
+import { useQorID } from '../../../hooks/useAbyssID';
 import { useChainStatus } from '../../../hooks/useChainStatus';
 import { Button } from '../../shared/Button';
 import { getAbyssBridge } from '../../../services/web3Bridge/qorBridge';

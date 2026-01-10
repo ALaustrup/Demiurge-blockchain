@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { useQorIDIdentity } from '../hooks/useQorIDIdentity';
-import { useQorIDUserData } from '../hooks/useQorIDIdentity';
+import { useAbyssIDIdentity } from '../hooks/useAbyssIDIdentity';
+import { useAbyssIDUserData } from '../hooks/useAbyssIDIdentity';
 
 /**
  * WalletInitializer - Ensures wallet is automatically synced with QorID
@@ -14,8 +14,8 @@ import { useQorIDUserData } from '../hooks/useQorIDIdentity';
  * All of this happens automatically when user logs in via QorID.
  */
 export function WalletInitializer() {
-  const { identity, isAuthenticated } = useQorIDIdentity();
-  const { balance, isSyncing } = useQorIDUserData();
+  const { identity, isAuthenticated } = useAbyssIDIdentity();
+  const { balance, isSyncing } = useAbyssIDUserData();
 
   // The identity service handles everything automatically
   // This component just ensures the hooks are active

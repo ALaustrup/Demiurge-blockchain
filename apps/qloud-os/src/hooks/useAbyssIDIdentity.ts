@@ -1,19 +1,19 @@
 /**
- * useQorIDIdentity Hook
+ * useAbyssIDIdentity Hook
  * 
  * Provides access to the unified QorID identity system.
  * All apps should use this hook to access user identity and data.
  */
 
 import { useEffect, useState } from 'react';
-import { useQorID } from './useQorID';
+import { useQorID } from './useAbyssID';
 import { qorIDIdentityService, type QorIDIdentity, type UserData } from '../services/identity/QorIDIdentityService';
 
 /**
  * Hook to access QorID identity
  * Automatically syncs with login/logout
  */
-export function useQorIDIdentity() {
+export function useAbyssIDIdentity() {
   const { session, isLoading } = useQorID();
   const [identity, setIdentity] = useState<QorIDIdentity | null>(null);
   const [isInitializing, setIsInitializing] = useState(false);
@@ -64,8 +64,8 @@ export function useQorIDIdentity() {
  * Hook to access user data (balance, assets, etc.)
  * Automatically syncs and updates in real-time
  */
-export function useQorIDUserData() {
-  const { identity } = useQorIDIdentity();
+export function useAbyssIDUserData() {
+  const { identity } = useAbyssIDIdentity();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
 

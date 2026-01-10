@@ -20,56 +20,54 @@ import "effects"
  *   - desktop: Main workspace
  *   - locked: Screen lock (session active but secured)
  */
-ApplicationWindow {
-    id: root
-    
-    // ========================================================================
-    // WINDOW CONFIGURATION
-    // ========================================================================
+Window {
+    id: window
     
     visible: true
-    visibility: Window.FullScreen  // Borderless fullscreen
+    visibility: Window.FullScreen
     title: "QØЯ - Demiurge Desktop"
     color: Theme.voidBlack
-    
-    // Minimum size for windowed mode (dev/debug)
     minimumWidth: 1280
     minimumHeight: 720
     
-    // ========================================================================
-    // APPLICATION STATE
-    // ========================================================================
-    
-    /** Current application state */
-    property string appState: "splash"
-    
-    /** Whether edit mode is active (UI customization unlocked) */
-    property bool editMode: false
-    
-    /** Connected QorID (empty if not logged in) */
-    property string abyssId: ""
-    
-    /** Premium tier of the user (0=free, 1=archon, 2=genesis) */
-    property int premiumTier: 0
-    
-    // ========================================================================
-    // SETTINGS PERSISTENCE
-    // ========================================================================
-    
-    Settings {
-        id: appSettings
-        category: "app"
+    Item {
+        id: root
+        anchors.fill: parent
         
-        property bool skipSplash: false
-        property bool rememberLogin: true
-        property string lastAbyssId: ""
-    }
-    
-    // ========================================================================
-    // STATE MACHINE
-    // ========================================================================
-    
-    states: [
+        // ========================================================================
+        // APPLICATION STATE
+        // ========================================================================
+        
+        /** Current application state */
+        property string appState: "splash"
+        
+        /** Whether edit mode is active (UI customization unlocked) */
+        property bool editMode: false
+        
+        /** Connected QorID (empty if not logged in) */
+        property string abyssId: ""
+        
+        /** Premium tier of the user (0=free, 1=archon, 2=genesis) */
+        property int premiumTier: 0
+        
+        // ========================================================================
+        // SETTINGS PERSISTENCE
+        // ========================================================================
+        
+        Settings {
+            id: appSettings
+            category: "app"
+            
+            property bool skipSplash: false
+            property bool rememberLogin: true
+            property string lastAbyssId: ""
+        }
+        
+        // ========================================================================
+        // STATE MACHINE
+        // ========================================================================
+        
+        states: [
         State {
             name: "splash"
             PropertyChanges { target: splashLoader; active: true }
@@ -141,11 +139,13 @@ ApplicationWindow {
         active: true
         sourceComponent: SplashScreen {
             onComplete: {
+                console.log("Splash complete! Transitioning to login...")
                 if (appSettings.skipSplash && appSettings.rememberLogin && appSettings.lastAbyssId !== "") {
                     // Auto-login with remembered credentials
                     root.abyssId = appSettings.lastAbyssId
                     root.appState = "desktop"
                 } else {
+                    console.log("Setting appState to 'login'")
                     root.appState = "login"
                 }
             }
@@ -160,7 +160,20 @@ ApplicationWindow {
         id: loginLoader
         anchors.fill: parent
         active: false
+        
+        onActiveChanged: {
+            console.log("LoginLoader active changed:", active)
+        }
+        
+        onStatusChanged: {
+            console.log("LoginLoader status:", status, "- Error:", (status === Loader.Error ? "YES" : "NO"))
+        }
+        
         sourceComponent: LoginView {
+            Component.onCompleted: {
+                console.log("LoginView loaded successfully!")
+            }
+            
             onLoginSuccess: function(id, tier) {
                 root.abyssId = id
                 root.premiumTier = tier
@@ -257,10 +270,10 @@ ApplicationWindow {
     Shortcut {
         sequence: "Escape"
         onActivated: {
-            if (root.visibility === Window.FullScreen) {
-                root.visibility = Window.Windowed
+            if (window.visibility === Window.FullScreen) {
+                window.visibility = Window.Windowed
             } else {
-                root.visibility = Window.FullScreen
+                window.visibility = Window.FullScreen
             }
         }
     }
@@ -283,4 +296,6 @@ ApplicationWindow {
             appSettings.skipSplash = true
         }
     }
+    
+    } // Item root
 }

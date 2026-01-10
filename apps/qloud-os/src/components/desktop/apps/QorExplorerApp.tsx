@@ -7,8 +7,8 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useQorID } from '../../../hooks/useQorID';
-import { useQorIDIdentity } from '../../../hooks/useQorIDIdentity';
+import { useQorID } from '../../../hooks/useAbyssID';
+import { useAbyssIDIdentity } from '../../../hooks/useAbyssIDIdentity';
 import { useChainStatus } from '../../../hooks/useChainStatus';
 import { Button } from '../../shared/Button';
 import { getAbyssBridge } from '../../../services/web3Bridge/qorBridge';
@@ -26,7 +26,7 @@ interface InternalPageProps {
 }
 
 function InternalPage({ path, onNavigate }: InternalPageProps) {
-  const { identity } = useQorIDIdentity();
+  const { identity } = useAbyssIDIdentity();
   const { status } = useChainStatus();
   const bookmarks = useBrowserStore(state => state.bookmarks);
   const navPosition = useBrowserStore(state => state.navPosition);
@@ -278,7 +278,7 @@ function ExplorerHistory({ onNavigate }: { onNavigate: (url: string) => void }) 
 
 export function QorExplorerApp() {
   const { session, login, signMessage } = useQorID();
-  const { identity } = useQorIDIdentity();
+  const { identity } = useAbyssIDIdentity();
   const { status } = useChainStatus();
   
   // Browser state

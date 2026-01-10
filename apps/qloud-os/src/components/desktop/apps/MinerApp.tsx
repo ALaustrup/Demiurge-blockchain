@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useQorIDIdentity } from '../../../hooks/useQorIDIdentity';
+import { useAbyssIDIdentity } from '../../../hooks/useAbyssIDIdentity';
 import { useBlockListener } from '../../../context/BlockListenerContext';
 import { Button } from '../../shared/Button';
 
@@ -39,7 +39,7 @@ interface WorkClaimHistory {
 }
 
 export function MinerApp() {
-  const { identity, demiurgePublicKey } = useQorIDIdentity();
+  const { identity, demiurgePublicKey } = useAbyssIDIdentity();
   const { currentBlockHeight } = useBlockListener();
   
   const [isMining, setIsMining] = useState(false);

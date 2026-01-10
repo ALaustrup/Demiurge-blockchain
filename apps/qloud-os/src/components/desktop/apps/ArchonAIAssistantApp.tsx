@@ -6,7 +6,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { useQorID } from '../../../hooks/useQorID';
+import { useQorID } from '../../../hooks/useAbyssID';
 
 interface Message {
   id: string;

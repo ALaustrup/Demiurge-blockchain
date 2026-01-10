@@ -87,7 +87,9 @@ Item {
             rowSpacing: Theme.spacingMedium
             columnSpacing: Theme.spacingMedium
             
-            // Desktop shortcuts
+            // Desktop shortcuts - temporarily disabled
+            // TODO: Re-implement DesktopIcon component
+            /*
             Repeater {
                 model: [
                     { name: "Wallet", icon: "💰", app: "wallet" },
@@ -108,6 +110,7 @@ Item {
                     onLaunch: desktopView.launchApp(appId)
                 }
             }
+            */
         }
         
         // ================================================================
@@ -316,64 +319,4 @@ Item {
     }
 }
 
-/**
- * Desktop Icon Component
- */
-component DesktopIcon: Item {
-    property string name: ""
-    property string icon: ""
-    property string appId: ""
-    property bool editMode: false
-    
-    signal launch(string appId)
-    
-    width: 80
-    height: 80
-    
-    Column {
-        anchors.centerIn: parent
-        spacing: Theme.spacingSmall
-        
-        // Icon
-        Rectangle {
-            width: 48
-            height: 48
-            radius: Theme.radiusMedium
-            color: mouseArea.containsMouse ? Theme.glassPanelWindow : "transparent"
-            anchors.horizontalCenter: parent.horizontalCenter
-            
-            Text {
-                anchors.centerIn: parent
-                text: icon
-                font.pixelSize: 28
-            }
-            
-            Behavior on color { ColorAnimation { duration: Theme.animFast } }
-        }
-        
-        // Label
-        Text {
-            text: name
-            font.family: Theme.fontBody
-            font.pixelSize: Theme.fontSizeSmall
-            color: Theme.textPrimary
-            anchors.horizontalCenter: parent.horizontalCenter
-            
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                shadowEnabled: true
-                shadowColor: Theme.voidBlack
-                shadowBlur: 0.3
-            }
-        }
-    }
-    
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        hoverEnabled: true
-        cursorShape: editMode ? Qt.SizeAllCursor : Qt.PointingHandCursor
-        
-        onDoubleClicked: launch(appId)
-    }
-}
+// Desktop Icon Component removed - moved to separate file if needed

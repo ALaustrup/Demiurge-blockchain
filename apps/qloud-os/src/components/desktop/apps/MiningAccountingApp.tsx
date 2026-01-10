@@ -9,7 +9,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useQorID } from '../../../hooks/useQorID';
+import { useQorID } from '../../../hooks/useAbyssID';
 import { demiurgeRpc } from '../../../lib/demiurgeRpcClient';
 
 interface MiningSession {

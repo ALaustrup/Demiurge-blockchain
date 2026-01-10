@@ -1,5 +1,6 @@
 import QtQuick
-import QtQuick.Effects
+// import QtQuick.Effects  // Not available
+import ".."
 
 /**
  * VoidBackground - The Animated Abyss
@@ -122,12 +123,12 @@ Item {
             color: index % 2 === 0 ? Theme.accentFlame : Theme.cipherCyan
             opacity: 0.03
             
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                blurEnabled: true
-                blur: 1.0
-                blurMax: 100
-            }
+            // layer.enabled: true
+            // layer.effect: MultiEffect {
+            //     blurEnabled: true
+            //     blur: 1.0
+            //     blurMax: 100
+            // }
         }
     }
     
@@ -194,3 +195,4 @@ Item {
         easing.type: Easing.OutQuad
     }
 }
+

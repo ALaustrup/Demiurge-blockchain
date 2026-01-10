@@ -12,8 +12,8 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Editor from '@monaco-editor/react';
-import { useQorID } from '../../../hooks/useQorID';
-import { useQorIDIdentity } from '../../../hooks/useQorIDIdentity';
+import { useQorID } from '../../../hooks/useAbyssID';
+import { useAbyssIDIdentity } from '../../../hooks/useAbyssIDIdentity';
 import { demiurgeRpc } from '../../../lib/demiurgeRpcClient';
 import type { editor } from 'monaco-editor';
 
@@ -246,7 +246,7 @@ const TEMPLATES: Template[] = [
 
 export function CraftApp() {
   const { session } = useQorID();
-  const { demiurgePublicKey } = useQorIDIdentity();
+  const { demiurgePublicKey } = useAbyssIDIdentity();
   const [projects, setProjects] = useState<Project[]>([]);
   const [currentProject, setCurrentProject] = useState<Project | null>(null);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);

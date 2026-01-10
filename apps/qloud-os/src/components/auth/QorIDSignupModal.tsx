@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../shared/Button';
 import { Card } from '../shared/Card';
 import { qorIdClient, type AbyssAccount } from '../../lib/qorIdClient';
-import { useQorID } from '../../hooks/useQorID';
+import { useQorID } from '../../hooks/useAbyssID';
 import { backgroundMusicService } from '../../services/backgroundMusic';
 
 interface QorIDSignupModalProps {

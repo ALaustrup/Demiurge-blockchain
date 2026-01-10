@@ -4,7 +4,7 @@ import { FullscreenContainer } from '../components/layout/FullscreenContainer';
 import { AbyssBackground } from '../components/layout/AbyssBackground';
 import { QorIDLoginForm } from '../components/auth/QorIDLoginForm';
 import { QorIDSignupModal } from '../components/auth/QorIDSignupModal';
-import { useQorID } from '../hooks/useQorID';
+import { useQorID } from '../hooks/useAbyssID';
 import { backgroundMusicService } from '../services/backgroundMusic';
 import { loginVoiceService } from '../services/loginVoice';
 

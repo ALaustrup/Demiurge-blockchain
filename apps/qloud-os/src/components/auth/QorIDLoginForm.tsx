@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../shared/Button';
 import { Card } from '../shared/Card';
-import { useQorID } from '../../hooks/useQorID';
+import { useQorID } from '../../hooks/useAbyssID';
 import { backgroundMusicService } from '../../services/backgroundMusic';
 
 interface QorIDLoginFormProps {

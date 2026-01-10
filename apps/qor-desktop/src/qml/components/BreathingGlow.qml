@@ -1,5 +1,6 @@
 import QtQuick
-import QtQuick.Effects
+// import QtQuick.Effects  // Not available
+import ".."
 
 /**
  * BreathingGlow - Pulsing glow animation component
@@ -59,12 +60,12 @@ Item {
             color: breathingGlow.glowColor
             opacity: breathingAnim.glowOpacity * 0.3
             
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                blurEnabled: true
-                blur: 0.8
-                blurMax: 64
-            }
+            // layer.enabled: true
+            // layer.effect: MultiEffect {
+            //     blurEnabled: true
+            //     blur: 0.8
+            //     blurMax: 64
+            // }
         }
     }
     
@@ -83,12 +84,12 @@ Item {
             color: breathingGlow.glowColorEnd
             opacity: breathingAnim.glowOpacity * 0.5
             
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                blurEnabled: true
-                blur: 0.6
-                blurMax: 48
-            }
+            // layer.enabled: true
+            // layer.effect: MultiEffect {
+            //     blurEnabled: true
+            //     blur: 0.6
+            //     blurMax: 48
+            // }
         }
     }
     
@@ -137,3 +138,4 @@ Item {
         }
     }
 }
+

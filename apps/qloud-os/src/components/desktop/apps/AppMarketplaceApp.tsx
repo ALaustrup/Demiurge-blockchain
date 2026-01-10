@@ -6,7 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { useDesktopStore } from '../../../state/desktopStore';
-import { useQorID } from '../../../hooks/useQorID';
+import { useQorID } from '../../../hooks/useAbyssID';
 
 interface AppListing {
   id: string;

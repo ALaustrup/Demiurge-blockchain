@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { useQorID } from '../../../hooks/useQorID';
+import { useQorID } from '../../../hooks/useAbyssID';
 import { abyssIdSDK } from '../../../services/qorid/sdk';
 import { Button } from '../../shared/Button';
 

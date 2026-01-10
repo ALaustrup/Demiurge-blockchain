@@ -10,7 +10,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDesktopStore, APP_INFOS, type AppId } from '../../state/desktopStore';
-import { useQorIDIdentity, useQorIDUserData } from '../../hooks/useQorIDIdentity';
+import { useAbyssIDIdentity, useAbyssIDUserData } from '../../hooks/useAbyssIDIdentity';
 import { useWalletStore } from '../../state/walletStore';
 
 interface Category {
@@ -80,8 +80,8 @@ interface AppStoreMenuProps {
 
 export function AppStoreMenu({ isOpen, onClose }: AppStoreMenuProps) {
   const { openApp } = useDesktopStore();
-  const { identity, username, demiurgePublicKey, isAuthenticated } = useQorIDIdentity();
-  const { balance, assets } = useQorIDUserData();
+  const { identity, username, demiurgePublicKey, isAuthenticated } = useAbyssIDIdentity();
+  const { balance, assets } = useAbyssIDUserData();
   const { transactions } = useWalletStore();
   const [activeCategory, setActiveCategory] = useState(CATEGORIES[0].id);
 

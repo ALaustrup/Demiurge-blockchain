@@ -1,5 +1,5 @@
 import QtQuick
-import QtQuick.Effects
+// import QtQuick.Effects  // Not available
 
 import "../components"
 
@@ -124,3 +124,4 @@ Item {
         // Click handled by parent to support drag in edit mode
     }
 }
+
