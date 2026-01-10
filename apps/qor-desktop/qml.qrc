@@ -1,12 +1,14 @@
 <RCC>
     <qresource prefix="/qml">
         <!-- Main Views -->
+        <file>src/qml/main.qml</file>
         <file>src/qml/Test.qml</file>
         <file>src/qml/Main.qml</file>
         <file>src/qml/SplashScreen.qml</file>
         <file>src/qml/LoginView.qml</file>
         <file>src/qml/DesktopView.qml</file>
         <file>src/qml/Theme.qml</file>
+        <file>src/qml/GlassPane.qml</file>
         <file>src/qml/qmldir</file>
         
         <!-- Components -->
