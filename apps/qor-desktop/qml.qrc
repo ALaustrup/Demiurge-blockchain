@@ -14,6 +14,9 @@
         <file>src/qml/LiquidWorkspace.qml</file>
         <file>src/qml/qmldir</file>
         
+        <!-- Widgets -->
+        <file>src/qml/widgets/SystemMonitorWidget.qml</file>
+        
         <!-- Components -->
         <file>src/qml/components/GlassPanel.qml</file>
         <file>src/qml/components/GlowText.qml</file>

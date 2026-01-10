@@ -170,6 +170,9 @@ Item {
             case "settings":
                 component = Qt.createComponent("widgets/SettingsWidget.qml")
                 break
+            case "system":
+                component = Qt.createComponent("widgets/SystemMonitorWidget.qml")
+                break
             default:
                 component = Qt.createComponent("BaseWidget.qml")
         }
@@ -187,6 +190,17 @@ Item {
             }
         } else if (component.status === Component.Error) {
             console.error("Error creating widget:", component.errorString())
+            
+            // Fallback to BaseWidget
+            component = Qt.createComponent("BaseWidget.qml")
+            if (component.status === Component.Ready) {
+                var fallbackWidget = component.createObject(widgetContainer, {
+                    "x": x || workspace.width / 2 - 200,
+                    "y": y || workspace.height / 2 - 150,
+                    "widgetName": widgetType.charAt(0).toUpperCase() + widgetType.slice(1)
+                })
+                return fallbackWidget
+            }
         }
         
         return null
@@ -329,8 +343,9 @@ Item {
                 cellHeight: 120
                 
                 model: ListModel {
+                    ListElement { name: "System Monitor"; icon: "📊"; type: "system" }
                     ListElement { name: "Terminal"; icon: "⚡"; type: "terminal" }
-                    ListElement { name: "Wallet"; icon: "📊"; type: "wallet" }
+                    ListElement { name: "Wallet"; icon: "💰"; type: "wallet" }
                     ListElement { name: "Settings"; icon: "⚙️"; type: "settings" }
                     ListElement { name: "Code"; icon: "🎨"; type: "editor" }
                     ListElement { name: "Explorer"; icon: "🔮"; type: "explorer" }
@@ -408,8 +423,7 @@ Item {
         console.log("   Grid size:", gridSize)
         console.log("   Liquid motion:", liquidMotion)
         
-        // Create demo widgets
-        createWidget("terminal", 100, 100)
-        createWidget("wallet", 550, 150)
+        // Create demo System Monitor widget
+        createWidget("system", 100, 100)
     }
 }

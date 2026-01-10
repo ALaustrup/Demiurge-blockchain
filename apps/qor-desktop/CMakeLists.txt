@@ -113,6 +113,10 @@ set(UI_SOURCES
 set(SOURCES
     src/main.cpp
     src/QorIDManager.cpp
+    src/SystemMonitor.cpp
+    src/SystemMonitor.h
+    src/AudioReactiveColors.cpp
+    src/AudioReactiveColors.h
 )
 
 # Resources

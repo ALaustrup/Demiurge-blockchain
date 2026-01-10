@@ -16,6 +16,8 @@
 #include <QDebug>
 #include <QSurfaceFormat>
 #include "QorIDManager.h"
+#include "SystemMonitor.h"
+#include "AudioReactiveColors.h"
 
 int main(int argc, char *argv[])
 {
@@ -53,10 +55,17 @@ int main(int argc, char *argv[])
     qDebug() << "🎨 QML engine created";
     
     // Create and expose QorID Manager to QML
+    QOR::SystemMonitor *systemMonitor = new QOR::SystemMonitor(&app);
+    QOR::AudioReactiveColors *audioColors = new QOR::AudioReactiveColors(&app);
     QorIDManager qorIDManager;
+    
+    engine.rootContext()->setContextProperty("SystemMonitor", systemMonitor);
+    engine.rootContext()->setContextProperty("AudioColors", audioColors);
     engine.rootContext()->setContextProperty("QorIDManager", &qorIDManager);
     
     qDebug() << "🔐 QorIDManager exposed to QML";
+    qDebug() << "📊 SystemMonitor exposed to QML";
+    qDebug() << "🎵 AudioReactiveColors exposed to QML";
     
     // Set import paths for QML modules
     engine.addImportPath("qrc:/qml");

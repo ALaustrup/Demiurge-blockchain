@@ -19,9 +19,9 @@ QtObject {
     readonly property color deepGold: "#FFD700"        // Ancient gold
     
     // Reactive Colors (Audio-modulated - these will be bound to AudioColors C++ object)
-    property color primaryAccent: neonCyan
-    property color secondaryAccent: electricPurple
-    property color tertiaryAccent: deepGold
+    property color primaryAccent: typeof AudioColors !== 'undefined' ? AudioColors.primaryColor : neonCyan
+    property color secondaryAccent: typeof AudioColors !== 'undefined' ? AudioColors.secondaryColor : electricPurple
+    property color tertiaryAccent: typeof AudioColors !== 'undefined' ? AudioColors.tertiaryColor : deepGold
     
     // Text Colors
     readonly property color textPrimary: Qt.rgba(1, 1, 1, 0.95)

@@ -138,7 +138,8 @@ ApplicationWindow {
                 
                 // Placeholder for system info
                 Text {
-                    text: "Initializing Glass Engine..."
+                    text: "CPU: " + SystemMonitor.cpuUsage.toFixed(1) + "% | " +
+                          "RAM: " + SystemMonitor.memoryUsage.toFixed(1) + "%"
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSizeSmall
                     color: Theme.textSecondary
@@ -226,8 +227,17 @@ ApplicationWindow {
     
     Component.onCompleted: {
         console.log("🌌 QOR Desktop Environment Initialized")
-        console.log("✨ Glass Engine v1.0.0 - Phase 2")
+        console.log("✨ Glass Engine v1.0.0 - Phase 3")
         console.log("🎨 Theme: Ancient Code Meets Ethereal Glass")
         console.log("💫 Features: Liquid Workspace + Infinity Dock + Draggable Widgets")
+        console.log("📊 System Integration: Live metrics + Audio reactive colors")
+        
+        // Connect audio colors to theme
+        if (typeof AudioColors !== 'undefined') {
+            AudioColors.basePrimary = Theme.neonCyan
+            AudioColors.baseSecondary = Theme.electricPurple
+            AudioColors.baseTertiary = Theme.deepGold
+            console.log("🎵 Audio reactive colors initialized")
+        }
     }
 }
