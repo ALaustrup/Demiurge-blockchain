@@ -16,6 +16,7 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QDebug>
+#include "QorIDManager.h"
 
 int main(int argc, char *argv[])
 {
@@ -42,6 +43,12 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     
     qDebug() << "QML engine created";
+    
+    // Create and expose QorID Manager to QML
+    QorIDManager qorIDManager;
+    engine.rootContext()->setContextProperty("QorIDManager", &qorIDManager);
+    
+    qDebug() << "QorIDManager exposed to QML";
     
     // Set import paths
     engine.addImportPath("qrc:/qml");

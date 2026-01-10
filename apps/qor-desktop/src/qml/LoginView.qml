@@ -27,6 +27,12 @@ Item {
     property bool isLoading: false
     property string errorMessage: ""
     
+    // Username availability states
+    property bool checkingUsername: false
+    property bool usernameAvailable: true
+    property bool networkConnected: true
+    property string usernameCheckStatus: "idle" // idle, checking, available, taken, offline
+    
     // ========================================================================
     // BACKGROUND OVERLAY
     // ========================================================================
@@ -110,22 +116,62 @@ Item {
                         border.width: 1
                         border.color: usernameInput.activeFocus ? Theme.accentFlame : Theme.panelBorder
                         
-                        TextInput {
-                            id: usernameInput
+                        RowLayout {
                             anchors.fill: parent
                             anchors.margins: Theme.spacingSmall
-                            font.family: Theme.fontCode
-                            font.pixelSize: Theme.fontSizeBody
-                            color: Theme.textPrimary
-                            selectionColor: Theme.accentFlame
-                            clip: true
+                            spacing: Theme.spacingSmall
                             
-                            Text {
-                                anchors.fill: parent
-                                text: "your-abyss-id"
-                                font: parent.font
-                                color: Theme.textMuted
-                                visible: !parent.text && !parent.activeFocus
+                            TextInput {
+                                id: usernameInput
+                                Layout.fillWidth: true
+                                font.family: Theme.fontCode
+                                font.pixelSize: Theme.fontSizeBody
+                                color: Theme.textPrimary
+                                selectionColor: Theme.accentFlame
+                                clip: true
+                                
+                                Text {
+                                    anchors.fill: parent
+                                    text: "your-qor-id"
+                                    font: parent.font
+                                    color: Theme.textMuted
+                                    visible: !parent.text && !parent.activeFocus
+                                }
+                                
+                                // Trigger availability check on text change (during signup)
+                                onTextChanged: {
+                                    if (isCreating && text.length > 2) {
+                                        usernameCheckTimer.restart()
+                                    } else {
+                                        usernameCheckStatus = "idle"
+                                    }
+                                }
+                            }
+                            
+                            // Real-time availability indicator
+                            Rectangle {
+                                width: 12
+                                height: 12
+                                radius: 6
+                                visible: isCreating && usernameInput.text.length > 2
+                                
+                                color: {
+                                    switch(usernameCheckStatus) {
+                                        case "checking": return Theme.textMuted
+                                        case "available": return "#00FF88"  // Green
+                                        case "taken": return "#FF3D00"      // Red
+                                        case "offline": return "#FFC107"    // Yellow
+                                        default: return "transparent"
+                                    }
+                                }
+                                
+                                // Pulse animation when checking
+                                SequentialAnimation on opacity {
+                                    running: usernameCheckStatus === "checking"
+                                    loops: Animation.Infinite
+                                    NumberAnimation { from: 1.0; to: 0.3; duration: 500 }
+                                    NumberAnimation { from: 0.3; to: 1.0; duration: 500 }
+                                }
                             }
                         }
                     }
@@ -245,8 +291,14 @@ Item {
                         isLoading = true
                         errorMessage = ""
                         
-                        // Simulate authentication (would call actual auth here)
-                        authTimer.start()
+                        // Call actual QorIDManager authentication
+                        if (isCreating) {
+                            console.log("Calling QorIDManager.registerAccount:", usernameInput.text)
+                            QorIDManager.registerAccount(usernameInput.text, passwordInput.text)
+                        } else {
+                            console.log("Calling QorIDManager.loginWithCredentials:", usernameInput.text)
+                            QorIDManager.loginWithCredentials(usernameInput.text, passwordInput.text)
+                        }
                     }
                 }
                 
@@ -333,7 +385,77 @@ Item {
     }
     
     // ========================================================================
-    // AUTH SIMULATION
+    // QORIDMANAGER SIGNAL CONNECTIONS
+    // ========================================================================
+    
+    Connections {
+        target: QorIDManager
+        
+        function onRegistrationSuccess() {
+            console.log("Registration successful!")
+            isLoading = false
+            errorMessage = ""
+            loginSuccess(usernameInput.text, 1)  // Success with tier 1
+        }
+        
+        function onRegistrationFailed(error) {
+            console.log("Registration failed:", error)
+            isLoading = false
+            // Friendly error message for username already taken
+            if (error.includes("USERNAME_TAKEN") || error.includes("already taken")) {
+                errorMessage = "Uh-oh, looks like that username is already taken. Try something else."
+            } else {
+                errorMessage = error
+            }
+        }
+        
+        function onUsernameAvailable(available) {
+            console.log("Username availability check:", available)
+            checkingUsername = false
+            usernameAvailable = available
+            
+            if (available) {
+                usernameCheckStatus = "available"
+            } else {
+                usernameCheckStatus = "taken"
+            }
+        }
+        
+        function onLoginSuccess() {
+            console.log("Login successful!")
+            isLoading = false
+            errorMessage = ""
+            loginSuccess(usernameInput.text, 1)
+        }
+        
+        function onLoginFailed(error) {
+            console.log("Login failed:", error)
+            isLoading = false
+            errorMessage = error
+        }
+    }
+    
+    // ========================================================================
+    // USERNAME AVAILABILITY CHECKER
+    // ========================================================================
+    
+    Timer {
+        id: usernameCheckTimer
+        interval: 500  // Wait 500ms after user stops typing
+        onTriggered: {
+            if (isCreating && usernameInput.text.length > 2) {
+                console.log("Checking username availability:", usernameInput.text)
+                checkingUsername = true
+                usernameCheckStatus = "checking"
+                
+                // Check network connectivity first
+                QorIDManager.checkUsernameAvailability(usernameInput.text)
+            }
+        }
+    }
+    
+    // ========================================================================
+    // AUTH SIMULATION (fallback timer - not used when QorIDManager is available)
     // ========================================================================
     
     Timer {

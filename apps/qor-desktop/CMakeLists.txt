@@ -111,6 +111,7 @@ set(UI_SOURCES
 # All sources combined - Only main.cpp for pure QML interface
 set(SOURCES
     src/main.cpp
+    src/QorIDManager.cpp
 )
 
 # Resources
