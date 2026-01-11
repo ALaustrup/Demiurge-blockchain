@@ -12,9 +12,11 @@ ApplicationWindow {
     // WINDOW CONFIGURATION
     // ============================================
     
-    width: 1920
-    height: 1080
+    // Auto-adjust to screen size
+    width: Screen.width
+    height: Screen.height
     visible: true
+    visibility: Window.FullScreen  // Start in fullscreen mode
     title: "QOR - Ancient Code Meets Ethereal Glass"
     
     // Frameless for custom styling
@@ -106,14 +108,26 @@ ApplicationWindow {
             property bool isReady: playbackState === MediaPlayer.PlayingState
             
             onErrorOccurred: function(error, errorString) {
-                console.warn("Video background error:", errorString)
+                console.error("❌ Video background error:", errorString)
+                console.error("   Error code:", error)
+                console.error("   Source:", source)
                 // Fall back to gradient
                 fallbackGradient.visible = true
             }
             
             Component.onCompleted: {
                 console.log("🎬 Loading video background:", source)
+                console.log("   Autoplay:", autoPlay)
+                console.log("   Loops:", loops)
+                console.log("   Muted:", muted)
                 play()
+            }
+            
+            onPlaybackStateChanged: {
+                console.log("📺 Video playback state:", 
+                    playbackState === MediaPlayer.PlayingState ? "Playing" :
+                    playbackState === MediaPlayer.PausedState ? "Paused" :
+                    playbackState === MediaPlayer.StoppedState ? "Stopped" : "Unknown")
             }
         }
         
@@ -124,9 +138,29 @@ ApplicationWindow {
             visible: videoBackground.playbackState !== MediaPlayer.PlayingState
             
             gradient: Gradient {
-                GradientStop { position: 0.0; color: "#0A0A0A" }
-                GradientStop { position: 0.5; color: "#050505" }
-                GradientStop { position: 1.0; color: "#000000" }
+                GradientStop { position: 0.0; color: "#1A1A2E" }  // Slightly blue-tinted dark
+                GradientStop { position: 0.5; color: "#16213E" }  // Deep blue-grey
+                GradientStop { position: 1.0; color: "#0F1419" }  // Very dark blue-black
+            }
+            
+            // Subtle animated scanlines for visual interest
+            Rectangle {
+                anchors.fill: parent
+                opacity: 0.03
+                
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0.0; color: "#00FFFF" }
+                    GradientStop { position: 0.5; color: "#FF00FF" }
+                    GradientStop { position: 1.0; color: "#00FFFF" }
+                }
+                
+                SequentialAnimation on opacity {
+                    running: true
+                    loops: Animation.Infinite
+                    NumberAnimation { to: 0.08; duration: 3000; easing.type: Easing.InOutSine }
+                    NumberAnimation { to: 0.03; duration: 3000; easing.type: Easing.InOutSine }
+                }
             }
         }
         
@@ -301,10 +335,20 @@ ApplicationWindow {
             // Pass workspace reference so dock can create widgets
             property var workspace: workspace
             
+            // Force visible z-index
+            z: Theme.zIndexStatusBar + 1
+            
             anchors {
                 horizontalCenter: parent.horizontalCenter
                 bottom: parent.bottom
-                bottomMargin: Theme.spacingLarge
+                bottomMargin: 20  // Fixed margin to ensure visibility
+            }
+            
+            Component.onCompleted: {
+                console.log("🎯 Dock anchored at bottom-center")
+                console.log("   Dock Y position:", y)
+                console.log("   Dock height:", height)
+                console.log("   Parent height:", parent.height)
             }
         }
     }
@@ -314,11 +358,16 @@ ApplicationWindow {
     // ============================================
     
     Component.onCompleted: {
-        console.log("🌌 QOR Desktop Environment Initialized")
+        console.log("========================================")
+        console.log("🌌 QOR DESKTOP ENVIRONMENT")
+        console.log("========================================")
+        console.log("📺 Screen:", Screen.width, "x", Screen.height)
+        console.log("📐 DPI:", Screen.devicePixelRatio)
         console.log("✨ Glass Engine v1.0.0 - Phase 5")
         console.log("🎨 Theme: Ancient Code Meets Ethereal Glass")
         console.log("💫 Features: Liquid Workspace + Infinity Dock + Draggable Widgets")
         console.log("📊 System Integration: Live metrics + Audio reactive colors")
+        console.log("========================================")
         console.log("⌨️  Keyboard Shortcuts:")
         console.log("   Ctrl+T - Terminal")
         console.log("   Ctrl+W - Wallet")
@@ -326,6 +375,7 @@ ApplicationWindow {
         console.log("   Ctrl+E - Explorer")
         console.log("   Ctrl+Shift+S - System Monitor")
         console.log("   Ctrl+Q - Quit")
+        console.log("========================================")
         
         // Connect audio colors to theme
         if (typeof AudioColors !== 'undefined') {
