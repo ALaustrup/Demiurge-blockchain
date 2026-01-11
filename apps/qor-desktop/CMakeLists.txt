@@ -11,6 +11,11 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+# MSVC-specific: Enable proper C++17 detection
+if(MSVC)
+    add_compile_options(/Zc:__cplusplus)
+endif()
+
 # Find Qt packages - Core required components
 find_package(Qt6 REQUIRED COMPONENTS
     Core
