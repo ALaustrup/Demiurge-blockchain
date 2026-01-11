@@ -1,10 +1,5 @@
-module QOR
-
-# Theme singleton
 singleton Theme 1.0 Theme.qml
-
-# Main views
-Main 1.0 Main.qml
-SplashScreen 1.0 SplashScreen.qml
-LoginView 1.0 LoginView.qml
-DesktopView 1.0 DesktopView.qml
+GlassPane 1.0 GlassPane.qml
+InfinityDock 1.0 InfinityDock.qml
+BaseWidget 1.0 BaseWidget.qml
+LiquidWorkspace 1.0 LiquidWorkspace.qml

@@ -1,13 +1,25 @@
 <RCC>
     <qresource prefix="/qml">
         <!-- Main Views -->
+        <file>src/qml/main.qml</file>
         <file>src/qml/Test.qml</file>
         <file>src/qml/Main.qml</file>
         <file>src/qml/SplashScreen.qml</file>
         <file>src/qml/LoginView.qml</file>
         <file>src/qml/DesktopView.qml</file>
         <file>src/qml/Theme.qml</file>
+        <file>src/qml/GlassPane.qml</file>
+        <file>src/qml/InfinityDock.qml</file>
+        <file>src/qml/BaseWidget.qml</file>
+        <file>src/qml/LiquidWorkspace.qml</file>
         <file>src/qml/qmldir</file>
+        
+        <!-- Widgets -->
+        <file>src/qml/widgets/SystemMonitorWidget.qml</file>
+        <file>src/qml/widgets/TerminalWidget.qml</file>
+        <file>src/qml/widgets/WalletWidget.qml</file>
+        <file>src/qml/widgets/SettingsWidget.qml</file>
+        <file>src/qml/widgets/ExplorerWidget.qml</file>
         
         <!-- Components -->
         <file>src/qml/components/GlassPanel.qml</file>
@@ -58,5 +70,10 @@
     
     <qresource prefix="/shaders">
         <!-- GLSL shaders will be added here -->
+    </qresource>
+    
+    <qresource prefix="/assets">
+        <!-- Wallpapers -->
+        <file>assets/wallpapers/default.mp4</file>
     </qresource>
 </RCC>

@@ -18,6 +18,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Widgets
     Quick
     QuickControls2
+    QuickEffects
     Network
     Sql
     Multimedia
@@ -112,6 +113,10 @@ set(UI_SOURCES
 set(SOURCES
     src/main.cpp
     src/QorIDManager.cpp
+    src/SystemMonitor.cpp
+    src/SystemMonitor.h
+    src/AudioReactiveColors.cpp
+    src/AudioReactiveColors.h
 )
 
 # Resources
@@ -151,11 +156,17 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt6::Widgets
     Qt6::Quick
     Qt6::QuickControls2
+    Qt6::QuickEffects
     Qt6::Network
     Qt6::Sql
     Qt6::Multimedia
     Qt6::MultimediaWidgets
 )
+
+# Platform-specific libraries
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE pdh)
+endif()
 
 # Link optional Qt libraries if available
 if(Qt6Quick3D_FOUND)

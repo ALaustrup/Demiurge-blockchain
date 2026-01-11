@@ -1,12 +1,10 @@
 /**
  * QØЯ - Demiurge Blockchain Desktop Client
+ * Glass Engine v1.0.0 - Ancient Code Meets Ethereal Glass
  * 
  * The complete native desktop environment for the Demiurge ecosystem.
- * Provides full chain access, QOR OS GUI, and native performance.
- * 
- * QØЯ (pronounced "core") represents the heart of Demiurge - 
- * a desktop client that facilitates all blockchain operations while
- * providing the QOR OS graphical environment.
+ * Provides full chain access, QOR OS GUI, and native performance with
+ * cutting-edge glassmorphism and shader effects.
  */
 
 #include <QGuiApplication>
@@ -16,20 +14,32 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QDebug>
+#include <QSurfaceFormat>
 #include "QorIDManager.h"
+#include "SystemMonitor.h"
+#include "AudioReactiveColors.h"
 
 int main(int argc, char *argv[])
 {
-    qDebug() << "QOR Desktop starting...";
+    qDebug() << "🌌 QOR Desktop - Glass Engine v1.0.0";
+    qDebug() << "✨ Ancient Code Meets Ethereal Glass";
     
     // Enable high DPI scaling for crisp display on modern monitors
     QGuiApplication::setHighDpiScaleFactorRoundingPolicy(
         Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
     
+    // Configure OpenGL surface format for Glass Engine shaders
+    QSurfaceFormat format;
+    format.setRenderableType(QSurfaceFormat::OpenGL);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setVersion(4, 5);  // OpenGL 4.5 for advanced shaders
+    format.setSamples(4);     // MSAA for smooth edges
+    QSurfaceFormat::setDefaultFormat(format);
+    
     // Initialize QØЯ application
     QGuiApplication app(argc, argv);
     
-    qDebug() << "Application initialized";
+    qDebug() << "🔧 Application initialized";
     app.setApplicationName("QOR");
     app.setApplicationVersion("1.0.0");
     app.setOrganizationName("Demiurge");
@@ -42,45 +52,51 @@ int main(int argc, char *argv[])
     // Create QML engine
     QQmlApplicationEngine engine;
     
-    qDebug() << "QML engine created";
+    qDebug() << "🎨 QML engine created";
     
     // Create and expose QorID Manager to QML
+    QOR::SystemMonitor *systemMonitor = new QOR::SystemMonitor(&app);
+    QOR::AudioReactiveColors *audioColors = new QOR::AudioReactiveColors(&app);
     QorIDManager qorIDManager;
+    
+    engine.rootContext()->setContextProperty("SystemMonitor", systemMonitor);
+    engine.rootContext()->setContextProperty("AudioColors", audioColors);
     engine.rootContext()->setContextProperty("QorIDManager", &qorIDManager);
     
-    qDebug() << "QorIDManager exposed to QML";
+    qDebug() << "🔐 QorIDManager exposed to QML";
+    qDebug() << "📊 SystemMonitor exposed to QML";
+    qDebug() << "🎵 AudioReactiveColors exposed to QML";
     
-    // Set import paths
+    // Set import paths for QML modules
     engine.addImportPath("qrc:/qml");
     engine.addImportPath("qrc:/");
     
-    qDebug() << "Import paths set";
+    qDebug() << "📦 Import paths configured";
     
-    // Load main QML file (note: qml.qrc prefix is /qml, file is src/qml/Main.qml)
-    const QUrl url(QStringLiteral("qrc:/qml/src/qml/Main.qml"));
+    // Load main QML file (Glass Engine interface)
+    const QUrl url(QStringLiteral("qrc:/qml/src/qml/main.qml"));
     
-    qDebug() << "Loading QML from:" << url;
+    qDebug() << "🚀 Loading Glass Engine from:" << url;
     
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
         &app, [url](QObject *obj, const QUrl &objUrl) {
-            qDebug() << "Object created callback:" << obj << objUrl;
             if (!obj && url == objUrl) {
-                qDebug() << "ERROR: Failed to create root object!";
+                qCritical() << "❌ ERROR: Failed to create root object!";
                 QCoreApplication::exit(-1);
-            } else {
-                qDebug() << "Root object created successfully!";
+            } else if (obj) {
+                qDebug() << "✅ Glass Engine root object created successfully!";
             }
         }, Qt::QueuedConnection);
     
     engine.load(url);
     
-    qDebug() << "QML load initiated. Root objects:" << engine.rootObjects().count();
-    
     if (engine.rootObjects().isEmpty()) {
-        qDebug() << "ERROR: No root objects loaded!";
+        qCritical() << "❌ ERROR: No root objects loaded! Check QML file.";
         return -1;
     }
     
-    qDebug() << "Entering event loop...";
+    qDebug() << "🎭 Glass Engine initialized - Entering event loop...";
+    qDebug() << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
+    
     return app.exec();
 }
