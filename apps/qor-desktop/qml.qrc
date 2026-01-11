@@ -71,4 +71,9 @@
     <qresource prefix="/shaders">
         <!-- GLSL shaders will be added here -->
     </qresource>
+    
+    <qresource prefix="/assets">
+        <!-- Wallpapers -->
+        <file>assets/wallpapers/default.mp4</file>
+    </qresource>
 </RCC>

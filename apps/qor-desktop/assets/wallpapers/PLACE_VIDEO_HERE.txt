@@ -1,0 +1,29 @@
+# 🎬 **PLACE YOUR VIDEO HERE**
+
+## Instructions:
+
+1. **Copy your `.mp4` video file** to this folder
+2. **Rename it to:** `default.mp4`
+3. **Run:** `Add-Video.bat` to verify
+4. **Rebuild QOR Desktop**:
+   - Use `Simple-Rebuild.bat` in the parent directory
+   - Or manually: `cd build && cmake --build . --config Release`
+5. **Launch QOR** and enjoy your custom background!
+
+---
+
+**Recommended Video Format:**
+- **MP4** with H.264 codec
+- **1920x1080** resolution (or higher)
+- **30fps** framerate
+- **10-60 seconds** duration (loops seamlessly)
+- **No audio** needed (will be muted)
+
+**Example conversion with FFmpeg:**
+```bash
+ffmpeg -i input.mp4 -c:v libx264 -crf 23 -preset medium -s 1920x1080 -r 30 -an default.mp4
+```
+
+---
+
+**Current Status:** Waiting for `default.mp4` video file

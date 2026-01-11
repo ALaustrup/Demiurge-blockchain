@@ -30,6 +30,19 @@ Rectangle {
     color: "transparent"
     
     // ============================================
+    // VISIBLE BASE (Always Visible)
+    // ============================================
+    
+    Rectangle {
+        id: dockBase
+        anchors.fill: parent
+        radius: parent.radius
+        color: Qt.rgba(0.05, 0.05, 0.05, 0.8)  // Slightly visible dark base
+        border.width: 1
+        border.color: Qt.rgba(0, 1, 1, 0.3)  // Subtle cyan border
+    }
+    
+    // ============================================
     // GLASS BACKGROUND
     // ============================================
     
@@ -68,7 +81,7 @@ Rectangle {
         spacing: dock.itemSpacing
         interactive: false
         
-        model: DockItemsModel { id: dockModel }
+        model: dockItemsModelComponent
         
         delegate: Item {
             id: dockItemDelegate
@@ -178,7 +191,7 @@ Rectangle {
                     
                     onClicked: {
                         console.log("Dock item clicked:", model.name)
-                        dockModel.activateItem(index)
+                        dockModelWrapper.activateItem(index)
                         
                         // Emit signal to workspace to create widget
                         if (typeof workspace !== 'undefined') {
@@ -269,14 +282,13 @@ Rectangle {
             onTriggered: console.log("Dock preferences")
         }
     }
-}
-
-// ============================================
-// DOCK ITEMS MODEL
-// ============================================
-
-ListModel {
-    id: dockItemsModelComponent
+    
+    // ============================================
+    // DOCK ITEMS MODEL (Internal)
+    // ============================================
+    
+    ListModel {
+        id: dockItemsModelComponent
         
         ListElement {
             name: "System"
@@ -312,22 +324,23 @@ ListModel {
             active: false
             widgetType: "explorer"
         }
-}
-
-// Model wrapper component
-QtObject {
-    id: dockModelWrapper
+    }
     
-    function activateItem(index) {
-        // Deactivate all
-        for (var i = 0; i < dockItemsModelComponent.count; i++) {
-            dockItemsModelComponent.setProperty(i, "active", false)
-        }
-        // Activate clicked
-        dockItemsModelComponent.setProperty(index, "active", true)
+    // Model wrapper
+    QtObject {
+        id: dockModelWrapper
         
-        // Emit signal to create widget
-        var item = dockItemsModelComponent.get(index)
-        console.log("Activate:", item.name, "Type:", item.widgetType)
+        function activateItem(index) {
+            // Deactivate all
+            for (var i = 0; i < dockItemsModelComponent.count; i++) {
+                dockItemsModelComponent.setProperty(i, "active", false)
+            }
+            // Activate clicked
+            dockItemsModelComponent.setProperty(index, "active", true)
+            
+            // Emit signal to create widget
+            var item = dockItemsModelComponent.get(index)
+            console.log("Activate:", item.name, "Type:", item.widgetType)
+        }
     }
 }
