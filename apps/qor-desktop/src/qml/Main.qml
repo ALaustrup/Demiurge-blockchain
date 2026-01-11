@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
 import QtQuick.Effects
+import QtMultimedia
 
 ApplicationWindow {
     id: rootWindow
@@ -83,19 +84,44 @@ ApplicationWindow {
     }
     
     // ============================================
-    // BACKGROUND LAYER
+    // BACKGROUND LAYER - VIDEO WALLPAPER
     // ============================================
     
-    Image {
-        id: backgroundWallpaper
+    Rectangle {
+        id: backgroundContainer
         anchors.fill: parent
-        source: "qrc:/assets/wallpapers/default.jpg"
-        fillMode: Image.PreserveAspectCrop
+        color: "#000000"  // Fallback black background
         
-        // Fallback gradient if no wallpaper
-        Rectangle {
+        // Video Background
+        Video {
+            id: videoBackground
             anchors.fill: parent
-            visible: backgroundWallpaper.status !== Image.Ready
+            source: "qrc:/assets/wallpapers/default.mp4"
+            fillMode: VideoOutput.PreserveAspectCrop
+            autoPlay: true
+            loops: MediaPlayer.Infinite
+            muted: true  // Silent background video
+            
+            // Smooth playback
+            property bool isReady: playbackState === MediaPlayer.PlayingState
+            
+            onErrorOccurred: function(error, errorString) {
+                console.warn("Video background error:", errorString)
+                // Fall back to gradient
+                fallbackGradient.visible = true
+            }
+            
+            Component.onCompleted: {
+                console.log("🎬 Loading video background:", source)
+                play()
+            }
+        }
+        
+        // Fallback gradient if video fails to load
+        Rectangle {
+            id: fallbackGradient
+            anchors.fill: parent
+            visible: videoBackground.playbackState !== MediaPlayer.PlayingState
             
             gradient: Gradient {
                 GradientStop { position: 0.0; color: "#0A0A0A" }
@@ -104,15 +130,32 @@ ApplicationWindow {
             }
         }
         
-        // Subtle vignette overlay
+        // Subtle vignette overlay (helps text readability)
         Rectangle {
             anchors.fill: parent
+            opacity: 0.6
             
             gradient: Gradient {
                 orientation: Gradient.Horizontal
-                GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.3) }
+                GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.4) }
                 GradientStop { position: 0.5; color: Qt.rgba(0, 0, 0, 0) }
-                GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.3) }
+                GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.4) }
+            }
+        }
+        
+        // Bottom darkening for dock visibility
+        Rectangle {
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+            }
+            height: 150
+            opacity: 0.5
+            
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "transparent" }
+                GradientStop { position: 1.0; color: "#000000" }
             }
         }
     }
