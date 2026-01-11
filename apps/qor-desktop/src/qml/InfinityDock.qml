@@ -37,9 +37,26 @@ Rectangle {
         id: dockBase
         anchors.fill: parent
         radius: parent.radius
-        color: Qt.rgba(0.05, 0.05, 0.05, 0.8)  // Slightly visible dark base
-        border.width: 1
-        border.color: Qt.rgba(0, 1, 1, 0.3)  // Subtle cyan border
+        color: Qt.rgba(0.1, 0.1, 0.15, 0.95)  // More visible dark blue-grey
+        border.width: 2
+        border.color: Qt.rgba(0, 1, 1, 0.6)  // Brighter cyan border
+        
+        // Subtle inner glow
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: 2
+            radius: parent.radius - 2
+            color: "transparent"
+            border.width: 1
+            border.color: Qt.rgba(0, 1, 1, 0.2)
+        }
+    }
+    
+    Component.onCompleted: {
+        console.log("🎮 InfinityDock initialized")
+        console.log("   Width:", width, "Height:", height)
+        console.log("   Position: bottom-center, margin:", Theme.spacingLarge)
+        console.log("   Items:", dockItemsModelComponent.count)
     }
     
     // ============================================
