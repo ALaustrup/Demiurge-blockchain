@@ -2,6 +2,7 @@
 import QtQuick
 import QtQuick.Window
 import QtQuick.Controls
+import QtQuick.Effects
 
 ApplicationWindow {
     id: rootWindow

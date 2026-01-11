@@ -1,6 +1,7 @@
 // InfinityDock.qml - Bottom Navigation with Magnification
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Effects
 
 Rectangle {
     id: dock
