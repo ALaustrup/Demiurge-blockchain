@@ -1,0 +1,25 @@
+[package]
+name = "demiurge-module-zk"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Zero-Knowledge module for private transactions and anonymous voting"
+
+[dependencies]
+codec = { workspace = true }
+scale-info = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+blake2 = { workspace = true }
+
+# ZK libraries (to be added)
+# arkworks or bellman for SNARKs
+# winterfell for STARKs
+
+# Internal dependencies
+demiurge-storage = { path = "../../../storage" }
+demiurge-modules = { path = "../../../modules" }
+
+[dev-dependencies]

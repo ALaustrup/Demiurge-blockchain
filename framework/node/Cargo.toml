@@ -1,0 +1,58 @@
+[package]
+name = "demiurge-node"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Full node implementation for Demiurge blockchain"
+
+[[bin]]
+name = "demiurge-node"
+path = "src/main.rs"
+
+[features]
+default = []
+# Enable post-quantum cryptography (CRYSTALS-Dilithium)
+pqc = ["demiurge-primitives/pqc", "demiurge-consensus/pqc"]
+# Enable all optional features
+full = ["pqc"]
+
+[dependencies]
+# Core framework
+demiurge-core = { path = "../core" }
+demiurge-storage = { path = "../storage" }
+demiurge-consensus = { path = "../consensus" }
+demiurge-network = { path = "../network" }
+demiurge-modules = { path = "../modules" }
+demiurge-rpc = { path = "../rpc" }
+demiurge-primitives = { path = "../primitives" }
+
+# CLI
+clap = { workspace = true }
+
+# Async
+tokio = { workspace = true }
+futures = { workspace = true }
+
+# Logging
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# Error handling
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Utilities
+hex = { workspace = true }
+ed25519-dalek = { workspace = true }
+rand = { workspace = true }
+libp2p = { workspace = true }
+blake2 = { workspace = true }
+codec = { workspace = true }
+
+[dev-dependencies]

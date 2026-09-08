@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  secrets-scan:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  framework:
+    name: Framework (Rust)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: framework
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: Build dependencies
+        run: sudo apt-get update && sudo apt-get install -y clang libclang-dev cmake pkg-config libssl-dev protobuf-compiler
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: framework
+      - name: Check
+        run: cargo check --workspace --all-targets
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Test
+        run: cargo test --workspace
+      - name: Node binary starts
+        run: |
+          cargo build -p demiurge-node
+          ./target/debug/demiurge-node --help
+
+  qor-auth:
+    name: QOR Auth (Rust)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/qor-auth
+    env:
+      SQLX_OFFLINE: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: services/qor-auth
+      - name: Check
+        run: cargo check --all-targets
+      - name: Test
+        run: cargo test
+
+  typescript:
+    name: TypeScript workspaces
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build SDKs
+        run: npm run build:sdk
+      - name: Typecheck Hub
+        run: npx tsc --noEmit -p apps/hub/tsconfig.json
+      - name: Build wallet extension
+        run: npm run build --workspace=@demiurge/wallet-extension --if-present
+      - name: Build CLI
+        run: npm run build --workspace=@demiurge/cli

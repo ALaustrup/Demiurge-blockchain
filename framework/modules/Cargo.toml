@@ -1,0 +1,14 @@
+[package]
+name = "demiurge-modules"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Module system for Demiurge blockchain (replacement for pallets)"
+
+[dependencies]
+codec = { workspace = true }
+scale-info = { workspace = true }
+thiserror = { workspace = true }
+demiurge-storage = { path = "../storage" }

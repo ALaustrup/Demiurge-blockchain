@@ -1,0 +1,28 @@
+[package]
+name = "demiurge-primitives"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Core primitives for the Demiurge Protocol"
+
+[features]
+default = ["ed25519"]
+ed25519 = []
+pqc = ["pqcrypto-dilithium", "pqcrypto-traits"]
+full = ["ed25519", "pqc"]
+
+[dependencies]
+codec = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+blake2 = { workspace = true }
+ed25519-dalek = { workspace = true }
+rand = { workspace = true }
+
+# Post-Quantum Cryptography (optional)
+pqcrypto-dilithium = { version = "0.5", optional = true }
+pqcrypto-traits = { version = "0.3", optional = true }
+
+[dev-dependencies]
+rand = { workspace = true }

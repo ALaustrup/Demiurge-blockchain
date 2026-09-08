@@ -1,0 +1,91 @@
+# Demiurge Protocol .gitignore
+# Lockfiles ARE committed (Cargo.lock, package-lock.json): reproducible builds matter.
+
+# Rust
+target/
+**/*.rs.bk
+*.pdb
+
+# Node
+node_modules/
+.next/
+.turbo/
+dist/
+build/
+*.tsbuildinfo
+npm-debug.log*
+yarn-*.log
+.pnpm-debug.log*
+
+# Generated wasm packages (rebuilt via `npm run wallet-wasm:build`)
+apps/hub/public/pkg/
+packages/*/pkg/
+
+# Chain runtime data (never commit a database)
+framework/data/
+projects/*/chain/*
+!projects/*/chain/.gitkeep
+projects/.studio/processes.json
+*.db
+*.sqlite
+*.sqlite3
+*.log
+logs/
+
+# Secrets and keys — never commit
+.env
+.env.local
+.env.*.local
+.env.production
+.env.neon
+secrets/
+*.key
+!*.key.example
+*.pem
+id_ed25519*
+id_rsa*
+.ssh/
+config/production/.secrets
+config/production/secrets/
+services/qor-auth/.env
+services/qor-auth/.env.neon
+
+# IDE / OS
+.vscode/
+.idea/
+.vs/
+**/.vs/
+*.slnx
+*.vsidx
+*.suo
+*.user
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Vercel link (never share)
+.vercel
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Unreal Engine
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+*.VC.db
+*.opensdf
+*.opendb
+*.sdf
+*.sln
+ue5-source/
+
+# Docker
+docker-compose.override.yml

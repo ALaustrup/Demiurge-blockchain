@@ -1,0 +1,20 @@
+[package]
+name = "demiurge-module-yield-nfts"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Yield NFTs Module - NFTs that earn passive income"
+
+[dependencies]
+codec = { workspace = true }
+scale-info = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+
+# Internal dependencies
+demiurge-storage = { path = "../../../storage" }
+demiurge-modules = { path = "../../../modules" }
+
+[dev-dependencies]

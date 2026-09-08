@@ -1,0 +1,19 @@
+[package]
+name = "demiurge-module-governance"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "On-chain governance module for the Demiurge Protocol"
+
+[dependencies]
+codec = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+blake2 = { workspace = true }
+hex = { workspace = true }
+
+demiurge-storage = { path = "../../../storage" }
+
+[dev-dependencies]

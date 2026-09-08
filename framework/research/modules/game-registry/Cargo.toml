@@ -1,0 +1,23 @@
+[package]
+name = "demiurge-game-registry"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "On-chain game registry module for Demiurge blockchain"
+
+[dependencies]
+demiurge-core = { path = "../../../core" }
+demiurge-storage = { path = "../../../storage" }
+demiurge-module-balances = { path = "../../../modules/balances" }
+
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+hex = { workspace = true }
+sha2 = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }

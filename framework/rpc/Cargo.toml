@@ -1,0 +1,33 @@
+[package]
+name = "demiurge-rpc"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "RPC layer for Demiurge blockchain - JSON-RPC + WebSocket"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+codec = { workspace = true }
+tokio = { workspace = true, features = ["sync"] }
+futures = { workspace = true }
+tracing = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+
+jsonrpsee = { workspace = true }
+hex = { workspace = true }
+rand = { workspace = true }
+blake2 = { workspace = true }
+
+# Internal dependencies
+demiurge-core = { path = "../core" }
+demiurge-storage = { path = "../storage" }
+demiurge-consensus = { path = "../consensus" }
+demiurge-network = { path = "../network" }
+demiurge-module-energy = { path = "../modules/energy" }
+demiurge-module-session-keys = { path = "../modules/session-keys" }
+
+[dev-dependencies]

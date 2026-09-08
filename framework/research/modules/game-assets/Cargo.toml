@@ -1,0 +1,20 @@
+[package]
+name = "demiurge-module-game-assets"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Game Assets Module - Multi-asset system for games"
+
+[dependencies]
+codec = { workspace = true }
+scale-info = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+
+# Internal dependencies
+demiurge-storage = { path = "../../../storage" }
+demiurge-modules = { path = "../../../modules" }
+
+[dev-dependencies]

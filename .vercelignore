@@ -1,0 +1,12 @@
+# Exclude heavy / local-only paths from Vercel uploads
+framework/data
+framework/target
+services/qor-auth/target
+**/target
+**/.next
+node_modules
+.git
+*.LOCK
+apps/sophia/.next
+apps/hub/.next
+apps/marketing-site/.next

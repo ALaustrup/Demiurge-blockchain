@@ -1,0 +1,32 @@
+[package]
+name = "demiurge-cvp"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Consensus-Verified Polymorphism (Archon CVP) - Dynamic bytecode mutation with ZK equivalence proofs"
+
+[dependencies]
+blake2 = { workspace = true }
+codec = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+hex = { workspace = true }
+sha2 = { workspace = true }
+rand = { workspace = true }
+
+# ZK Proof Systems
+plonky2 = { version = "0.2", optional = true }
+plonky2_field = { version = "0.2", optional = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+
+[features]
+default = []
+zk-plonky2 = ["plonky2", "plonky2_field"]
+zk-full = ["zk-plonky2"]
+

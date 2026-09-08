@@ -1,0 +1,24 @@
+[package]
+name = "demiurge-network"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "P2P networking layer for Demiurge blockchain"
+
+[dependencies]
+codec = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+futures = { workspace = true }
+libp2p = { workspace = true }
+tracing = { workspace = true }
+blake2 = { workspace = true }
+hex = { workspace = true }
+
+# Internal dependencies
+demiurge-core = { path = "../core" }
+
+[dev-dependencies]

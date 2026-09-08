@@ -1,0 +1,209 @@
+# Demiurge Blockchain Testnet - 4-Node Deployment
+# This docker-compose file sets up a local testnet with 4 validator nodes
+#
+# Usage:
+#   docker-compose -f docker-compose.testnet.yml up -d
+#   docker-compose -f docker-compose.testnet.yml logs -f node1
+#   docker-compose -f docker-compose.testnet.yml down -v
+
+version: '3.8'
+
+services:
+  # Node 1 - Primary boot node
+  node1:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.node
+    container_name: demiurge-node1
+    hostname: node1
+    ports:
+      - "9944:9944"   # RPC/WebSocket
+      - "30333:30333" # P2P
+      - "9615:9615"   # Prometheus metrics
+    environment:
+      - NODE_NAME=Alpha
+      - NODE_KEY=0000000000000000000000000000000000000000000000000000000000000001
+      - VALIDATOR_ENABLED=true
+      - RPC_CORS=all
+      - RPC_METHODS=unsafe
+      - PROMETHEUS_ENABLED=true
+      - LOG_LEVEL=info
+      - RUST_LOG=info,demiurge=debug
+    volumes:
+      - node1-data:/data
+      - ../config/testnet:/config:ro
+    networks:
+      testnet:
+        ipv4_address: 172.28.0.11
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9944/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Node 2 - Validator
+  node2:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.node
+    container_name: demiurge-node2
+    hostname: node2
+    ports:
+      - "9945:9944"
+      - "30334:30333"
+      - "9616:9615"
+    environment:
+      - NODE_NAME=Beta
+      - NODE_KEY=0000000000000000000000000000000000000000000000000000000000000002
+      - VALIDATOR_ENABLED=true
+      - BOOTNODES=/dns/node1/tcp/30333/p2p/12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2
+      - RPC_CORS=all
+      - LOG_LEVEL=info
+      - RUST_LOG=info,demiurge=debug
+    volumes:
+      - node2-data:/data
+      - ../config/testnet:/config:ro
+    networks:
+      testnet:
+        ipv4_address: 172.28.0.12
+    depends_on:
+      node1:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Node 3 - Validator
+  node3:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.node
+    container_name: demiurge-node3
+    hostname: node3
+    ports:
+      - "9946:9944"
+      - "30335:30333"
+      - "9617:9615"
+    environment:
+      - NODE_NAME=Gamma
+      - NODE_KEY=0000000000000000000000000000000000000000000000000000000000000003
+      - VALIDATOR_ENABLED=true
+      - BOOTNODES=/dns/node1/tcp/30333/p2p/12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2
+      - RPC_CORS=all
+      - LOG_LEVEL=info
+      - RUST_LOG=info,demiurge=debug
+    volumes:
+      - node3-data:/data
+      - ../config/testnet:/config:ro
+    networks:
+      testnet:
+        ipv4_address: 172.28.0.13
+    depends_on:
+      node1:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Node 4 - Validator
+  node4:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.node
+    container_name: demiurge-node4
+    hostname: node4
+    ports:
+      - "9947:9944"
+      - "30336:30333"
+      - "9618:9615"
+    environment:
+      - NODE_NAME=Delta
+      - NODE_KEY=0000000000000000000000000000000000000000000000000000000000000004
+      - VALIDATOR_ENABLED=true
+      - BOOTNODES=/dns/node1/tcp/30333/p2p/12D3KooWBmAwcd4PJNJvfV89HwE48nwkRmAgo8Vy3uQEyNNHBox2
+      - RPC_CORS=all
+      - LOG_LEVEL=info
+      - RUST_LOG=info,demiurge=debug
+    volumes:
+      - node4-data:/data
+      - ../config/testnet:/config:ro
+    networks:
+      testnet:
+        ipv4_address: 172.28.0.14
+    depends_on:
+      node1:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # RPC Load Balancer / Proxy
+  rpc-proxy:
+    image: nginx:alpine
+    container_name: demiurge-rpc-proxy
+    ports:
+      - "9940:80"
+    volumes:
+      - ./testnet/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      testnet:
+        ipv4_address: 172.28.0.100
+    depends_on:
+      - node1
+      - node2
+      - node3
+      - node4
+    restart: unless-stopped
+
+  # Block Explorer - run apps/hub separately; Dockerfile.explorer not yet in repo
+  # explorer: ...
+  # Use: cd apps/hub && npm run dev (connect to ws://localhost:9940)
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: demiurge-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./testnet/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    networks:
+      testnet:
+        ipv4_address: 172.28.0.200
+    restart: unless-stopped
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: demiurge-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=demiurge
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      testnet:
+        ipv4_address: 172.28.0.201
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+networks:
+  testnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
+          gateway: 172.28.0.1
+
+volumes:
+  node1-data:
+  node2-data:
+  node3-data:
+  node4-data:
+  prometheus-data:
+  grafana-data:

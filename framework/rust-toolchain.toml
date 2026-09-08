@@ -1,0 +1,12 @@
+# Rust Toolchain Configuration for Demiurge Blockchain
+#
+# The workspace builds on stable Rust.
+#
+# NOTE: the optional `zk-plonky2` feature (modules/cvp, and the research
+# crates under research/modules) depends on plonky2, which requires nightly
+# (specialization, stdarch_x86_avx512). To build with that feature use e.g.
+#   cargo +nightly-2024-12-01 build -p demiurge-cvp --features zk-plonky2
+
+[toolchain]
+channel = "stable"
+components = ["rustfmt", "clippy"]

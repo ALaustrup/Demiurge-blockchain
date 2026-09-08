@@ -1,0 +1,650 @@
+openapi: 3.1.0
+info:
+  title: Demiurge Protocol RPC API
+  version: 1.0.0
+  description: |
+    JSON-RPC 2.0 API for the Demiurge Protocol blockchain.
+    
+    ## Overview
+    
+    The Demiurge RPC API provides access to blockchain state, transaction submission,
+    and module-specific functionality.
+    
+    ## Authentication
+    
+    Most read endpoints are public. Write operations require signed transactions.
+    
+    ## Rate Limits
+    
+    - Public endpoints: 100 requests/minute
+    - Authenticated endpoints: 1000 requests/minute
+    
+  contact:
+    name: Demiurge Protocol
+    url: https://demiurge.cloud
+    email: dev@demiurge.cloud
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://rpc.demiurge.cloud
+    description: Production RPC endpoint
+  - url: https://127.0.0.1:9933
+    description: Direct node RPC endpoint
+  - url: http://localhost:9944
+    description: Local development
+
+tags:
+  - name: System
+    description: System and node information
+  - name: Chain
+    description: Blockchain state queries
+  - name: Transactions
+    description: Transaction submission and status
+  - name: Balances
+    description: CGT token balances and transfers
+  - name: Energy
+    description: Energy system (feeless transactions)
+  - name: Identity
+    description: QOR ID and DID operations
+  - name: NFT
+    description: DRC-369 NFT operations
+  - name: Staking
+    description: Validator and staking operations
+  - name: Agents
+    description: AI agent operations
+
+paths:
+  /:
+    post:
+      summary: JSON-RPC 2.0 Endpoint
+      description: All RPC methods are accessed via POST to this endpoint
+      tags:
+        - System
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonRpcRequest'
+      responses:
+        '200':
+          description: JSON-RPC response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonRpcResponse'
+
+components:
+  schemas:
+    JsonRpcRequest:
+      type: object
+      required:
+        - jsonrpc
+        - method
+        - id
+      properties:
+        jsonrpc:
+          type: string
+          enum: ["2.0"]
+        method:
+          type: string
+          description: RPC method name
+        params:
+          type: array
+          description: Method parameters
+        id:
+          oneOf:
+            - type: string
+            - type: integer
+          description: Request identifier
+      examples:
+        - jsonrpc: "2.0"
+          method: "system_health"
+          params: []
+          id: 1
+
+    JsonRpcResponse:
+      type: object
+      required:
+        - jsonrpc
+        - id
+      properties:
+        jsonrpc:
+          type: string
+          enum: ["2.0"]
+        result:
+          description: Method result (if successful)
+        error:
+          $ref: '#/components/schemas/JsonRpcError'
+        id:
+          oneOf:
+            - type: string
+            - type: integer
+
+    JsonRpcError:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          type: object
+
+    # System Types
+    HealthStatus:
+      type: object
+      properties:
+        isSyncing:
+          type: boolean
+        peers:
+          type: integer
+        shouldHavePeers:
+          type: boolean
+        finality:
+          type: integer
+          description: Finality time in milliseconds
+
+    NodeInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        version:
+          type: string
+        chain:
+          type: string
+        nodeType:
+          type: string
+          enum: [Full, Light, Archive]
+
+    # Chain Types
+    BlockInfo:
+      type: object
+      properties:
+        number:
+          type: integer
+          format: int64
+        hash:
+          type: string
+          pattern: '^0x[a-fA-F0-9]{64}$'
+        parentHash:
+          type: string
+        stateRoot:
+          type: string
+        extrinsicsRoot:
+          type: string
+        timestamp:
+          type: integer
+          format: int64
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionInfo'
+
+    TransactionInfo:
+      type: object
+      properties:
+        hash:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        amount:
+          type: string
+        module:
+          type: string
+        call:
+          type: string
+        status:
+          type: string
+          enum: [pending, included, finalized, failed]
+        blockNumber:
+          type: integer
+
+    # Balances Types
+    BalanceInfo:
+      type: object
+      properties:
+        free:
+          type: string
+          description: Available balance in Sparks (1 CGT = 100 Sparks)
+        reserved:
+          type: string
+          description: Locked balance
+        total:
+          type: string
+          description: Total balance
+
+    # Energy Types
+    EnergyInfo:
+      type: object
+      properties:
+        current:
+          type: integer
+          description: Current energy level (0-100)
+        max:
+          type: integer
+          description: Maximum energy capacity
+        regenRate:
+          type: number
+          description: Energy regeneration per second
+        lastUpdate:
+          type: integer
+          format: int64
+          description: Last update timestamp
+
+    # Identity Types
+    QorIdInfo:
+      type: object
+      properties:
+        did:
+          type: string
+          description: Decentralized Identifier
+        handle:
+          type: string
+          description: Human-readable handle (e.g., alice#1234)
+        address:
+          type: string
+          description: On-chain address
+        created:
+          type: integer
+          format: int64
+        keys:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyInfo'
+
+    KeyInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        keyType:
+          type: string
+          enum: [Master, Session, Recovery]
+        publicKey:
+          type: string
+        expires:
+          type: integer
+          format: int64
+
+    # NFT Types
+    DRC369Token:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+        owner:
+          type: string
+        creator:
+          type: string
+        collection:
+          type: string
+        royalty:
+          type: integer
+          description: Royalty in basis points (500 = 5%)
+        attributes:
+          type: array
+          items:
+            type: object
+            properties:
+              trait_type:
+                type: string
+              value:
+                oneOf:
+                  - type: string
+                  - type: number
+        dynamicState:
+          type: object
+          description: Mutable NFT state
+          additionalProperties: true
+        physics:
+          $ref: '#/components/schemas/PhysicsMetadata'
+        cvp:
+          $ref: '#/components/schemas/CVPStatus'
+
+    PhysicsMetadata:
+      type: object
+      properties:
+        mass:
+          type: number
+        friction:
+          type: number
+        restitution:
+          type: number
+        velocity:
+          type: object
+          properties:
+            x:
+              type: number
+            y:
+              type: number
+            z:
+              type: number
+
+    CVPStatus:
+      type: object
+      properties:
+        codeHash:
+          type: string
+        lastVerified:
+          type: integer
+          format: int64
+        mutations:
+          type: integer
+
+    # Staking Types
+    ValidatorInfo:
+      type: object
+      properties:
+        account:
+          type: string
+        stake:
+          type: string
+        commission:
+          type: integer
+          description: Commission percentage (0-100)
+        active:
+          type: boolean
+        nominators:
+          type: integer
+        era:
+          type: integer
+
+    StakingPoolInfo:
+      type: object
+      properties:
+        validator:
+          type: string
+        totalStake:
+          type: string
+        nominatorCount:
+          type: integer
+        commission:
+          type: integer
+        minNomination:
+          type: string
+
+    EraInfo:
+      type: object
+      properties:
+        current:
+          type: integer
+        startBlock:
+          type: integer
+        endBlock:
+          type: integer
+        totalRewards:
+          type: string
+        totalStake:
+          type: string
+
+    # Agent Types
+    AgentInfo:
+      type: object
+      properties:
+        did:
+          type: string
+          description: Agent DID (did:demiurge:agent:...)
+        name:
+          type: string
+        owner:
+          type: string
+        autonomyLevel:
+          type: string
+          enum: [supervised, bounded, autonomous, sovereign]
+        capabilities:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [active, idle, suspended]
+        walletBalance:
+          type: string
+        spendingLimit:
+          type: string
+        createdAt:
+          type: integer
+          format: int64
+
+    BountyInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [optimization, security, analysis, maintenance, governance]
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        status:
+          type: string
+          enum: [open, assigned, in_progress, verification, completed, expired]
+        reward:
+          type: string
+        deadline:
+          type: integer
+          format: int64
+        creator:
+          type: string
+        assignee:
+          type: string
+
+---
+# RPC Methods Reference
+
+## System Methods
+
+### system_health
+Returns node health status.
+
+**Parameters:** None
+
+**Returns:** `HealthStatus`
+
+**Example:**
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "system_health",
+  "params": [],
+  "id": 1
+}
+```
+
+### system_nodeInfo
+Returns node information.
+
+**Parameters:** None
+
+**Returns:** `NodeInfo`
+
+---
+
+## Chain Methods
+
+### chain_getBlockNumber
+Returns the current block number.
+
+**Parameters:** None
+
+**Returns:** `integer`
+
+### chain_getBlock
+Returns block by number or hash.
+
+**Parameters:**
+- `blockId` (string|integer): Block number or hash
+
+**Returns:** `BlockInfo`
+
+### chain_getLatestBlock
+Returns the latest finalized block.
+
+**Parameters:** None
+
+**Returns:** `BlockInfo`
+
+---
+
+## Balance Methods
+
+### balances_getBalance
+Returns account balance.
+
+**Parameters:**
+- `address` (string): Account address
+
+**Returns:** `BalanceInfo`
+
+### balances_transfer
+Submit a transfer transaction.
+
+**Parameters:**
+- `to` (string): Recipient address
+- `amount` (string): Amount in Sparks
+- `signature` (string): Transaction signature
+
+**Returns:** `string` (transaction hash)
+
+---
+
+## Energy Methods
+
+### energy_getEnergy
+Returns account energy.
+
+**Parameters:**
+- `address` (string): Account address
+
+**Returns:** `EnergyInfo`
+
+---
+
+## Identity Methods
+
+### identity_resolve
+Resolve QOR ID handle to DID.
+
+**Parameters:**
+- `handle` (string): QOR ID handle (e.g., "alice#1234")
+
+**Returns:** `QorIdInfo`
+
+### identity_getDid
+Get DID document.
+
+**Parameters:**
+- `did` (string): DID identifier
+
+**Returns:** `QorIdInfo`
+
+---
+
+## NFT Methods (DRC-369)
+
+### drc369_getToken
+Get NFT by ID.
+
+**Parameters:**
+- `tokenId` (string): Token identifier
+
+**Returns:** `DRC369Token`
+
+### drc369_getTokensByOwner
+Get all NFTs owned by address.
+
+**Parameters:**
+- `owner` (string): Owner address
+- `limit` (integer, optional): Max results
+- `offset` (integer, optional): Pagination offset
+
+**Returns:** `DRC369Token[]`
+
+### drc369_getDynamicState
+Get mutable state of an NFT.
+
+**Parameters:**
+- `tokenId` (string): Token identifier
+
+**Returns:** `object` (dynamic state)
+
+---
+
+## Staking Methods
+
+### staking_getValidators
+Get all validators.
+
+**Parameters:**
+- `activeOnly` (boolean, optional): Filter to active only
+
+**Returns:** `ValidatorInfo[]`
+
+### staking_getValidator
+Get validator by account.
+
+**Parameters:**
+- `account` (string): Validator account
+
+**Returns:** `ValidatorInfo`
+
+### staking_getPool
+Get staking pool info.
+
+**Parameters:**
+- `validator` (string): Validator account
+
+**Returns:** `StakingPoolInfo`
+
+### staking_getCurrentEra
+Get current era info.
+
+**Parameters:** None
+
+**Returns:** `EraInfo`
+
+---
+
+## Agent Methods
+
+### agent_getAgent
+Get agent by DID.
+
+**Parameters:**
+- `did` (string): Agent DID
+
+**Returns:** `AgentInfo`
+
+### agent_listBounties
+List available bounties.
+
+**Parameters:**
+- `category` (string, optional): Filter by category
+- `status` (string, optional): Filter by status
+
+**Returns:** `BountyInfo[]`
+
+### agent_getBounty
+Get bounty details.
+
+**Parameters:**
+- `id` (string): Bounty ID
+
+**Returns:** `BountyInfo`

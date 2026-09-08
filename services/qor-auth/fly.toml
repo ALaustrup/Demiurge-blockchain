@@ -1,0 +1,32 @@
+# Fly.io app for QOR Auth (Phase 3)
+# Create app: fly apps create demiurge-qor-auth
+# Set secrets: fly secrets set QOR_AUTH__DATABASE__URL=... QOR_AUTH__REDIS__URL=... (see .env.fly.example)
+
+app = "demiurge-qor-auth"
+primary_region = "cdg"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  QOR_AUTH__SERVER__HOST = "0.0.0.0"
+  QOR_AUTH__SERVER__PORT = "8080"
+  RUN_ENV = "production"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 250
+    soft_limit = 200
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1

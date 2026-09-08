@@ -1,0 +1,62 @@
+services:
+  n8n-db:
+    image: postgres:16-alpine
+    container_name: demiurge-n8n-db
+    restart: always
+    environment:
+      - POSTGRES_USER=demiurge_ops
+      - POSTGRES_PASSWORD=${N8N_DB_PASSWORD:-change-me-local-n8n}
+      - POSTGRES_DB=n8n_internal
+    volumes:
+      - n8n_db_data:/var/lib/postgresql/data
+    networks:
+      - demiurge-bridge
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demiurge_ops -d n8n_internal"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  n8n-app:
+    image: n8nio/n8n:latest
+    container_name: demiurge-n8n-app
+    restart: always
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=n8n-db
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_USER=demiurge_ops
+      - DB_POSTGRESDB_PASSWORD=${N8N_DB_PASSWORD:-change-me-local-n8n}
+      - DB_POSTGRESDB_DATABASE=n8n_internal
+      - N8N_HOST=127.0.0.1
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-local-dev-n8n-encryption-key-change-me}
+      - N8N_TELEMETRY_ENABLED=false
+      - GENERIC_TIMEZONE=UTC
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=demiurge
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-change-me-local}
+      - WEBHOOK_URL=http://127.0.0.1:5678/
+      - N8N_METRICS=true
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      n8n-db:
+        condition: service_healthy
+    networks:
+      - demiurge-bridge
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  demiurge-bridge:
+    driver: bridge
+
+volumes:
+  n8n_db_data:
+    name: demiurge_n8n_db_data
+  n8n_data:
+    name: demiurge_n8n_data

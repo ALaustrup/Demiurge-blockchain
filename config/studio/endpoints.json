@@ -1,0 +1,47 @@
+{
+  "schema": "demiurge-studio-endpoints/v1",
+  "mode": "local-first",
+  "retiredHosts": [],
+  "identity": {
+    "nodeName": "Monad",
+    "hostname": "Pleroma",
+    "note": "Monad/Pleroma are local Studio identities, not a remote VPS."
+  },
+  "services": {
+    "postgres": {
+      "host": "127.0.0.1",
+      "port": 5432,
+      "database": "qor_auth"
+    },
+    "valkey": {
+      "host": "127.0.0.1",
+      "port": 6379
+    },
+    "qorAuth": {
+      "url": "http://127.0.0.1:8080",
+      "api": "http://127.0.0.1:8080/api/v1"
+    },
+    "nodeRpc": {
+      "http": "http://127.0.0.1:9944",
+      "ws": "ws://127.0.0.1:9944"
+    },
+    "nodeP2p": {
+      "host": "127.0.0.1",
+      "port": 30333
+    },
+    "hub": {
+      "url": "http://127.0.0.1:3000"
+    },
+    "marketing": {
+      "url": "http://127.0.0.1:3001",
+      "optional": true
+    },
+    "sophia": {
+      "url": "http://127.0.0.1:3003",
+      "optional": true
+    }
+  },
+  "cloud": {
+    "note": "No hosted services are part of the Studio stack. Optional hosted Postgres/Vercel settings live in gitignored .env files only."
+  }
+}

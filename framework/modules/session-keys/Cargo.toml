@@ -1,0 +1,21 @@
+[package]
+name = "demiurge-module-session-keys"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Session Keys Module - Temporary game authorization"
+
+[dependencies]
+codec = { workspace = true }
+scale-info = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+
+# Internal dependencies
+demiurge-storage = { path = "../../storage" }
+demiurge-modules = { path = ".." }
+
+[dev-dependencies]
+tempfile = { workspace = true }

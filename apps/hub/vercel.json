@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "installCommand": "cd ../.. && npm ci",
+  "buildCommand": "cd ../.. && npm run vercel:build:hub",
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "maxDuration": 60
+    }
+  }
+}

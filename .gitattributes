@@ -1,0 +1,9 @@
+# Normalize line endings; no LFS (all assets in this tree are small).
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.png binary
+*.jpg binary
+*.mp4 binary
+*.wasm binary
+*.woff2 binary

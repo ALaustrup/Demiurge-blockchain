@@ -1,0 +1,28 @@
+[package]
+name = "demiurge-core"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Core runtime engine for Demiurge blockchain"
+
+[dependencies]
+codec = { workspace = true }
+scale-info = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+blake2 = { workspace = true }
+ed25519-dalek = { workspace = true }
+
+# Internal dependencies
+demiurge-storage = { path = "../storage" }
+demiurge-modules = { path = "../modules" }
+demiurge-module-balances = { path = "../modules/balances" }
+demiurge-module-energy = { path = "../modules/energy" }
+demiurge-module-session-keys = { path = "../modules/session-keys" }
+demiurge-module-drc369 = { path = "../modules/drc369" }
+
+[dev-dependencies]
+tokio = { workspace = true }

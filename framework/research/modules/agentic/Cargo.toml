@@ -1,0 +1,42 @@
+[package]
+name = "demiurge-agentic"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Agentic Integration Layer for Demiurge Protocol - Sovereign AI Agents"
+
+[dependencies]
+demiurge-primitives = { path = "../../../primitives" }
+demiurge-qor-identity = { path = "../qor-identity" }
+demiurge-module-drc369 = { path = "../../../modules/drc369" }
+
+serde = { workspace = true }
+serde_json = { workspace = true }
+codec = { workspace = true }
+scale-info = { workspace = true }
+blake3 = { workspace = true }
+rand = { workspace = true }
+hex = { workspace = true }
+sha2 = { workspace = true }
+
+# ZK Proofs (optional)
+plonky2 = { version = "0.2", optional = true }
+plonky2_field = { version = "0.2", optional = true }
+
+# Async
+tokio = { workspace = true, optional = true }
+
+# Vector operations
+ndarray = { version = "0.15", optional = true }
+
+[features]
+default = ["std"]
+std = ["tokio"]
+pqc = ["demiurge-primitives/pqc"]
+vector-state = ["ndarray"]
+zk-vcp = ["plonky2", "plonky2_field"]
+full = ["std", "pqc", "vector-state", "zk-vcp"]
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }

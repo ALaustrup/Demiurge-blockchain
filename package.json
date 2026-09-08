@@ -1,0 +1,62 @@
+{
+  "name": "demiurge-ecosystem",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Demiurge Studio — local-first game creator suite on the Demiurge Protocol",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "sdk",
+    "cli"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --concurrency=15",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "build:sdk": "npm run build --workspace=sdk && npm run build --workspace=@demiurge/qor-sdk && npm run build --workspace=@demiurge/drc369-sdk && npm run build --workspace=@demiurge/agent-foundry",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean",
+    "qor-auth:infra": "powershell -ExecutionPolicy Bypass -File scripts/setup-qor-auth-infra.ps1",
+    "qor-auth:run": "powershell -ExecutionPolicy Bypass -File scripts/qor-auth-run.ps1",
+    "local:node": "powershell -ExecutionPolicy Bypass -File scripts/run-local-node.ps1",
+    "local:hub": "npm run dev --workspace=@demiurge/hub",
+    "local:marketing": "npm run dev --workspace=@demiurge/marketing-site",
+    "local:health": "powershell -ExecutionPolicy Bypass -File scripts/check-local-stack.ps1",
+    "studio": "powershell -ExecutionPolicy Bypass -File scripts/start-studio.ps1",
+    "studio:start": "powershell -ExecutionPolicy Bypass -File scripts/start-studio-stack.ps1",
+    "studio:stop": "powershell -ExecutionPolicy Bypass -File scripts/stop-studio-stack.ps1",
+    "studio:health": "npm run local:health",
+    "studio:servers": "powershell -ExecutionPolicy Bypass -File scripts/start-studio-servers.ps1",
+    "studio:servers:stop": "powershell -ExecutionPolicy Bypass -File scripts/stop-studio-servers.ps1",
+    "studio:infra": "npm run studio:servers",
+    "studio:node": "npm run local:node",
+    "studio:auth": "npm run qor-auth:run",
+    "studio:hub": "npm run local:hub",
+    "studio:marketing": "npm run local:marketing",
+    "studio:keys": "powershell -ExecutionPolicy Bypass -File scripts/generate-studio-keys.ps1",
+    "studio:project": "npm run build --workspace=@demiurge/cli && npx demiurge studio project",
+    "wallet-wasm:build": "npm run build --workspace=@demiurge/wallet-wasm && npm run copy-wasm --workspace=@demiurge/hub",
+    "vercel:build:marketing": "npm run build --workspace=@demiurge/qor-sdk && npm run build --workspace=@demiurge/marketing-site",
+    "vercel:build:hub": "npm run build --workspace=@demiurge/qor-sdk && npm run build --workspace=@demiurge/drc369-sdk && npm run build --workspace=@demiurge/sdk && npm run copy-wasm --workspace=@demiurge/hub && npm run build --workspace=@demiurge/hub",
+    "publish:sdk": "npm run build:sdk && npm publish --workspace=sdk --access public && npm publish --workspace=packages/qor-sdk --access public && npm publish --workspace=packages/drc369-sdk --access public && npm publish --workspace=packages/agent-foundry --access public"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0"
+  },
+  "overrides": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "packageManager": "npm@9.0.0",
+  "allowScripts": {
+    "esbuild@0.27.7": true,
+    "esbuild@0.21.5": true,
+    "sharp@0.34.5": true,
+    "unrs-resolver@1.12.2": true
+  }
+}

@@ -1,0 +1,9 @@
+# DEMIURGE PROTOCOL — WORKING RULES
+- TRUTH: `STATUS.md` is the only source of completion claims. Never describe a feature as live, complete, or audited unless STATUS.md says so. Docs describe what exists; specs say "design" in the title.
+- RUNTIME: Local-first. The stack runs on this machine (`npm run studio:start`). There is no hosted mainnet or testnet. 'Monad' is the local node identity; 'Pleroma' is the future settlement layer, not a server.
+- IDENTITY: QOR ID (`name#0001`) is the single identity system. Humans log in via qor-auth; the chain sees only public keys.
+- CURRENCY: CGT. 2 decimals, 13,000,000,000 fixed supply, 100 Sparks = 1 CGT. Parameters live in `docs/specifications/cgt-tokenomics.md` only.
+- SECURITY: No RPC may write state without a signed transaction. No keys derived from usernames. No secrets in the tree; use `.env` (gitignored). Every "for now" or "in production we would" comment must become a tracked issue or be deleted.
+- NAMING: Gnostic conventions (Aeons, Archons, Syzygies, Pleroma) may be used for module names; ask before naming new modules. Never use them in place of accurate technical descriptions.
+- CODE: A feature lands with a test that would fail without it. Rust: clippy clean. TypeScript: strict, no `ignoreBuildErrors`.
+- SCOPE: Follow `ROADMAP.md` phase order. Do not start Phase N+1 work while Phase N exit criteria are unmet.

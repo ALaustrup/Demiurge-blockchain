@@ -1,0 +1,17 @@
+-- Migration 008: (intentionally a no-op)
+--
+-- This migration previously seeded a hard-coded 'godmode#0001' account with a
+-- documented password and a fixed backup code ('GODMODE-RECOVERY-2026').
+-- That seed was removed for security. Privileged accounts are never created by
+-- migrations; use the documented bootstrap path instead:
+--
+--   Set QOR_AUTH_BOOTSTRAP_GOD_PASSWORD at startup. If no user with role 'god'
+--   exists, the service creates godmode#0001 with that password (Argon2id-hashed)
+--   and logs a warning. Unset the variable afterwards.
+--
+-- See services/qor-auth/MIGRATION_NOTES.md: because this file's content changed,
+-- its sqlx checksum changed; existing dev databases must be reset or have the
+-- _sqlx_migrations row for version 8 updated.
+--
+-- Migration 011 removes any account created by the old seed.
+SELECT 1;

@@ -1,0 +1,25 @@
+[package]
+name = "demiurge-qor-identity"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Qor Identity - Sovereign Identity System for Demiurge"
+
+[dependencies]
+demiurge-primitives = { path = "../../../primitives" }
+demiurge-storage = { path = "../../../storage" }
+demiurge-modules = { path = "../../../modules" }
+
+codec = { workspace = true }
+scale-info = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+blake2 = { workspace = true }
+hex = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+ed25519-dalek = { workspace = true }
+rand = { workspace = true }

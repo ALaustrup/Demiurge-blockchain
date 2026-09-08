@@ -1,0 +1,36 @@
+{
+  "name": "@demiurge/sophia",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3003 --webpack",
+    "build": "next build --webpack",
+    "start": "next start",
+    "lint": "eslint . --ext .ts,.tsx",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf .next dist"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.0",
+    "@ai-sdk/openai": "^1.0.0",
+    "@tailwindcss/postcss": "^4.3.0",
+    "ai": "^6.0.0",
+    "axios": "^1.7.0",
+    "framer-motion": "^12.0.0",
+    "next": "^16.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "typescript": "^5.7.0",
+    "zustand": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^16.1.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^4.3.0"
+  }
+}
