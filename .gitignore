@@ -89,3 +89,6 @@ ue5-source/
 
 # Docker
 docker-compose.override.yml
+
+# Claude Code personal settings
+.claude/settings.local.json
