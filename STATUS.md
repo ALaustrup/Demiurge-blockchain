@@ -7,7 +7,7 @@
 
 | Phase | Name | State |
 |-------|------|-------|
-| 0 | Stop the bleeding (secrets, unsafe RPC, CI, honest docs) | **Complete** (2026-09-08, local verification; first CI run pending) |
+| 0 | Stop the bleeding (secrets, unsafe RPC, CI, honest docs) | **Complete** (2026-09-08; sanitized baseline pushed to `Astra-Matrix/DEMIURGE-PROTOCOL` main, legacy history tagged `legacy-2026-08`) |
 | 1 | Make one node correct (tx v2, nonce, Merkle state, energy at admission, session-key scope) | **Next** |
 | 2 | Make four nodes agree (HotStuff-2, gossip, sync, fork choice) | Not started |
 | 3 | Studio 1.0 (single SDK, trimmed Hub, installer) | Not started |
