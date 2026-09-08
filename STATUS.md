@@ -1,14 +1,14 @@
 # Project Status
 
-**Last verified:** 2026-09-08 (Phase 0 in progress)
+**Last verified:** 2026-09-08 (Phase 0 complete)
 **Rule:** This file is the only place completion claims live. Anything not listed as *Working* here should be assumed unimplemented, regardless of what older docs, comments, or READMEs say.
 
 ## Phase
 
 | Phase | Name | State |
 |-------|------|-------|
-| 0 | Stop the bleeding (secrets, unsafe RPC, CI, honest docs) | **In progress** |
-| 1 | Make one node correct (tx v2, nonce, Merkle state, energy at admission, session-key scope) | Not started |
+| 0 | Stop the bleeding (secrets, unsafe RPC, CI, honest docs) | **Complete** (2026-09-08, local verification; first CI run pending) |
+| 1 | Make one node correct (tx v2, nonce, Merkle state, energy at admission, session-key scope) | **Next** |
 | 2 | Make four nodes agree (HotStuff-2, gossip, sync, fork choice) | Not started |
 | 3 | Studio 1.0 (single SDK, trimmed Hub, installer) | Not started |
 | 4 | Programmable game logic (metered WASM VM) | Not started |

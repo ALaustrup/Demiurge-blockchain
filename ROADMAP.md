@@ -21,7 +21,7 @@ Goal: the repository is safe to look at and honest about itself.
 - [x] Wallet extension: per-origin approval flow implemented; domain-tagged signing payloads (node verification lands in Phase 1).
 - [x] Workspace builds on stable Rust; non-compiling tests fixed or removed.
 - [x] Orphaned modules moved to `framework/research/`.
-- [ ] `git init` with the sanitized tree as the first commit.
+- [x] `git init` with the sanitized tree as the first commit (2a19631).
 
 **Exit:** CI green on a clean clone; secret scan clean; no RPC method can mutate state without a signed transaction.
 
